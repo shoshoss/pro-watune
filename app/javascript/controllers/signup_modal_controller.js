@@ -8,16 +8,16 @@ export default class extends Controller {
 
   closeModal() {
     // モーダルを閉じる
-    this.element.removeAttribute("open");
+    this.element.close();
   }
 
-  redirectAfterClose(event) {
+  redirectSubmit(event) {
     if (!event.detail.success) {
       // フォームのバリデーションエラーの場合はここで何もしない
       return;
     }
     // リダイレクトパスを取得してリダイレクトを実行する
     const redirectPath = this.data.get("redirectPath");
-    window.location.href = redirectPath;
+    Turbo.visit(redirectPath, { action: "replace" });
   }
 }
