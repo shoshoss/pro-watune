@@ -9,16 +9,47 @@ export default class extends Controller {
   startTime;
   recordingInterval;
 
-  // コントローラが接続されたときの初期設定
+  // 初期設定: コントローラが接続されたときに呼ばれる
   connect() {
     this.element.setAttribute("open", true);
+
+    // モーダルが開いたときにバックグラウンドをクリックして閉じるイベントを追加
+    // this.element.addEventListener("click", this.closeBackground.bind(this));
+
     this.canvasCtx = this.element.querySelector(".visualizer").getContext("2d");
     if (!this.audioCtx) {
       this.audioCtx = new AudioContext();
     }
   }
 
-  // 録音開始処理
+  closeModal() {
+    // モーダルを閉じる
+    this.element.close();
+  }
+
+  closeBackground(event) {
+    // バックグラウンドをクリックしたかどうかをチェック
+    if (
+      event.target === this.dialogTarget &&
+      this.dialogTarget.hasAttribute("open")
+    ) {
+      console.log("Dialog closed");
+      // モーダルを閉じる
+      this.closeModal();
+    }
+  }
+
+  redirectAfterClose(event) {
+    if (!event.detail.success) {
+      // フォームのバリデーションエラーの場合はここで何もしない
+      return;
+    }
+    // リダイレクトパスを取得してリダイレクトを実行する
+    const redirectPath = this.data.get("redirectPath");
+    window.location.href = redirectPath;
+  }
+
+  // 録音開始
   startRecording() {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -38,12 +69,12 @@ export default class extends Controller {
 
         this.visualize(stream);
       })
-      .catch((error) =>
-        console.error("マイクへのアクセス中にエラーが発生しました:", error)
-      );
+      .catch((error) => {
+        console.error("マイクへのアクセス中にエラーが発生しました:", error);
+      });
   }
 
-  // 録音停止処理
+  // 録音を停止するメソッド
   stopRecording() {
     this.mediaRecorder.stop();
     clearInterval(this.recordingInterval);
@@ -62,7 +93,7 @@ export default class extends Controller {
     )}:${this.pad(seconds)}`;
   }
 
-  // 数字を2桁に整形
+  // 数字を2桁に整形するメソッド
   pad(number) {
     return number < 10 ? "0" + number : number;
   }
@@ -74,31 +105,40 @@ export default class extends Controller {
     this.createSoundClip(audioURL);
   }
 
-  // 音声クリップの生成と表示
+  // 音声クリップを生成して表示するメソッド
   createSoundClip(audioURL) {
     const clipContainer = document.createElement("div");
     clipContainer.className =
-      "clip flex flex-col sm:flex-row justify-between items-center my-2 p-2 border border-gray-200 rounded";
+      "clip flex flex-col items-center w-full max-w-screen-lg mx-auto my-2 p-2 border border-gray-200 rounded overflow-hidden";
 
     const audio = document.createElement("audio");
     audio.controls = true;
     audio.src = audioURL;
+    audio.className = "w-full";
 
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "削除";
-    deleteButton.className =
-      "delete bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded";
-    deleteButton.onclick = () => {
-      clipContainer.remove();
-      this.element.querySelector(".record").disabled = false;
-      this.element.querySelector(".timer").textContent = "00:00"; // タイマーをリセット
-    };
+    // 削除ボタン
+    const deleteButton = this.createDeleteButton(clipContainer);
 
     clipContainer.appendChild(audio);
     clipContainer.appendChild(deleteButton);
 
     this.element.querySelector(".sound-clips").innerHTML = "";
     this.element.querySelector(".sound-clips").appendChild(clipContainer);
+  }
+
+  // 削除ボタンを生成するメソッド
+  createDeleteButton(clipContainer) {
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "削除";
+    deleteButton.className =
+      "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mt-2 self-end"; // 右端に配置
+    deleteButton.onclick = () => {
+      clipContainer.remove();
+      this.element.querySelector(".record").disabled = false;
+      this.element.querySelector(".timer").textContent = "00:00"; // タイマーをリセット
+    };
+
+    return deleteButton;
   }
 
   // 可視化処理
@@ -110,37 +150,37 @@ export default class extends Controller {
     const dataArray = new Uint8Array(bufferLength);
 
     source.connect(analyser);
+    analyser.smoothingTimeConstant = 0.9; // スムージングを適用
 
     const WIDTH = this.element.querySelector(".visualizer").width;
     const HEIGHT = this.element.querySelector(".visualizer").height;
+    const centerX = WIDTH / 2;
+    const centerY = HEIGHT / 2;
 
     const draw = () => {
       if (this.shouldStop) return;
       this.animationFrameRequest = requestAnimationFrame(draw);
-      analyser.getByteTimeDomainData(dataArray);
 
-      this.canvasCtx.fillStyle = "rgb(200, 200, 200)";
+      analyser.getByteFrequencyData(dataArray); // 周波数データを取得
+
       this.canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-      this.canvasCtx.beginPath();
 
-      let sliceWidth = WIDTH / bufferLength;
-      let x = 0;
+      let maxRadius = Math.max(WIDTH, HEIGHT) / 2;
+      let step = (maxRadius / bufferLength) * 2;
 
       for (let i = 0; i < bufferLength; i++) {
-        let v = dataArray[i] / 128.0;
-        let y = (v * HEIGHT) / 2;
+        let radius = step * i;
+        let amplitude = dataArray[i] / 128.0;
+        let color = `hsla(${200 + amplitude * 20}, 100%, 50%, ${
+          0.75 + 0.25 * amplitude // 透明度を動的に変更
+        })`; // 波紋の色をより海色に近づける
 
-        if (i === 0) {
-          this.canvasCtx.moveTo(x, y);
-        } else {
-          this.canvasCtx.lineTo(x, y);
-        }
-
-        x += sliceWidth;
+        this.canvasCtx.beginPath();
+        this.canvasCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        this.canvasCtx.strokeStyle = color;
+        this.canvasCtx.lineWidth = 2;
+        this.canvasCtx.stroke();
       }
-
-      this.canvasCtx.lineTo(WIDTH, HEIGHT / 2);
-      this.canvasCtx.stroke();
     };
 
     draw();
