@@ -1,6 +1,11 @@
 class PostsController < ApplicationController
   def index
-    @posts = Post.order(created_at: :desc)
+    @pagy, @posts = pagy_countless(Post.includes(:user).order(created_at: :desc), items: 10)
+    respond_to do |format|
+      format.html
+      format.turbo_stream
+    end
+    # @posts = Post.includes(:user).order(created_at: :desc).page(params[:page]).per(10)
   end
 
   def show; end
@@ -37,6 +42,6 @@ class PostsController < ApplicationController
   private
 
   def post_params
-    params.require(:post).permit(:user_id, :body, :audio, :privacy)
+    params.require(:post).permit(:user_id, :body, :audio, :duration, :privacy)
   end
 end
