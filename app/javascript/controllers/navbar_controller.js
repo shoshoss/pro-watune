@@ -1,107 +1,67 @@
+// app/javascript/controllers/navbar_controller.js
 import { Controller } from "@hotwired/stimulus";
 import { Turbo } from "@hotwired/turbo-rails";
 
 export default class extends Controller {
+  static targets = ["notificationCount"];
+
   connect() {
-    window.addEventListener("popstate", this.handlePopState.bind(this));
-    document.addEventListener(
-      "turbo:frame-load",
-      this.updateActiveLink.bind(this)
-    );
     this.updateActiveLink();
     this.updateUnreadNotifications(); // 初期の未読通知数を設定
+
+    document.addEventListener("turbo:load", this.updateActiveLink.bind(this));
+
+    // 30秒ごとに未読通知数を更新
+    this.notificationInterval = setInterval(() => {
+      this.updateUnreadNotifications();
+    }, 30000);
   }
 
   disconnect() {
-    window.removeEventListener("popstate", this.handlePopState.bind(this));
     document.removeEventListener(
-      "turbo:frame-load",
+      "turbo:load",
       this.updateActiveLink.bind(this)
     );
+    clearInterval(this.notificationInterval);
   }
 
   updateActiveLink() {
-    const activeLinks = document.querySelectorAll(".active");
-    activeLinks.forEach((link) =>
-      link.classList.remove(
-        "text-blue-500",
-        "font-bold",
-        "border-b-4",
-        "border-sky-400-accent",
-        "bg-white",
-        "active"
-      )
-    );
+    const activeLinks = document.querySelectorAll(".active-link");
+    activeLinks.forEach((link) => link.classList.remove("active-link"));
 
-    const links = document.querySelectorAll("a[data-corresponding-link-id]");
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll(
+      "a[data-action='click->navbar#setActive']"
+    );
     links.forEach((link) => {
-      const correspondingLinkId = link.getAttribute(
-        "data-corresponding-link-id"
-      );
-      const correspondingLink = document.getElementById(correspondingLinkId);
-      if (window.location.pathname === link.pathname) {
-        link.classList.add(
-          "text-blue-500",
-          "font-bold",
-          "border-b-4",
-          "border-sky-400-accent",
-          "bg-white",
-          "active"
-        );
-        if (correspondingLink) {
-          correspondingLink.classList.add("text-blue-500", "active");
-        }
+      if (link.getAttribute("href") === currentPath) {
+        link.classList.add("active-link");
       }
     });
   }
 
-  setActive(event) {
+  async setActive(event) {
     event.preventDefault();
 
     const target = event.currentTarget;
-    const url = new URL(target.href);
-    const frame = document.querySelector("turbo-frame#main-content");
 
-    if (frame) {
-      // 現在の状態を履歴に追加
-      history.pushState({ turboFrameSrc: frame.src }, "", url.href);
-
-      frame.src = url.href;
-
-      frame.addEventListener(
-        "turbo:frame-load",
-        () => {
-          this.updateActiveLink();
-          this.updateUnreadNotifications(); // 未読通知数を更新
-
-          const correspondingLinkId = target.getAttribute(
-            "data-corresponding-link-id"
-          );
-          const correspondingLink =
-            document.getElementById(correspondingLinkId);
-          if (correspondingLink) {
-            correspondingLink.classList.add("text-blue-500", "active");
-          }
-
-          target.classList.add(
-            "text-blue-500",
-            "font-bold",
-            "border-b-4",
-            "border-sky-400-accent",
-            "bg-white",
-            "active"
-          );
-          window.scrollTo(0, 0);
+    try {
+      const response = await fetch(target.href, {
+        headers: {
+          Accept: "text/vnd.turbo-stream.html", // Turbo Streamレスポンスを期待
         },
-        { once: true }
-      );
-    }
-  }
+      });
 
-  handlePopState(event) {
-    const frame = document.querySelector("turbo-frame#main-content");
-    if (frame && event.state && event.state.turboFrameSrc) {
-      frame.src = event.state.turboFrameSrc;
+      if (response.ok) {
+        const html = await response.text();
+        Turbo.renderStreamMessage(html);
+        history.pushState({}, "", target.href);
+        this.updateActiveLink();
+      } else {
+        console.error("Failed to fetch Turbo Stream:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching Turbo Stream:", error);
     }
   }
 
@@ -118,16 +78,16 @@ export default class extends Controller {
   }
 
   renderUnreadCount(count) {
-    const unreadCountElement = document.getElementById(
-      "unread-notifications-count"
+    const unreadCountElements = document.querySelectorAll(
+      "[data-notification-target='notificationCount']"
     );
-    if (unreadCountElement) {
-      unreadCountElement.textContent = count;
+    unreadCountElements.forEach((element) => {
+      element.textContent = count;
       if (count > 0) {
-        unreadCountElement.classList.remove("hidden");
+        element.style.display = "block";
       } else {
-        unreadCountElement.classList.add("hidden");
+        element.style.display = "none";
       }
-    }
+    });
   }
 }
