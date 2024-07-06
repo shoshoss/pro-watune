@@ -103,7 +103,7 @@ class PostsController < ApplicationController
       }
 
       fixed_category = categories[category] || Post.fixed_categories[:recommended]
-      posts = posts.where(fixed_category: fixed_category)
+      posts = posts.where(fixed_category:)
     end
 
     posts
