@@ -120,7 +120,7 @@ export default class extends Controller {
     const categoryFromUrl = urlParams.get("category");
     const categoryFromCookie = document.cookie
       .split("; ")
-      .find((row) => row.startsWith("selected_category="))
+      .find((row) => row.startsWith("selected_post_category="))
       ?.split("=")[1];
 
     return categoryFromUrl || categoryFromCookie || "recommended";
@@ -129,7 +129,7 @@ export default class extends Controller {
   // 選択されたカテゴリーをサーバーに送信
   setCategoryCookie() {
     const selectedCategory = this.getCurrentCategory();
-    document.cookie = `selected_category=${selectedCategory}; path=/`;
+    document.cookie = `selected_post_category=${selectedCategory}; path=/`;
   }
 
   // アクティブなタブを更新
