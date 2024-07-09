@@ -87,7 +87,7 @@ export default class extends Controller {
     Turbo.visit(event.currentTarget.href, { frame: "_top" });
 
     // 選択されたカテゴリーをサーバーに送信
-    this.setCategoryCookie();
+    this.setCategoryCookie(category);
     // アクティブなタブを更新
     this.updateActiveTab(category);
   }
@@ -120,16 +120,23 @@ export default class extends Controller {
     const categoryFromUrl = urlParams.get("category");
     const categoryFromCookie = document.cookie
       .split("; ")
-      .find((row) => row.startsWith("selected_category="))
+      .find((row) => row.startsWith("selected_post_category="))
       ?.split("=")[1];
+    const categoryFromLocalStorage = localStorage.getItem("selectedCategory");
 
-    return categoryFromUrl || categoryFromCookie || "recommended";
+    return (
+      categoryFromUrl ||
+      categoryFromCookie ||
+      categoryFromLocalStorage ||
+      "recommended"
+    );
   }
 
-  // 選択されたカテゴリーをサーバーに送信
-  setCategoryCookie() {
-    const selectedCategory = this.getCurrentCategory();
-    document.cookie = `selected_category=${selectedCategory}; path=/`;
+  // 選択されたカテゴリーをクッキーに保存
+  setCategoryCookie(selectedCategory) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + 365 * 24 * 60 * 60 * 1000); // 1年間有効
+    document.cookie = `selected_post_category=${selectedCategory}; path=/; expires=${expires.toUTCString()}; SameSite=Lax;`;
   }
 
   // アクティブなタブを更新
