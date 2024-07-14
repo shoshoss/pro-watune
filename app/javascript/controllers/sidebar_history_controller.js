@@ -1,6 +1,5 @@
 // app/javascript/controllers/sidebar_history_controller.js
 import { Controller } from "@hotwired/stimulus";
-import Cookies from "js-cookie";
 
 export default class extends Controller {
   connect() {
@@ -10,16 +9,16 @@ export default class extends Controller {
 
   navigate(event) {
     event.preventDefault();
-    const url = event.currentTarget.href;
+    const url = new URL(event.currentTarget.href);
 
     // Turboフレームでの遷移
-    document.querySelector("#main-content").src = url;
+    document.querySelector("#main-content").src = url.pathname;
 
     // URLを変更し、履歴に追加
-    history.pushState({ url: url }, "", url);
+    history.pushState({ url: url.pathname }, "", url.pathname);
 
     // アクティブなリンクを更新
-    this.updateActiveLink(url);
+    this.updateActiveLink(url.pathname);
   }
 
   handlePopState(event) {
@@ -45,7 +44,7 @@ export default class extends Controller {
     links.forEach((id) => {
       const link = document.getElementById(id);
       if (link) {
-        if (link.href === url) {
+        if (link.pathname === url) {
           link.classList.add(
             "font-bold",
             "border-b-4",
