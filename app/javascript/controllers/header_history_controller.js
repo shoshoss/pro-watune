@@ -19,6 +19,11 @@ export default class extends Controller {
 
     // アクティブなリンクを更新
     this.updateActiveLink(url.pathname);
+
+    // クリックされたリンクのIDが "header-notifications-link" ならば5秒後に未読カウントを非表示にする
+    if (event.currentTarget.id === "header-notifications-link") {
+      this.hideUnreadCountAfterDelay();
+    }
   }
 
   handlePopState(event) {
@@ -66,5 +71,16 @@ export default class extends Controller {
         }
       }
     });
+  }
+
+  hideUnreadCountAfterDelay() {
+    setTimeout(() => {
+      const unreadCountElement = document.querySelector(
+        "#header-notifications-link .absolute"
+      );
+      if (unreadCountElement) {
+        unreadCountElement.style.display = "none";
+      }
+    }, 5000); // 5秒後に実行
   }
 }
