@@ -43,7 +43,6 @@ export default class extends Controller {
       "sidebar-profile-link",
       "sidebar-notifications-link",
       "sidebar-settings-link",
-      "sidebar-new-post-link",
     ];
 
     links.forEach((id) => {
