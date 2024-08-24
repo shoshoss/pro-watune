@@ -62,7 +62,7 @@ export default class extends Controller {
         "#header-logo-link, #header-about-link, #header-home-link, #header-profile-link, #header-users-link, #header-notifications-link, #header-settings-link, #header-logout-link, #header-delete-account-link"
       ),
       ...document.querySelectorAll(
-        "#sidebar-profile-avatar-link, #sidebar-posts-link, #sidebar-profile-link, #sidebar-notifications-link, #sidebar-settings-link, #sidebar-new-post-link"
+        "#sidebar-profile-avatar-link, #sidebar-posts-link, #sidebar-profile-link, #sidebar-notifications-link, #sidebar-settings-link"
       ),
       ...document.querySelectorAll(
         "#bottom-navbar-home-link, #bottom-navbar-profile-link, #bottom-navbar-notifications-link, #bottom-navbar-messages-link, #bottom-navbar-settings-link"
