@@ -55,6 +55,16 @@ class User < ApplicationRecord
   # enumでユーザーの役割を定義：一般ユーザーは0、管理者は1
   enum role: { general: 0, admin: 1 }
 
+  def self.find_or_create_admin
+    admin = find_or_initialize_by(email: ENV['ADMIN_EMAIL'])
+    if admin.new_record?
+      admin.password = ENV['ADMIN_PASSWORD']
+      admin.role = :admin
+      admin.save!
+    end
+    admin
+  end
+
   # スコープ: ログインしているユーザーがフォローしているユーザーを除外して、新規ユーザーを表示
   def self.recently_registered(current_user = nil)
     users = where(guest: false)
