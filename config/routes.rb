@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
-
   root 'static_pages#root'
   get 'top', to: 'static_pages#top'
   get 'about', to: 'static_pages#about'
@@ -58,13 +56,6 @@ Rails.application.routes.draw do
   get '/:username_slug/status/:id/reply_modal', to: 'replies#new_modal', as: 'new_reply_modal'
   post '/:username_slug/status/:id/reply_modal', to: 'replies#create_modal', as: 'create_reply_modal'
 
-  # TestPostsController用のルートを追加
-  namespace :test_posts do
-    get 'new', to: 'test_posts#new', as: 'new'
-    post 'create', to: 'test_posts#create', as: 'create'
-    get 'index', to: 'test_posts#index', as: 'index'
-  end
-
   # PostUserのルーティング（投稿受信者管理）
   resources :post_users, only: %i[show create destroy]
 
@@ -72,6 +63,19 @@ Rails.application.routes.draw do
   resource :profile, only: %i[edit update]
   # プロフィールモーダルのルーティング
   get '/profiles/:username_slug/modal', to: 'profiles#modal', as: 'profile_modal'
-  # プロフィールの詳細のルーティング
+  
+  # 管理者用ルーティング
+  namespace :admin_sho do
+    root "dashboards#index"
+    resource :dashboard, only: %i[index]
+    get 'login' => 'user_sessions#new', :as => :login
+    post 'login' => "user_sessions#create"
+    delete 'logout' => 'user_sessions#destroy', :as => :logout
+  end
+
+  # 開発用ツール
+  mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
+
+  # プロフィールの詳細のルーティング（他のルートに影響しないよう、最後に配置すること）
   get '/:username_slug', to: 'profiles#show', as: :profile_show
 end
