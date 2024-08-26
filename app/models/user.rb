@@ -40,6 +40,7 @@ class User < ApplicationRecord
     api about top help faq terms privacy register search account
     subscribe billing download feed audio modal movie movies film
     films image images photo photos photograph photographs picture pictures
+    admin_sho letter_opener
   ].freeze
 
   validates :username_slug, presence: true, uniqueness: { case_sensitive: false, message: :taken },
