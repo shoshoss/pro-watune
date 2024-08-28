@@ -65,7 +65,7 @@ Rails.application.routes.draw do
   get '/profiles/:username_slug/modal', to: 'profiles#modal', as: 'profile_modal'
   
   # 管理者用ルーティング
-  namespace :admin_sho do
+  namespace :admin do
     root "dashboards#index"
     resource :dashboard, only: %i[index]
     get 'login' => 'user_sessions#new', :as => :login
