@@ -57,9 +57,12 @@ class User < ApplicationRecord
   enum role: { general: 0, admin: 1 }
 
   def self.find_or_create_admin
-    admin = find_or_initialize_by(email: ENV['ADMIN_EMAIL'])
+    admin_email = Rails.application.credentials.dig(:admin, :email)
+    admin_password = Rails.application.credentials.dig(:admin, :password)
+  
+    admin = find_or_initialize_by(email: admin_email)
     if admin.new_record?
-      admin.password = ENV['ADMIN_PASSWORD']
+      admin.password = admin_password
       admin.role = :admin
       admin.save!
     end
