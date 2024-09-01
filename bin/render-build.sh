@@ -9,3 +9,6 @@ yarn build:css
 bundle exec rails assets:precompile
 bundle exec rails assets:clean
 bundle exec rails db:migrate
+
+# 管理者ユーザーの作成
+bundle exec rails runner "User.find_or_create_admin"
