@@ -1,5 +1,5 @@
 class TestPostsController < ApplicationController
-  include PostsHelper
+  include PostsAllHelper
   include ActionView::RecordIdentifier
 
   before_action :set_followings_by_post_count, only: %i[new create]

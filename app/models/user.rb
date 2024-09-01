@@ -40,6 +40,7 @@ class User < ApplicationRecord
     api about top help faq terms privacy register search account
     subscribe billing download feed audio modal movie movies film
     films image images photo photos photograph photographs picture pictures
+    letter_opener
   ].freeze
 
   validates :username_slug, presence: true, uniqueness: { case_sensitive: false, message: :taken },
@@ -54,6 +55,19 @@ class User < ApplicationRecord
 
   # enumでユーザーの役割を定義：一般ユーザーは0、管理者は1
   enum role: { general: 0, admin: 1 }
+
+  def self.find_or_create_admin
+    admin_email = Rails.application.credentials.dig(:admin, :email)
+    admin_password = Rails.application.credentials.dig(:admin, :password)
+
+    admin = find_or_initialize_by(email: admin_email)
+    if admin.new_record?
+      admin.password = admin_password
+      admin.role = :admin
+      admin.save!
+    end
+    admin
+  end
 
   # スコープ: ログインしているユーザーがフォローしているユーザーを除外して、新規ユーザーを表示
   def self.recently_registered(current_user = nil)
