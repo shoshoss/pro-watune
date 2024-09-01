@@ -4,6 +4,9 @@
   </div>
   <nav class="flex items-center">
     <%= link_to 'Dashboard', admin_root_path, class: 'mr-4 hover:underline' %>
-    <%= link_to 'Logout', admin_logout_path, method: :delete, class: 'text-red-500 hover:underline' %>
+    <%= link_to 'Logout', admin_logout_path,
+                          method: :delete,
+                          data: { turbo_method: :delete },
+                          class: 'text-red-500 hover:underline' %>
   </nav>
 </header>
