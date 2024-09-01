@@ -63,13 +63,13 @@ Rails.application.routes.draw do
   resource :profile, only: %i[edit update]
   # プロフィールモーダルのルーティング
   get '/profiles/:username_slug/modal', to: 'profiles#modal', as: 'profile_modal'
-  
+
   # 管理者用ルーティング
   namespace :admin do
-    root "dashboards#index"
+    root 'dashboards#index'
     resource :dashboard, only: %i[index]
     get 'login' => 'user_sessions#new', :as => :login
-    post 'login' => "user_sessions#create"
+    post 'login' => 'user_sessions#create'
     delete 'logout' => 'user_sessions#destroy', :as => :logout
   end
 
