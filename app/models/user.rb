@@ -59,7 +59,7 @@ class User < ApplicationRecord
   def self.find_or_create_admin
     admin_email = Rails.application.credentials.dig(:admin, :email)
     admin_password = Rails.application.credentials.dig(:admin, :password)
-  
+
     admin = find_or_initialize_by(email: admin_email)
     if admin.new_record?
       admin.password = admin_password
