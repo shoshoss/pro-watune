@@ -27,6 +27,8 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       SENDER_ADDRESS: ${SENDER_ADDRESS}
       SELENIUM_DRIVER_URL: http://chrome:4444/wd/hub
+      RAILS_MASTER_KEY: ${RAILS_DEVELOPMENT_KEY}
+      RAILS_ENV: development
     ports:
       - "3000:3000"
     depends_on:

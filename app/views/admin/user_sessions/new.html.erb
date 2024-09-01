@@ -1,0 +1,17 @@
+<!-- app/views/admin/user_sessions/new.html.erb -->
+<% content_for(:title, 'ログイン') %>
+<main class="form-signin w-100 m-auto">
+  <%= form_with url: admin_login_path, data: { turbo: false } do |f| %>
+    <h1 class="h3 mb-3 fw-normal">ログイン</h1>
+
+    <div class="form-floating">
+      <%= f.email_field :email, class: "form-control", placeholder: "name@example.com" %>
+      <%= f.label :email %>
+    </div>
+    <div class="form-floating">
+      <%= f.password_field :password, class: "form-control", placeholder: "Password" %>
+      <%= f.label :password %>
+    </div>
+    <%= f.submit 'ログイン', class: "w-100 btn btn-lg btn-primary" %>
+  <% end %>
+</main>
