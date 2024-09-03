@@ -1,0 +1,15 @@
+<%= form_with model: [:admin, @test_post], local: true, html: { multipart: true } do |f| %>
+  <div class="form-control mb-4">
+    <%= f.label :body, "本文", class: "label text-lg font-semibold" %>
+    <%= f.text_area :body, class: "textarea textarea-bordered h-24 w-full mt-2", placeholder: "ここに本文を入力してください" %>
+  </div>
+
+  <div class="form-control mb-4">
+    <%= f.label :audio, "音声ファイル", class: "label text-lg font-semibold" %>
+    <%= f.file_field :audio, class: "file-input file-input-bordered w-full mt-2" %>
+  </div>
+
+  <div class="form-control mt-6">
+    <%= f.submit "投稿する", class: "btn btn-primary w-full" %>
+  </div>
+<% end %>
