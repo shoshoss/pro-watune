@@ -40,7 +40,6 @@ module Admin
       @test_post.destroy
       redirect_to admin_test_posts_path, notice: '音声投稿が削除されました。'
     end
-    
 
     private
 
