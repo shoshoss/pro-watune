@@ -1,15 +1,23 @@
-<%= form_with model: [:admin, @test_post], local: true, html: { multipart: true } do |f| %>
-  <div class="form-control mb-4">
-    <%= f.label :body, "本文", class: "label text-lg font-semibold" %>
-    <%= f.text_area :body, class: "textarea textarea-bordered h-24 w-full mt-2", placeholder: "ここに本文を入力してください" %>
+<!-- app/views/admin/test_posts/new.html.erb -->
+<h1>音声投稿</h1>
+
+<%= form_with model: @test_post, url: admin_test_posts_path, local: true, html: { id: "audioForm" } do |f| %>
+  <div class="main-controls">
+    <canvas class="visualizer" height="60px"></canvas>
+    <div id="buttons">
+      <button type="button" class="record">録音開始</button>
+      <button type="button" class="stop" disabled>録音停止</button>
+    </div>
   </div>
 
-  <div class="form-control mb-4">
-    <%= f.label :audio, "音声ファイル", class: "label text-lg font-semibold" %>
-    <%= f.file_field :audio, class: "file-input file-input-bordered w-full mt-2" %>
-  </div>
+  <section class="sound-clips"></section>
 
-  <div class="form-control mt-6">
-    <%= f.submit "投稿する", class: "btn btn-primary w-full" %>
-  </div>
+  <%= f.submit "投稿", id: "submitBtn" %>
 <% end %>
+
+<%= link_to '戻る', admin_test_posts_path %>
+
+<!-- JavaScriptの読み込み -->
+<script type="module">
+  import "admin/test/audio_recorder";
+</script>
