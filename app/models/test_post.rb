@@ -1,6 +1,7 @@
 # app/models/test_post.rb
 class TestPost < ApplicationRecord
-  mount_uploader :audio, AudioUploader
+  has_one_attached :audio
+
 
   # カスタムバリデーションを追加し、bodyまたはaudioのどちらかが必須であることを検証
   validate :body_or_audio_present
