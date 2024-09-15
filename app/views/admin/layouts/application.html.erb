@@ -7,11 +7,8 @@
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
 
-  <!-- JavaScriptの設定 -->
+  <!-- 管理者用のJavaScriptのみを読み込む -->
   <%= javascript_importmap_tags %>
-
-  <!-- スタイルシートのリンク -->
-  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   
 </head>
 <body class="font-sans bg-gray-100 min-h-screen flex flex-col">
