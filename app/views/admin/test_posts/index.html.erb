@@ -1,0 +1,16 @@
+<!-- app/views/admin/test_posts/index.html.erb -->
+<h1>音声投稿一覧</h1>
+
+<%= link_to '新しい音声投稿', new_admin_test_post_path %>
+
+<% @test_posts.each do |post| %>
+  <% if post.body.present? %>
+    <p><%= post.body %></p>
+  <% end %>
+  <% if post.audio.present? %>
+    <audio controls>
+      <source src="<%= post.audio.url %>" type="audio/webm">
+      お使いのブラウザはオーディオタグに対応していません。
+    </audio>
+  <% end %>
+<% end %>
