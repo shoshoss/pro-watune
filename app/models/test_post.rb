@@ -2,7 +2,6 @@
 class TestPost < ApplicationRecord
   has_one_attached :audio
 
-
   # カスタムバリデーションを追加し、bodyまたはaudioのどちらかが必須であることを検証
   validate :body_or_audio_present
 
