@@ -10,3 +10,4 @@ pin 'js-cookie' # @3.0.5
 
 # 管理者用
 pin_all_from 'app/javascript/admin', under: 'admin'
+# pin 'audioRecorder', to: 'app/javascripts/admin/test/audio_recorder.js', preload: true
