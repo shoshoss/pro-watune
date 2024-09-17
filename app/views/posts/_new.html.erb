@@ -10,13 +10,16 @@
   </div>
   <div class="container mx-auto px-4" data-controller="post-create">
     <div class="mx-auto pt-2">
-      <%= render 'posts/new/record_controls' %>
       <%= render 'posts/new/post_form', post: post %>
     </div>
   </div>
   <div id="scripts"></div>
 </div>
 
+  <!-- JavaScriptの読み込み -->
+  <script type="module">
+    import "user/post/audio_recorder";
+  </script>
   <script>
     // テキストエリアの入力イベントに対する処理
     document.addEventListener('input', function(event) {

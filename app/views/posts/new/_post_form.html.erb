@@ -1,4 +1,4 @@
-<%= form_with model: post, data: { controller: "post-create", turbo: false } do |f| %>
+<%= form_with model: post, data: { turbo: false } do |f| %>
   <div class="p-2">
     <%= render 'shared/error_messages', object: f.object %>
 
@@ -47,10 +47,10 @@
       <div class="text-sm text-gray-500 mt-1" data-post-create-target="characterCount">0 / 50000</div>
     </div>
 
-    <div class="form-control pt-2">
+    <div class="main-controls pt-2">
       <p class="block text-lg font-semibold">音声</p>
       <section>
-        <canvas class="visualizer w-full rounded-lg h-24 md:h-80" style="background-color: #05aaff;"></canvas>
+        <canvas class="visualizer w-full rounded-lg h-24" style="background-color: #05aaff;"></canvas>
       </section>
 
       <div class="flex justify-around items-center pt-2 px-5">
