@@ -118,51 +118,48 @@ function visualize(stream) {
   }
 
   const source = audioCtx.createMediaStreamSource(stream);
-
   const analyser = audioCtx.createAnalyser();
   analyser.fftSize = 2048;
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
 
   source.connect(analyser);
+  analyser.smoothingTimeConstant = 0.9; // スムージングを適用
 
-  draw();
+  const WIDTH = canvas.width;
+  const HEIGHT = canvas.height;
+  const centerX = WIDTH / 2;
+  const centerY = HEIGHT / 2;
 
   function draw() {
-    const WIDTH = canvas.width;
-    const HEIGHT = canvas.height;
+    if (!canvasCtx) return;
+
+    const maxRadius = Math.max(WIDTH, HEIGHT) / 2;
+    const step = (maxRadius / bufferLength) * 2;
 
     requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(dataArray); // 周波数データを取得
 
-    analyser.getByteTimeDomainData(dataArray);
-
-    canvasCtx.fillStyle = "rgb(200, 200, 200)";
-    canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-
-    canvasCtx.lineWidth = 2;
-    canvasCtx.strokeStyle = "rgb(0, 0, 0)";
-
-    canvasCtx.beginPath();
-
-    let sliceWidth = (WIDTH * 1.0) / bufferLength;
-    let x = 0;
+    canvasCtx.clearRect(0, 0, WIDTH, HEIGHT); // 画面をクリア
 
     for (let i = 0; i < bufferLength; i++) {
-      let v = dataArray[i] / 128.0;
-      let y = (v * HEIGHT) / 2;
+      const radius = step * i;
+      const amplitude = dataArray[i] / 256.0; // 振幅を0-1に正規化
 
-      if (i === 0) {
-        canvasCtx.moveTo(x, y);
-      } else {
-        canvasCtx.lineTo(x, y);
-      }
+      // 振幅に応じて青色の明るさを調整 (大きいほど明るく)
+      const hue = 200; // 固定の青色
+      const lightness = 50 + amplitude * 50; // 振幅に応じて明るさを調整 (50% - 100%)
+      const color = `hsl(${hue}, 100%, ${lightness}%)`; // 青色の明るさを調整
 
-      x += sliceWidth;
+      canvasCtx.beginPath();
+      canvasCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      canvasCtx.strokeStyle = color;
+      canvasCtx.lineWidth = 2;
+      canvasCtx.stroke();
     }
-
-    canvasCtx.lineTo(canvas.width, canvas.height / 2);
-    canvasCtx.stroke();
   }
+
+  draw();
 }
 
 window.onresize = function () {
