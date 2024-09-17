@@ -4,15 +4,15 @@
 const record = document.querySelector(".record");
 const stop = document.querySelector(".stop");
 const soundClips = document.querySelector(".sound-clips");
-// const canvas = document.querySelector(".visualizer"); // Canvas部分をコメントアウト
-// const mainSection = document.querySelector(".main-controls"); // Canvas関連部分をコメントアウト
+const canvas = document.querySelector(".visualizer");
+const mainSection = document.querySelector(".main-controls");
 
 // Disable stop button while not recording
 stop.disabled = true;
 
 // Visualiser setup - create web audio api context and canvas
-// let audioCtx; // ビジュアライザー関連をコメントアウト
-// const canvasCtx = canvas.getContext("2d"); // Canvas部分をコメントアウト
+let audioCtx;
+const canvasCtx = canvas.getContext("2d");
 
 // Compatibility handling for old and new getUserMedia API
 const getUserMedia =
@@ -31,7 +31,7 @@ if (getUserMedia) {
   const onSuccess = function (stream) {
     const mediaRecorder = new MediaRecorder(stream);
 
-    // visualize(stream); // ビジュアライザーの呼び出しをコメントアウト
+    visualize(stream);
 
     record.onclick = function () {
       mediaRecorder.start();
@@ -110,8 +110,6 @@ if (getUserMedia) {
   console.log("MediaDevices.getUserMedia() not supported on your browser!");
 }
 
-// visualize 関数をコメントアウト
-/*
 function visualize(stream) {
   if (!audioCtx) {
     audioCtx = new AudioContext();
@@ -165,4 +163,3 @@ window.onresize = function () {
 };
 
 window.onresize();
-*/
