@@ -14,14 +14,21 @@ stop.disabled = true;
 let audioCtx;
 const canvasCtx = canvas.getContext("2d");
 
-// Main block for doing the audio recording
-if (navigator.mediaDevices.getUserMedia) {
+// Compatibility handling for old and new getUserMedia API
+const getUserMedia =
+  navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+    ? navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices)
+    : navigator.getUserMedia ||
+      navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia;
+
+if (getUserMedia) {
   console.log("The mediaDevices.getUserMedia() method is supported.");
 
   const constraints = { audio: true };
   let chunks = [];
 
-  let onSuccess = function (stream) {
+  const onSuccess = function (stream) {
     const mediaRecorder = new MediaRecorder(stream);
 
     visualize(stream);
@@ -47,7 +54,7 @@ if (navigator.mediaDevices.getUserMedia) {
       record.disabled = false;
     };
 
-    mediaRecorder.onstop = function (e) {
+    mediaRecorder.onstop = function () {
       console.log("Last data to read (after MediaRecorder.stop() called).");
 
       const clipName = prompt(
@@ -65,11 +72,7 @@ if (navigator.mediaDevices.getUserMedia) {
       deleteButton.textContent = "Delete";
       deleteButton.className = "delete";
 
-      if (clipName === null) {
-        clipLabel.textContent = "My unnamed clip";
-      } else {
-        clipLabel.textContent = clipName;
-      }
+      clipLabel.textContent = clipName || "My unnamed clip";
 
       clipContainer.appendChild(audio);
       clipContainer.appendChild(clipLabel);
@@ -83,18 +86,13 @@ if (navigator.mediaDevices.getUserMedia) {
       audio.src = audioURL;
       console.log("recorder stopped");
 
-      deleteButton.onclick = function (e) {
-        e.target.closest(".clip").remove();
+      deleteButton.onclick = function () {
+        clipContainer.remove();
       };
 
       clipLabel.onclick = function () {
-        const existingName = clipLabel.textContent;
         const newClipName = prompt("Enter a new name for your sound clip?");
-        if (newClipName === null) {
-          clipLabel.textContent = existingName;
-        } else {
-          clipLabel.textContent = newClipName;
-        }
+        clipLabel.textContent = newClipName || clipLabel.textContent;
       };
     };
 
@@ -103,11 +101,11 @@ if (navigator.mediaDevices.getUserMedia) {
     };
   };
 
-  let onError = function (err) {
-    console.log("The following error occured: " + err);
+  const onError = function (err) {
+    console.log("The following error occurred: " + err);
   };
 
-  navigator.mediaDevices.getUserMedia(constraints).then(onSuccess, onError);
+  getUserMedia(constraints).then(onSuccess).catch(onError);
 } else {
   console.log("MediaDevices.getUserMedia() not supported on your browser!");
 }
@@ -118,14 +116,12 @@ function visualize(stream) {
   }
 
   const source = audioCtx.createMediaStreamSource(stream);
-
   const analyser = audioCtx.createAnalyser();
   analyser.fftSize = 2048;
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
 
   source.connect(analyser);
-
   draw();
 
   function draw() {
@@ -133,23 +129,20 @@ function visualize(stream) {
     const HEIGHT = canvas.height;
 
     requestAnimationFrame(draw);
-
     analyser.getByteTimeDomainData(dataArray);
 
     canvasCtx.fillStyle = "rgb(200, 200, 200)";
     canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-
     canvasCtx.lineWidth = 2;
     canvasCtx.strokeStyle = "rgb(0, 0, 0)";
-
     canvasCtx.beginPath();
 
-    let sliceWidth = (WIDTH * 1.0) / bufferLength;
+    let sliceWidth = WIDTH / bufferLength;
     let x = 0;
 
     for (let i = 0; i < bufferLength; i++) {
-      let v = dataArray[i] / 128.0;
-      let y = (v * HEIGHT) / 2;
+      const v = dataArray[i] / 128.0;
+      const y = (v * HEIGHT) / 2;
 
       if (i === 0) {
         canvasCtx.moveTo(x, y);
