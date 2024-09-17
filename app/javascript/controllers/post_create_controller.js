@@ -12,6 +12,24 @@ export default class extends Controller {
   // 初期設定 コントローラが接続されたときに呼ばれる
   connect() {
     this.checkForm(); // フォームの初期状態をチェック
+
+    // ページが読み込まれた時に音声録音の許可を取得
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        console.log("Audio recording permission granted.");
+        this.initializeMediaRecorder(stream); // MediaRecorderの初期化
+      })
+      .catch((error) => {
+        console.error("Error: Unable to access microphone.", error);
+        alert("マイクのアクセスが許可されていません。設定を確認してください。");
+      });
+  }
+
+  // MediaRecorderの初期化処理を行うメソッド
+  initializeMediaRecorder(stream) {
+    this.mediaRecorder = new MediaRecorder(stream);
+    console.log("MediaRecorder initialized.");
   }
 
   // フォームの状態をチェックし、投稿ボタンの有効/無効を切り替えるメソッド
@@ -46,33 +64,30 @@ export default class extends Controller {
       this.audioCtx = new AudioContext();
     }
 
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then((stream) => {
-        this.mediaRecorder = new MediaRecorder(stream);
-        let chunks = [];
+    // すでに許可が得られている `MediaRecorder` を使用して録音開始
+    if (this.mediaRecorder) {
+      let chunks = [];
 
-        this.element.querySelector(".record").disabled = true;
-        this.element.querySelector(".stop").disabled = false;
-        this.element.querySelector('input[type="submit"]').disabled = true; // Submitボタンを無効化
-        this.shouldStop = false;
-        this.startTime = Date.now();
-        this.recordingInterval = setInterval(() => this.updateTimer(), 1000);
+      this.element.querySelector(".record").disabled = true;
+      this.element.querySelector(".stop").disabled = false;
+      this.element.querySelector('input[type="submit"]').disabled = true; // Submitボタンを無効化
+      this.shouldStop = false;
+      this.startTime = Date.now();
+      this.recordingInterval = setInterval(() => this.updateTimer(), 1000);
 
-        this.mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-        this.mediaRecorder.onstop = (e) => this.handleRecordingStop(chunks);
-        this.mediaRecorder.start();
+      this.mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+      this.mediaRecorder.onstop = (e) => this.handleRecordingStop(chunks);
+      this.mediaRecorder.start();
 
-        // 録音時間の制限を設定 (例: 59分59秒)
-        setTimeout(() => {
-          if (!this.shouldStop) this.stopRecording();
-        }, (59 * 60 + 59) * 1000); // 59分59秒後に自動停止
+      // 録音時間の制限を設定 (例: 59分59秒)
+      setTimeout(() => {
+        if (!this.shouldStop) this.stopRecording();
+      }, (59 * 60 + 59) * 1000); // 59分59秒後に自動停止
 
-        this.visualize(stream);
-      })
-      .catch((error) => {
-        console.error("マイクへのアクセス中にエラーが発生しました:", error);
-      });
+      this.visualize(this.mediaRecorder.stream);
+    } else {
+      console.error("MediaRecorder is not initialized.");
+    }
   }
 
   // 録音を停止するメソッド
