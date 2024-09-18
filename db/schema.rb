@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_01_102507) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_18_032948) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -129,12 +129,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_01_102507) do
     t.bigint "category_id"
     t.datetime "latest_activity", default: -> { "CURRENT_TIMESTAMP" }
     t.string "audio"
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
+    t.integer "access_mode", default: 0, null: false
     t.index ["category_id"], name: "index_posts_on_category_id"
     t.index ["fixed_category"], name: "index_posts_on_fixed_category"
     t.index ["latest_activity"], name: "index_posts_on_latest_activity"
     t.index ["post_reply_id"], name: "index_posts_on_post_reply_id"
     t.index ["privacy"], name: "index_posts_on_privacy"
     t.index ["user_id"], name: "index_posts_on_user_id"
+    t.index ["uuid"], name: "index_posts_on_uuid", unique: true
   end
 
   create_table "reposts", force: :cascade do |t|
