@@ -42,6 +42,9 @@ class Post < ApplicationRecord
   # プライバシー設定
   enum privacy: { only_me: 0, reply: 1, open: 2, selected_users: 10, community: 20, only_direct: 30 }
 
+  # アクセス設定
+  # enum access_mode: { legacy_id: 0, uuid: 10, custom_token: 20 }
+
   # カテゴリー設定
   enum fixed_category: {
     praise_gratitude: 0,
@@ -110,6 +113,9 @@ class Post < ApplicationRecord
 
   scope :reposted, -> { joins(:reposts).distinct }
 
+  # ポストする前のアクション
+  # before_create :set_default_access_mode
+
   # リポストが作成されたときに最新活動日時を更新
   after_create :update_latest_activity
   after_update :update_latest_activity, if: :saved_change_to_created_at?
@@ -120,4 +126,8 @@ class Post < ApplicationRecord
     latest_time = [created_at, reposts.maximum(:created_at)].compact.max
     update(latest_activity: latest_time)
   end
+
+  # def set_default_access_mode
+  #   self.access_mode ||= :uuid  # 新規投稿はuuidに設定
+  # end
 end
