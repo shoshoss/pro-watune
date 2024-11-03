@@ -1,9 +1,3 @@
-databases:
-  - name: WaveConGra
-    databaseName: dbcongra
-    user: shonosuke
-    region: singapore
-
 services:
   - type: web
     name: WaveConGra
@@ -11,12 +5,3 @@ services:
     region: singapore
     buildCommand: "./bin/render-build.sh"
     startCommand: "bundle exec puma -C config/puma.rb"
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: WaveConGra
-          property: connectionString
-      - key: RAILS_MASTER_KEY
-        sync: false
-      - key: WEB_CONCURRENCY
-        value: 2
