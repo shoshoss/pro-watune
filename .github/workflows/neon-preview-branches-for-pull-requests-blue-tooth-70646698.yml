@@ -41,8 +41,15 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3.0" # あなたのRubyバージョンに合わせて変更
+          ruby-version: "3.3.0"
           bundler-cache: true
+
+      # neonctlのインストールと認証を追加
+      - name: Install neonctl
+        run: npm install -g neonctl@2
+
+      - name: Authenticate neonctl
+        run: neonctl auth "${{ secrets.NEON_API_KEY }}" # APIキーを用いて認証
 
       - name: Create Neon Branch
         id: create_neon_branch
