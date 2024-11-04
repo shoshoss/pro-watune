@@ -48,7 +48,7 @@ class User < ApplicationRecord
             format: { with: /\A[\w]+\z/, message: :invalid_format },
             exclusion: { in: RESERVED_USERNAMES, message: :reserved } # ユーザー名スラグ
 
-  validates :self_introduction, length: { maximum: 500 } # 自己紹介文
+  validates :self_introduction, length: { maximum: 150 } # 自己紹介文
 
   # コールバック
   before_validation :generate_username_slug, on: :create, unless: :username_slug? # ユーザー名スラグを生成
