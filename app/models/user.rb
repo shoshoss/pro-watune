@@ -44,9 +44,9 @@ class User < ApplicationRecord
   ].freeze
 
   validates :username_slug, presence: true, uniqueness: { case_sensitive: false, message: :taken },
-            length: { minimum: 3, maximum: 15, too_short: :too_short, too_long: :too_long },
-            format: { with: /\A[\w]+\z/, message: :invalid_format },
-            exclusion: { in: RESERVED_USERNAMES, message: :reserved } # ユーザー名スラグ
+                            length: { minimum: 3, maximum: 15, too_short: :too_short, too_long: :too_long },
+                            format: { with: /\A[\w]+\z/, message: :invalid_format },
+                            exclusion: { in: RESERVED_USERNAMES, message: :reserved } # ユーザー名スラグ
 
   validates :self_introduction, length: { maximum: 150 } # 自己紹介文
 
