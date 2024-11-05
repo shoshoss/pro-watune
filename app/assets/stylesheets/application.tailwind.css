@@ -4,6 +4,13 @@
 
 /* カスタムスタイル */
 
+.btn-link {
+  @apply text-blue-400 hover:text-blue-600;
+}
+.btn-google {
+  @apply px-6 py-3 border flex gap-2 border-blue-200 rounded-lg text-blue-700 hover:bg-sky-400 hover:text-white transition duration-150 text-lg;
+}
+
 .link {
   @apply text-blue-500 underline;
 }
@@ -93,35 +100,35 @@
 }
 
 .btn-choice-selected_users {
-  @apply bg-yellow-100 text-gray-500;
+  @apply bg-teal-100 text-gray-500;
 }
 
 .btn-choice-open {
-  @apply bg-sky-100 text-gray-500;
+  @apply bg-blue-100 text-gray-500;
 }
 
 .btn-choice-only_me-active {
-  @apply bg-orange-400 text-black border-2 border-black;
+  @apply bg-orange-400 text-white;
 }
 
 .btn-choice-selected_users-active {
-  @apply bg-yellow-400-accent text-black border-2 border-black;
+  @apply bg-teal-400 text-white;
 }
 
 .btn-choice-open-active {
-  @apply bg-sky-400 text-black border-2 border-black;
+  @apply bg-blue-400 text-white;
 }
 
 .btn-choice-only_me:hover {
-  @apply bg-orange-400 text-black;
+  @apply bg-orange-400 text-white;
 }
 
 .btn-choice-selected_users:hover {
-  @apply bg-yellow-400-accent text-black;
+  @apply bg-teal-400 text-white;
 }
 
 .btn-choice-open:hover {
-  @apply bg-sky-400 text-black;
+  @apply bg-blue-400 text-white;
 }
 
 .trial-btn {
