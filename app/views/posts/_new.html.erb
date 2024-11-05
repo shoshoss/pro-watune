@@ -33,12 +33,12 @@
       textarea.style.height = 'auto';
       textarea.style.height = textarea.scrollHeight + 'px';
 
-      // 投稿内容の文字数をカウントし、50000文字を超えた場合は投稿ボタンを無効化
+      // 投稿内容の文字数をカウントし、3150文字を超えた場合は投稿ボタンを無効化
       const submitButton = document.querySelector('[data-post-create-target="submitButton"]');
       const characterCount = document.querySelector('[data-post-create-target="characterCount"]');
-      characterCount.textContent = `${textLength} / 50000`;
+      characterCount.textContent = `${textLength} / 3150 文字`;
 
-      if (textLength > 50000) {
+      if (textLength > 3150) {
         submitButton.disabled = true;
         submitButton.classList.add('opacity-50');
         submitButton.classList.add('cursor-not-allowed');
