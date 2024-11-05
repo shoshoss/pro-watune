@@ -79,10 +79,10 @@ export default class extends Controller {
       this.mediaRecorder.onstop = (e) => this.handleRecordingStop(chunks);
       this.mediaRecorder.start();
 
-      // 録音時間の制限を設定 (例: 59分59秒)
+      // 録音時間の制限を設定 (3分15秒)
       setTimeout(() => {
         if (!this.shouldStop) this.stopRecording();
-      }, (59 * 60 + 59) * 1000); // 59分59秒後に自動停止
+      }, (3 * 60 + 15) * 1000); // 3分15秒後に自動停止
 
       this.visualize(this.mediaRecorder.stream);
     } else {

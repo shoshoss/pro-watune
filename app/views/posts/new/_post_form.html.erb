@@ -54,18 +54,16 @@
     <!-- 投稿内容 -->
     <div class="form-control pt-2">
       <div>
-        <%= f.label :body, '投稿内容', class: "block text-lg font-semibold", for: "body" %>
-        <span class="text-sm text-gray-600 mt-1">全ユーザーに公開</span>
-        <%= f.label :password, class: "label-text text-lg mb-1" do %>
-        パスワード <span class="text-base">※8文字以上</span>
-      <% end %>
-    </div>
+        <%= f.label :body, class: "label-text text-lg font-semibold", for: "body" do %>
+          投稿内容 <span class="text-base font-normal">※3150文字まで</span>
+        <% end %>
+      </div>
       <%= f.text_area :body, id: 'body', class: "block mt-1 p-2 text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-sky-500 resize-none overflow-y-auto", rows: "3", data: { action: "input->post-create#checkForm", "post-create-target" => "body" } %>
-      <div class="text-sm text-gray-500 mt-1" data-post-create-target="characterCount">0 / 50000</div>
+      <div class="text-sm text-gray-500 mt-1" data-post-create-target="characterCount">0 / 3150 文字</div>
     </div>
 
     <div class="main-controls pt-2">
-      <p class="block text-lg font-semibold">音声</p>
+      <p class="block text-lg font-semibold">音声 <span class="text-base font-normal">※3分15秒まで</span></p>
       <section>
         <canvas class="visualizer w-full rounded-lg h-24" style="background-color: #05aaff;"></canvas>
       </section>
