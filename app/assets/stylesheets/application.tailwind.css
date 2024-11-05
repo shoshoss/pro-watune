@@ -5,7 +5,7 @@
 /* カスタムスタイル */
 
 .btn-link {
-  @apply text-blue-500 hover:text-blue-600;
+  @apply text-blue-400 hover:text-blue-600;
 }
 .btn-google {
   @apply px-6 py-3 border flex gap-2 border-blue-200 rounded-lg text-blue-700 hover:bg-sky-400 hover:text-white transition duration-150 text-lg;
