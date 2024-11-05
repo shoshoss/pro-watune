@@ -9,6 +9,9 @@ export default class extends Controller {
   startTime;
   recordingInterval;
 
+  static targets = ["recordButton", "stopButton"]; // 既存のtargetsがある場合は追加
+  static MAX_RECORDING_DURATION = 5; // 3分15秒
+
   // 初期設定 コントローラが接続されたときに呼ばれる
   connect() {
     this.checkForm(); // フォームの初期状態をチェック
@@ -64,25 +67,29 @@ export default class extends Controller {
       this.audioCtx = new AudioContext();
     }
 
-    // すでに許可が得られている `MediaRecorder` を使用して録音開始
     if (this.mediaRecorder) {
       let chunks = [];
 
+      // 録音ボタンの制御
       this.element.querySelector(".record").disabled = true;
       this.element.querySelector(".stop").disabled = false;
-      this.element.querySelector('input[type="submit"]').disabled = true; // Submitボタンを無効化
+      this.element.querySelector('input[type="submit"]').disabled = true;
       this.shouldStop = false;
       this.startTime = Date.now();
       this.recordingInterval = setInterval(() => this.updateTimer(), 1000);
 
+      // 録音時間制限の設定を修正
+      setTimeout(() => {
+        if (!this.shouldStop) {
+          // 録音完了ボタンを自動クリック
+          document.getElementById("stopRecordingButton").click();
+          alert("録音時間が制限時間（3分15秒）に達しました。");
+        }
+      }, 5 * 1000); // 3分15秒 195
+
       this.mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
       this.mediaRecorder.onstop = (e) => this.handleRecordingStop(chunks);
       this.mediaRecorder.start();
-
-      // 録音時間の制限を設定 (3分15秒)
-      setTimeout(() => {
-        if (!this.shouldStop) this.stopRecording();
-      }, (3 * 60 + 15) * 1000); // 3分15秒後に自動停止
 
       this.visualize(this.mediaRecorder.stream);
     } else {
@@ -94,14 +101,23 @@ export default class extends Controller {
   stopRecording() {
     this.mediaRecorder.stop();
     clearInterval(this.recordingInterval);
-    this.element.querySelector(".stop").disabled = true;
+
+    // 録音ボタンのスタイルを元に戻す（この部分を修正）
+    const recordButton = this.element.querySelector(".record");
+    recordButton.disabled = false;
+    recordButton.classList.remove("bg-gray-400");
+    recordButton.classList.add("bg-blue-500", "hover:bg-blue-700");
+
+    const stopButton = this.element.querySelector(".stop");
+    stopButton.disabled = true;
+
     this.shouldStop = true;
     cancelAnimationFrame(this.animationFrameRequest);
 
     // 経過時間をミリ秒から秒に変換し、切り捨てを行う
     const durationInSeconds = Math.floor((Date.now() - this.startTime) / 1000);
     document.querySelector(".duration-field").value = durationInSeconds;
-    this.checkForm(); // フォームの状態を再チェック
+    this.checkForm();
   }
 
   // タイマー更新
