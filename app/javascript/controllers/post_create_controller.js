@@ -10,7 +10,7 @@ export default class extends Controller {
   recordingInterval;
 
   static targets = ["recordButton", "stopButton"]; // 既存のtargetsがある場合は追加
-  static MAX_RECORDING_DURATION = 5; // 3分15秒
+  static MAX_RECORDING_DURATION = 196; // 3分15秒
 
   // 初期設定 コントローラが接続されたときに呼ばれる
   connect() {
@@ -85,7 +85,7 @@ export default class extends Controller {
           document.getElementById("stopRecordingButton").click();
           alert("録音時間が制限時間（3分15秒）に達しました。");
         }
-      }, 5 * 1000); // 3分15秒 195
+      }, 195.999 * 1000); // 3分15秒
 
       this.mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
       this.mediaRecorder.onstop = (e) => this.handleRecordingStop(chunks);
