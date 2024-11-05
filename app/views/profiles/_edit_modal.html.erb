@@ -27,17 +27,28 @@
           </div>
 
           <div class="form-control">
-            <%= f.label :display_name, '名前', class: "label-text text-lg font-semibold mb-1", for: "user_display_name" %>
+            <div class="flex items-center">
+              <%= f.label :display_name, '名前', class: "label-text text-lg font-semibold", for: "user_display_name" %>
+              <div class="flex-none text-lg text-gray-600">（50文字以内）</div>
+            </div>
             <%= f.text_field :display_name, id: "user_display_name", class: "input-style", placeholder: "ウェーチュン#{user.id}", value: (user.display_name if @user.display_name.present? && @user.display_name != "ウェーチュン#{@user.id}") %>
           </div>
 
           <div class="form-control mt-2">
-            <%= f.label :username_slug, 'ユーザー名', class: "label-text text-lg font-semibold mb-1", for: "user_username_slug" %>
-            <%= f.text_field :username_slug, id: "user_username_slug", class: "input-style" %>
+            <%= f.label :username_slug, 'ユーザー名（オリジナルURL）', class: "label-text text-lg font-semibold mb-1", for: "user_username_slug" %>
+            <div class="flex items-center">
+              <div class="flex-none text-lg text-gray-600 mx-1">https://www.watune.com/</div>
+              <%= f.text_field :username_slug, id: "user_username_slug", class: "flex-1 input-style", maxlength: 15, pattern: "[a-zA-Z0-9_]{3,15}", title: "3文字以上15文字以内で、英数字または_(アンダースコア)のみ使用できます。" %>
+            </div>
+            <div class="flex-none text-md text-gray-600 mx-1">・3文字以上15文字以内</div>
+            <div class="flex-none text-md text-gray-600 mx-1">・英数字または_(アンダースコア)のみ使用可能</div>
           </div>
 
           <div class="form-control mt-2">
-            <%= f.label :self_introduction, '自己紹介', class: "label-text text-lg font-semibold mb-1 overflow-y-auto", for: "self_introduction" %>
+            <div class="flex items-center">
+              <%= f.label :self_introduction, '自己紹介', class: "label-text text-lg font-semibold overflow-y-auto", for: "self_introduction" %>
+              <div class="flex-none text-lg text-gray-600">（150文字以内）</div>
+            </div>
             <%= f.text_area :self_introduction, id: "self_introduction", class: "input-style", rows: "8" %>
           </div>
 
