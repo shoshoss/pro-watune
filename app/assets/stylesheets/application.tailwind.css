@@ -96,7 +96,7 @@
 }
 
 .btn-choice-only_me {
-  @apply bg-orange-100 opacity-50 text-gray-500;
+  @apply bg-orange-100 opacity-50 text-gray-700;
 }
 
 .btn-choice-selected_users {

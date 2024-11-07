@@ -22,30 +22,30 @@ module PostsAllHelper
   end
 
   # プライバシー設定に基づくリダイレクト先を決定する
-  def redirect_based_on_privacy
-    cookies[:selected_post_category] = post_params[:fixed_category] if post_params[:fixed_category].present?
-    current_category = cookies[:selected_post_category] || 'recommended'
-    case params[:privacy] || @post.privacy
-    when 'only_me'
-      redirect_to profile_show_path(username_slug: current_user.username_slug, category: 'only_me'), status: :see_other,
-                                                                                                     notice: flash[:notice]
-    when 'selected_users'
-      recipient_ids = post_params[:recipient_ids]
-      if recipient_ids.blank?
-        redirect_to_only_me
-      elsif recipient_ids.size > 1
-        redirect_to profile_show_path(username_slug: current_user.username_slug, category: 'my_posts_following'),
-                    status: :see_other, notice: flash[:notice]
-      elsif recipient_user
-        redirect_to profile_show_path(username_slug: recipient_user.username_slug, category: 'shared_with_you'),
-                    status: :see_other, notice: flash[:notice]
-      end
-    when 'open'
-      redirect_to posts_path(category: current_category || 'recommended'), status: :see_other, notice: flash[:notice]
-    else
-      redirect_to_default
-    end
-  end
+  # def redirect_based_on_privacy
+  #   cookies[:selected_post_category] = post_params[:fixed_category] if post_params[:fixed_category].present?
+  #   current_category = cookies[:selected_post_category] || 'recommended'
+  #   case params[:privacy] || @post.privacy
+  #   when 'only_me'
+  #     redirect_to profile_show_path(username_slug: current_user.username_slug, category: 'only_me'), status: :see_other,
+  #                                                                                                    notice: flash[:notice]
+  #   when 'selected_users'
+  #     recipient_ids = post_params[:recipient_ids]
+  #     if recipient_ids.blank?
+  #       redirect_to_only_me
+  #     elsif recipient_ids.size > 1
+  #       redirect_to profile_show_path(username_slug: current_user.username_slug, category: 'my_posts_following'),
+  #                   status: :see_other, notice: flash[:notice]
+  #     elsif recipient_user
+  #       redirect_to profile_show_path(username_slug: recipient_user.username_slug, category: 'shared_with_you'),
+  #                   status: :see_other, notice: flash[:notice]
+  #     end
+  #   when 'open'
+  #     redirect_to posts_path(category: current_category || 'recommended'), status: :see_other, notice: flash[:notice]
+  #   else
+  #     redirect_to_default
+  #   end
+  # end
 
   # その他のプライバシー設定の場合のリダイレクト処理
   def redirect_to_default
