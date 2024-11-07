@@ -1,15 +1,19 @@
+// プライバシーモーダルに関連するカテゴリ選択、スクロール位置、タブの状態を管理し、ページ遷移や状態復元を行うコントローラー
+
 import { Controller } from "@hotwired/stimulus";
 import { Turbo } from "@hotwired/turbo-rails";
 
 export default class extends Controller {
   static targets = ["tab"];
 
+  // コントローラーの接続時にページ初期化処理を実行し、ブラウザの「戻る」操作に対応する
   connect() {
     this.initializePage();
     window.addEventListener("popstate", this.updateActiveTabFromUrl.bind(this));
     this.redirectToCategoryFromCookie();
   }
 
+  // ページの初期化処理：ナビゲーションバーの透明度設定、カテゴリタブの固定、タブの状態復元、カテゴリCookieの設定
   initializePage() {
     this.handleNavbarOpacity();
     this.handleCategoryTabs();
@@ -17,6 +21,7 @@ export default class extends Controller {
     this.setCategoryCookie();
   }
 
+  // ナビゲーションバーの透明度をスクロール位置に応じて変更する
   handleNavbarOpacity() {
     const navbar = document.getElementById("bottom-navbar");
     if (!navbar) return;
@@ -29,6 +34,7 @@ export default class extends Controller {
     });
   }
 
+  // カテゴリタブをスクロール位置に応じて固定する
   handleCategoryTabs() {
     const categoryTabsWrapper = document.getElementById(
       "post-category-tabs-wrapper"
@@ -64,6 +70,7 @@ export default class extends Controller {
     });
   }
 
+  // タブの選択状態とスクロール位置を保存し、ページ遷移する
   saveTabState(event) {
     event.preventDefault();
     const category = event.currentTarget.href.split("category=")[1];
@@ -80,6 +87,7 @@ export default class extends Controller {
     this.updateActiveTab(category);
   }
 
+  // タブのスクロール位置と選択状態を復元する
   restoreTabState() {
     const container = document.getElementById("post-category-tabs-container");
     const scrollPosition = localStorage.getItem("tabScrollPosition");
@@ -98,6 +106,7 @@ export default class extends Controller {
     this.updateActiveTab(selectedCategory);
   }
 
+  // 現在のカテゴリをURLパラメータ、Cookie、ローカルストレージから取得する
   getCurrentCategory() {
     const urlParams = new URLSearchParams(window.location.search);
     const categoryFromUrl = urlParams.get("category");
@@ -115,6 +124,7 @@ export default class extends Controller {
     );
   }
 
+  // 現在のカテゴリをCookieに保存する
   setCategoryCookie(selectedCategory) {
     const category = selectedCategory || "recommended";
     const expires = new Date();
@@ -122,6 +132,7 @@ export default class extends Controller {
     document.cookie = `selected_post_category=${category}; path=/; expires=${expires.toUTCString()}; SameSite=Lax;`;
   }
 
+  // 指定されたカテゴリをアクティブなタブとして設定する
   updateActiveTab(selectedCategory) {
     const category = selectedCategory || "recommended";
     this.tabTargets.forEach((tab) => {
@@ -133,11 +144,13 @@ export default class extends Controller {
     });
   }
 
+  // URL変更に応じてアクティブタブを更新する
   updateActiveTabFromUrl() {
     const category = this.getCurrentCategory();
     this.updateActiveTab(category);
   }
 
+  // Cookieに保存されたカテゴリにリダイレクトする
   redirectToCategoryFromCookie() {
     const currentPath = window.location.pathname + window.location.search;
     const currentCategory = this.getCurrentCategory();
