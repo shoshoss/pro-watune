@@ -96,39 +96,39 @@
 }
 
 .btn-choice-only_me {
-  @apply bg-orange-100 text-gray-500;
+  @apply bg-orange-100 opacity-50 text-gray-500;
 }
 
 .btn-choice-selected_users {
-  @apply bg-teal-100 text-gray-500;
+  @apply bg-teal-100 opacity-50 text-gray-500;
 }
 
 .btn-choice-open {
-  @apply bg-blue-100 text-gray-500;
+  @apply bg-blue-100 opacity-50 text-gray-500;
 }
 
 .btn-choice-only_me-active {
-  @apply bg-orange-400 text-white;
+  @apply bg-orange-400 opacity-100 text-white;
 }
 
 .btn-choice-selected_users-active {
-  @apply bg-teal-400 text-white;
+  @apply bg-teal-400 opacity-100 text-white;
 }
 
 .btn-choice-open-active {
-  @apply bg-blue-400 text-white;
+  @apply bg-blue-400 opacity-100 text-white;
 }
 
 .btn-choice-only_me:hover {
-  @apply bg-orange-400 text-white;
+  @apply bg-orange-400 opacity-80 text-white;
 }
 
 .btn-choice-selected_users:hover {
-  @apply bg-teal-400 text-white;
+  @apply bg-teal-400 opacity-80 text-white;
 }
 
 .btn-choice-open:hover {
-  @apply bg-blue-400 text-white;
+  @apply bg-blue-400 opacity-80 text-white;
 }
 
 .trial-btn {
