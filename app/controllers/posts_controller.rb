@@ -107,7 +107,8 @@ class PostsController < ApplicationController
     flash[:notice] = t('defaults.flash_message.created', item: Post.model_name.human, default: '投稿が作成されました。')
     recipient_ids = post_params[:recipient_ids] || []
     PostCreationJob.perform_later(@post.id, recipient_ids, @post.privacy)
-    redirect_to profile_show_path(username_slug: current_user.username_slug, category: 'all_my_posts'), status: :see_other, notice: flash[:notice]
+    redirect_to profile_show_path(username_slug: current_user.username_slug, category: 'all_my_posts'), status: :see_other,
+                                                                                                        notice: flash[:notice]
   end
 
   # 失敗した投稿作成の処理
