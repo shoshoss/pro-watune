@@ -10,15 +10,15 @@
           <div class="flex space-x-4">
             <div class="flex-1 text-center">
               <%= link_to '自分', new_post_path(privacy: 'only_me'), class: "btn-choice #{active_bottom('only_me')} w-full", method: :get, data: { turbo_frame: "privacy-settings", turbo_action: :advance, turbo: true } %>
-              <p class="text-sm text-gray-600 mt-1">あなたのみが閲覧可能</p>
+              <p class="text-sm text-gray-600 mt-1">あなたのみが<br class="sm:hidden">閲覧可能</p>
             </div>
             <div class="flex-1 text-center">
               <%= link_to 'DM', new_post_path(privacy: 'selected_users', selected_user_ids: params[:selected_user_ids]), class: "btn-choice #{active_bottom('selected_users')} w-full", method: :get, data: { turbo_frame: "privacy-settings", turbo_action: :advance, turbo: true } %>
-              <p class="text-sm text-gray-600 mt-1">特定のユーザーのみが閲覧可能</p>
+              <p class="text-sm text-gray-600 mt-1">基本フォローした<br class="sm:hidden">ユーザーへ<br class="md:hidden">送ったユーザーが<br class="sm:hidden">閲覧可能</p>
             </div>
             <div class="flex-1 text-center">
               <%= link_to '全体', new_post_path(privacy: 'open'), class: "btn-choice #{active_bottom('open')} w-full", method: :get, data: { turbo_frame: "privacy-settings", turbo_action: :advance, turbo: true } %>
-              <p class="text-sm text-gray-600 mt-1">全ユーザーに公開</p>
+              <p class="text-sm text-gray-600 mt-1">ホームに公開され<br class="md:hidden">全てのユーザーが<br class="sm:hidden">閲覧可能</p>
             </div>
           </div>
         </div>
@@ -69,12 +69,12 @@
       </section>
 
       <div class="flex justify-around items-center pt-2 px-5">
-        <button id="startRecordingButton" class="record text-xl bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-5 md:px-10 rounded disabled:opacity-50" data-action="click->post-create#startRecording">
-          録音<br class="md:hidden">開始
+        <button id="startRecordingButton" class="record text-xl bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-5 md:px-10 rounded disabled:opacity-50" data-action="click->post-create#startRecording">
+          録音<br class="sm:hidden">開始
         </button>
         <span id="timer" class="timer text-gray-800 font-semibold text-3xl md:text-3xl lg:text-3xl">00:00</span>
         <button id="stopRecordingButton" class="stop text-xl bg-red-500 hover:bg-red-700 text-white font-semibold py-2 px-5 md:px-10 rounded disabled:opacity-50" data-action="click->post-create#stopRecording" disabled>
-          録音<br class="md:hidden">完了
+          録音<br class="sm:hidden">完了
         </button>
       </div>
 
