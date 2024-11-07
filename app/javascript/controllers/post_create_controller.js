@@ -9,9 +9,6 @@ export default class extends Controller {
   startTime;
   recordingInterval;
 
-  static targets = ["recordButton", "stopButton"]; // 既存のtargetsがある場合は追加
-  static MAX_RECORDING_DURATION = 196; // 3分15秒
-
   // 初期設定 コントローラが接続されたときに呼ばれる
   connect() {
     this.checkForm(); // フォームの初期状態をチェック
