@@ -1,0 +1,23 @@
+<!-- app/views/admin/test_posts/new.html.erb -->
+<h1>音声投稿</h1>
+
+<%= form_with model: @test_post, url: admin_test_posts_path, local: true, html: { id: "audioForm" } do |f| %>
+  <div class="main-controls">
+    <canvas class="visualizer" height="60px"></canvas>
+    <div id="buttons">
+      <button type="button" class="record">録音開始</button>
+      <button type="button" class="stop" disabled>録音停止</button>
+    </div>
+  </div>
+
+  <section class="sound-clips"></section>
+
+  <%= f.submit "投稿", id: "submitBtn" %>
+<% end %>
+
+<%= link_to '戻る', admin_test_posts_path %>
+
+<!-- JavaScriptの読み込み -->
+<script type="module">
+  import "admin/test/audio_recorder";
+</script>

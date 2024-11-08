@@ -1,50 +1,135 @@
-<div class="navbar px-4">
-  <div class="flex items-center justify-between w-full">
-    <!-- ロゴ -->
-    <div class="shrink-0">
-      <%= link_to '/' do %>
-        <%= image_tag 'logo.png', alt: 'ロゴ', class: "h-10 md:h-14 w-auto" %>
+<div id="after-header" >
+  <div class="py-2 flex items-center justify-between w-full">
+    <div class="mx-2 md-plus:mx-5 shrink-0">
+      <%= link_to posts_path( category: cookies[:selected_post_category] || 'recommended'),
+                  id: "header-logo-link",
+                  method: :get,
+                  data: { turbo_frame: "_top" },
+                  class: "#{active_if(posts_path)}" do %>
+        <picture>
+          <source srcset="/logo-watune.png" media="(min-width: 768px)">
+          <img src="/logo-watune-en.png" alt="ロゴ" class="rounded-full h-[48px] w-[48px] md:h-[48px] md:w-[200px]">
+        </picture>
       <% end %>
     </div>
-
-    <!-- ナビゲーションリンク -->
-    <div class="flex flex-1 justify-end items-center space-x-4">
-      <%= link_to t('header.about'), '/', class: 'hidden md:block text-md font-bold py-2 border-b-4 border-cyan-600 text-current' %>
-      <%= link_to t('header.post_index'), posts_path, class: 'hidden md:block text-md font-bold py-2 border-b-4 border-transparent hover:border-cyan-300 hover:text-current' %>
-
-      <!-- 投稿ボタン -->
+    <div class="flex flex-1 justify-end items-center">
+      <% if current_user.guest %>
+        <%= link_to '引き継ぐ',
+                    new_signup_modal_path,
+                    id: "guest-update",
+                    method: :get,
+                    data: { turbo_frame: "signup_modal" },
+                    class: 'btn btn-outline btn-accent flex rounded-full btn-sm text-sm sm:btn-md sm:text-lg sm:btn-sm sm:rounded-full mr-2 sm:mr-4' %>
+      <% end %>
       <%= link_to t('header.post_audio'),
-                  new_post_path,
-                  class: 'btn btn-outline btn-accent md:text-lg sm:text-sm',
-                  data: { turbo_frame: "post_modal" } %>
-
-      <!-- ユーザーメニュー -->
-      <div class="dropdown dropdown-end ml-4">
-        <div class="dropdown dropdown-end">
-          <label tabindex="0" class="btn btn-ghost rounded-btn">
-            <% if current_user.avatar.present? %>
-              <%= image_tag current_user.avatar, class: 'rounded-full w-8 h-8' %>
-            <% else %>
-              <%= image_tag 'sample.jpg', class: 'rounded-full w-8 h-8' %>
+                  new_post_path(privacy: 'only_me'),
+                  method: :get,
+                  data: { turbo_frame: "_top"},
+                  class: "text-white font-bold btn btn-info flex rounded-full btn-sm text-sm sm:btn-md sm:text-lg bg-opacity-80" %>
+      <div class="dropdown dropdown-hover dropdown-end shrink-0 sm:ml-0">
+        <label tabindex="0" class="btn btn-ghost rounded-btn">
+          <%= image_tag (current_user.avatar.presence || '/logo-watune-en.png'), class: "rounded-full h-10 w-10 min-w-[40px] md:h-12 md:w-12 sm:min-w-[35px]" %>
+        </label>
+        <ul tabindex="0" class="z-20 menu dropdown-content p-2 bg-white rounded-box" style="min-width: 300px; max-width: 670px;">
+          <li class="py-2">
+            <%= link_to t('header.about'),
+                        top_path,
+                        method: :get,
+                        data: { turbo_frame: "_top"},
+                        id: "header-about-link",
+                        class: "text-[15px] sm:text-lg hover:bg-sky-100 rounded-full px-4 #{active_if(about_path)}" %>
+          </li>
+          <li class="block py-2">
+            <%= link_to posts_path( category: cookies[:selected_post_category] || 'recommended'),
+                        method: :get,
+                        data: { 
+                          action: "click->history#navigate",
+                          category: cookies[:selected_post_category] || 'recommended'
+                        },
+                        id: "header-home-link",
+                        class: "text-[15px] sm:text-lg hover:bg-sky-100 rounded-full px-4 #{active_if(posts_path)}" do %>
+              <i class="fa-solid fa-house text-[15px] sm:text-lg"></i>
+              <span>ホーム</span>
             <% end %>
-          </label>
-          <ul tabindex="0" class="menu dropdown-content p-2 shadow bg-base-100 rounded-box w-52 mt-4">
-            <li>
-              <%= link_to '「Wこんぐら」とは', '/', class: 'hover:bg-cyan-600 hover:text-white' %>
+          </li>
+          <li class="block py-2">
+            <%= link_to profile_show_path(current_user.username_slug, category: cookies["#{current_user.username_slug}_selected_category"]),
+                        method: :get,
+                        data: { turbo_frame: "_top"},
+                        id: "header-profile-link",
+                        class: "text-[15px] sm:text-lg hover:bg-sky-100 rounded-full px-4 #{active_if(profile_show_path(current_user.username_slug))}" do %>
+              <i class="fas fa-user text-[15px] sm:text-lg"></i>
+              <span>プロフィール</span>
+            <% end %>
+          </li>
+          <li class="block py-2 text-[15px] sm:text-lg">
+            <%= link_to users_path,
+                        method: :get,
+                        data: { turbo_frame: "_top"},
+                        id: "header-users-link",
+                        class: "text-[15px] sm:text-lg hover:bg-sky-100 rounded-full px-4 #{active_if(users_path)}" do %>
+              <i class="fas fa-users text-[15px] sm:text-lg"></i>
+              <span>未フォロー<strong> <%= @unfollowed_users_count %>ユーザー</strong></span>
+            <% end %>
+          </li>
+            <li class="block py-2 text-[15px] sm:text-lg" data-controller="notification">
+              <%= link_to notifications_path,
+                          method: :post,
+                          data: { turbo_frame: "_top" },
+                          id: "header-notifications-link",
+                          class: "flex items-center block py-2 hover:bg-sky-100 rounded-full #{active_if(notifications_path)}" do %>
+                <div class="justify-self-center relative">
+                  <i class="fas fa-bell text-[15px] sm:text-lg"></i>
+                  <span class="absolute -top-[7px] -right-[7px] inline-block w-4 h-4 bg-orange-400 text-white text-xs rounded-full text-center <%= @unread_count.to_i > 0 ? '' : 'hidden' %>">
+                    <%= @unread_count.to_i %>
+                  </span>
+                </div>
+                <span>通知</span>
+              <% end %>
             </li>
-            <li class="block md:hidden">
-              <%= link_to 'みんなのWave', '#', class: 'hover:bg-cyan-600 hover:text-white' %>
-            </li>
-            <li>
-              <%= link_to 'プロフィール', profile_path, class: 'hover:bg-cyan-600 hover:text-white' %>
-            </li>
-            <li>
-              <%= link_to 'ログアウト', logout_path, method: :delete, data: { turbo_method: :delete }, class: 'hover:bg-cyan-600 hover:text-white' %>
-            </li>
-          </ul>
-        </div>
+          <li class="block py-2">
+            <%= link_to edit_notification_settings_path,
+                        method: :get,
+                        data: { turbo_frame: "_top"},
+                        id: "header-settings-link",
+                        class: "text-[15px] sm:text-lg hover:bg-sky-100 rounded-full px-4 #{active_if(edit_notification_settings_path)}" do %>
+              <i class="fas fa-cog text-[15px] sm:text-lg"></i>
+              <span>通知設定</span>
+            <% end %>
+          </li>
+          <li class="py-2">
+            <%= link_to 'ログアウト', logout_path,
+                        id: "header-logout-link",
+                        method: :delete, data: { turbo_method: :delete },
+                        class: "text-[15px] sm:text-lg hover:bg-sky-100 rounded-full px-4",
+                        onclick: "unregisterServiceWorker()" %>
+          </li>
+          <li class="py-2">
+            <%= link_to '退会する',
+                        user_path(current_user),
+                        id: "header-delete-account-link",
+                        method: :delete,
+                        data: { turbo_method: :delete, turbo_confirm: '本当に退会しますか（アカウント削除）？' }, class: 'btn btn-danger btn-sm text-sm' %>
+          </li>
+        </ul>
       </div>
-
     </div>
   </div>
 </div>
+
+<script>
+  function unregisterServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      }).finally(() => {
+        // サービスワーカーの解除後にページをリロード
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000); // 少し待機してからリロード
+      });
+    }
+  }
+</script>

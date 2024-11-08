@@ -1,28 +1,113 @@
-// Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
+// Turbo Railsとコントローラをインポート
 import "@hotwired/turbo-rails";
 import "controllers";
+
+// Active Storageをインポートしてスタート
 import * as ActiveStorage from "@rails/activestorage";
 ActiveStorage.start();
 
-document.addEventListener("DOMContentLoaded", function () {
-  const paginationLink = document.getElementById("pagination-link");
+// サービスワーカーのサポートをチェック
+if ("serviceWorker" in navigator) {
+  // ウィンドウがロードされたときにサービスワーカーを登録
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js").then(
+      (registration) => {
+        console.log(
+          "ServiceWorker registration successful with scope: ",
+          registration.scope
+        );
 
-  if (!paginationLink) return;
+        // 新しいサービスワーカーが待機状態の場合、skipWaitingメッセージを送信
+        if (registration.waiting) {
+          registration.waiting.postMessage({ action: "skipWaiting" });
+        }
 
-  var intersectionObserver = new IntersectionObserver(
-    function (entries) {
-      // エントリーが見えるかどうかをチェック
-      if (entries[0].isIntersecting) {
-        // リンクをクリック
-        paginationLink.click();
+        // 新しいサービスワーカーが見つかった場合の処理
+        registration.addEventListener("updatefound", () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener("statechange", () => {
+            if (
+              newWorker.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
+              newWorker.postMessage({ action: "skipWaiting" });
+            }
+          });
+        });
+
+        // サービスワーカーが準備完了したら追加リソースをキャッシュ
+        navigator.serviceWorker.ready.then((swRegistration) => {
+          swRegistration.active.postMessage({
+            action: "cacheAdditionalResources",
+          });
+
+          // ユーザーのusername_slugを取得してユーザー特定のリソースをキャッシュ
+          const usernameSlug = getUsernameSlug();
+          if (usernameSlug) {
+            if (navigator.serviceWorker.controller) {
+              navigator.serviceWorker.controller.postMessage({
+                action: "cacheUserSpecificResources",
+                urls: [
+                  `/${usernameSlug}`,
+                  `/${usernameSlug}?category=all_my_posts`,
+                  `/${usernameSlug}?category=only_me`,
+                  `/${usernameSlug}?category=my_posts_following`,
+                  `/${usernameSlug}?category=my_posts_open`,
+                  `/${usernameSlug}?category=posts_to_you`,
+                  `/${usernameSlug}?category=bookmarked`,
+                  `/${usernameSlug}?category=liked`,
+                  "/notifications",
+                  "/notification_settings/edit",
+                  `/${usernameSlug}/following`,
+                  `/${usernameSlug}/followers`,
+                ],
+              });
+            } else {
+              console.error("ServiceWorker controller is null");
+            }
+          }
+        });
+      },
+      (error) => {
+        console.log("ServiceWorker registration failed: ", error);
       }
-    },
-    {
-      rootMargin: "0px",
-      threshold: 1.0, // 全部見えている時だけ反応させる
-    }
-  );
+    );
+  });
+}
 
-  // リンクを監視
-  intersectionObserver.observe(paginationLink);
+// Turboがロードされたときにフォローボタンのイベントリスナーを設定
+document.addEventListener("turbo:load", () => {
+  const container = document.querySelector("#follow-buttons-container");
+  if (container) {
+    container.removeEventListener("click", handleFollowButtonClick);
+    container.addEventListener("click", handleFollowButtonClick);
+  }
 });
+
+// フォローボタンがクリックされたときの処理
+function handleFollowButtonClick(event) {
+  const button = event.target.closest(".follow-button");
+  if (!button) return;
+
+  // サービスワーカーがアクティブであればupdateWidgetアクションを送信
+  if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      action: "updateWidget",
+    });
+  }
+}
+
+// DOMコンテンツが読み込まれたときにサービスワーカーをアンレジスタするスクリプトを読み込む
+document.addEventListener("DOMContentLoaded", () => {
+  const script = document.createElement("script");
+  script.src = "/unregister_service_worker.js";
+  document.head.appendChild(script);
+});
+
+// ユーザーのusername_slugを取得する関数
+function getUsernameSlug() {
+  const metaTag = document.querySelector(
+    'meta[name="current-user-username-slug"]'
+  );
+  return metaTag ? metaTag.content : null;
+}

@@ -1,3 +1,180 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* カスタムスタイル */
+
+.btn-link {
+  @apply text-blue-400 hover:text-blue-600;
+}
+.btn-google {
+  @apply px-6 py-3 border flex gap-2 border-blue-200 rounded-lg text-blue-700 hover:bg-sky-400 hover:text-white transition duration-150 text-lg;
+}
+
+.link {
+  @apply text-blue-500 underline;
+}
+
+.link:hover {
+  @apply text-blue-700 underline;
+}
+
+.input-style {
+  @apply block mt-1 p-2 text-base sm:text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-sky-400 resize-y;
+}
+
+.c-post-tab {
+  @apply flex-1 px-4 py-2 text-center text-base hover:bg-sky-100 hover:border-b-4 hover:border-sky-400 whitespace-nowrap;
+}
+
+.active {
+  @apply font-bold border-b-4 border-sky-400-accent text-blue-500;
+}
+
+.no-active {
+  @apply font-medium border-b-2 border-gray-200;
+}
+
+.c-post-tab span {
+  @apply text-black;
+}
+
+.c-active span {
+  @apply text-black;
+}
+
+/* プロフィールのタブのレイアウト */
+/* タブの基本スタイル */
+.c-tabs {
+  @apply text-center align-middle py-2;
+}
+
+.c-tab {
+  @apply flex-1 px-4 py-2 text-center border-b-2 border-gray-300 hover:bg-sky-100 hover:border-b-4 hover:border-sky-400 whitespace-nowrap;
+}
+
+.c-tab span {
+  @apply text-gray-600;
+}
+
+.c-tab-active {
+  @apply border-b-4 border-sky-400 font-bold;
+}
+
+.c-tab-active span {
+  @apply text-black;
+}
+
+/* アクティブ状態のアイコンとテキストの色 */
+.c-tab-active-all-my-posts,
+.c-tab-active-only-me,
+.c-tab-active-my-posts-open {
+  @apply text-blue-500;
+}
+
+.c-tab-active-posts-to-you {
+  @apply text-orange-400;
+}
+
+.c-tab-active-all-likes-chance,
+.c-tab-active-my-likes-chance,
+.c-tab-active-public-likes-chance {
+  @apply text-pink-400-accent;
+}
+
+.c-tab-active-bookmarked {
+  @apply text-yellow-700-accent;
+}
+
+.c-tab-active-liked {
+  @apply text-red-400;
+}
+
+/* 投稿のプライバシー選択のボタンのレイアウト */
+.btn-choice {
+  @apply inline-block px-4 py-2 text-xl cursor-pointer font-bold rounded-full transition-colors;
+}
+
+.btn-choice-only_me {
+  @apply bg-orange-100 opacity-50 text-gray-700;
+}
+
+.btn-choice-selected_users {
+  @apply bg-teal-100 opacity-50 text-gray-500;
+}
+
+.btn-choice-open {
+  @apply bg-blue-100 opacity-50 text-gray-500;
+}
+
+.btn-choice-only_me-active {
+  @apply bg-orange-400 opacity-100 text-white;
+}
+
+.btn-choice-selected_users-active {
+  @apply bg-teal-400 opacity-100 text-white;
+}
+
+.btn-choice-open-active {
+  @apply bg-blue-400 opacity-100 text-white;
+}
+
+.btn-choice-only_me:hover {
+  @apply bg-orange-400 opacity-80 text-white;
+}
+
+.btn-choice-selected_users:hover {
+  @apply bg-teal-400 opacity-80 text-white;
+}
+
+.btn-choice-open:hover {
+  @apply bg-blue-400 opacity-80 text-white;
+}
+
+.trial-btn {
+  @apply bg-white bg-opacity-80 text-pink-400-accent font-bold py-4 px-6 rounded-full border-2 border-pink-400-accent transition-colors duration-300;
+  display: inline-block;
+  text-align: center;
+  white-space: normal;
+}
+.trial-btn:hover {
+  @apply bg-pink-400-accent text-white;
+}
+
+/* フォローボタン */
+.btn-follow {
+  @apply bg-black text-white font-bold btn-sm text-sm rounded-full hover:bg-orange-400;
+}
+
+/* フォロー中ボタン */
+.btn-following {
+  @apply bg-orange-400 text-white font-bold btn-sm text-sm rounded-full;
+  position: relative;
+}
+
+/* フォロー解除テキスト用クラス */
+.btn-unfollow-hover::after {
+  content: attr(data-unfollow-text);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f56565; /* text-red-600 */
+  background-color: #fed7d7; /* bg-red-100 */
+  border-radius: 9999px; /* rounded-full */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.btn-following:hover::after {
+  opacity: 1;
+}
+
+/* アクティブリンクのカスタムスタイル */
+.active-link {
+  @apply bg-white;
+  @apply text-blue-500;
+  @apply font-bold;
+  @apply border-b-4 border-sky-400;
+}

@@ -2,59 +2,108 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  
   <title><%= page_title(yield(:title)) %></title>
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
-  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-10YY0QQ95M"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-10YY0QQ95M');
+  </script>
+
+  <!-- JavaScriptの設定 -->
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.8.2/dist/es-module-shims.js" data-turbo-track="reload"></script>
   <%= javascript_importmap_tags %>
   <script src="https://kit.fontawesome.com/630314d173.js" crossorigin="anonymous"></script>
+
+  <!-- スタイルシートのリンク -->
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+
+  <!-- Turboフレームタグ -->
   <%= turbo_frame_tag 'signup_modal' %>
-  <%= turbo_frame_tag 'login_modal' %>
+  <%= turbo_frame_tag 'tou_modal' %>
+  <%= turbo_frame_tag 'privacy_modal' %>
   <%= turbo_frame_tag 'post_modal' %>
+  <%= turbo_frame_tag 'reply_modal' %>
+
+  <!-- Favicon for legacy browsers -->
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+
+  <!-- SVG icon for modern browsers with light/dark mode support -->
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- Android Touch Icon -->
+  <link rel="icon" sizes="192x192" href="/icon-192.png">
+  <link rel="icon" sizes="512x512" href="/icon-512.png">
+
+  <!-- manifestファイル -->
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <%= show_meta_tags %>
+  <!-- username_slugをJavaScriptに渡す ログインユーザのプロフィールの読み込みのため -->
+  <% if current_user %>
+    <meta name="current-user-username-slug" content="<%= current_user.username_slug %>">
+  <% end %>
 </head>
-<body class="font-sans bg-white">
+
+<body id="main-body" class="font-sans bg-white flex flex-col min-h-screen" data-controller="history">
 
   <!-- ヘッダー -->
-  <header class="sticky top-0 z-30 bg-white w-full shadow md:max-w-screen-xl md:mx-auto">
-    <% if logged_in? %>
-      <%= render 'shared/header' %>
-    <% else %>
+  <% if logged_in? %>
+    <header class="z-15 bg-white w-full max-w-screen-xl mx-auto border border-gray-200">
+        <%= render 'shared/header' %>
+    </header>
+  <% else %>
+    <header class="sticky top-0 z-20 bg-white w-full max-w-screen-xl mx-auto border border-gray-200">
       <div id="before_login_header">
-      <%= render 'shared/before_login_header' %>
+        <%= render 'shared/before_login_header' %>
       </div>
-    <% end %>
-  </header>
+    </header>
+  <% end %>
 
   <!-- コンテンツコンテナ -->
-  <div class="flex flex-col md:flex-row h-screen max-w-screen-xl mx-auto overflow-hidden">
+  <div class="flex-1 flex flex-col md:flex-row max-w-screen-xl mx-auto w-full">
     <!-- サイドバー -->
     <% if logged_in? %>
-      <%= render 'shared/sidebar' %>
-      <% else %>
-        <div id="sidebar">
-        </div>
+      <div id="after-sidebar">
+        <%= render 'shared/sidebar' %>
+      </div>
+    <% else %>
+      <div id="no-sidebar"></div>
     <% end %>
 
     <!-- メインコンテンツ -->
-    <main class="flex-1 overflow-auto">
-      <turbo-frame id="notification" >
-        <%= render 'shared/flash_message' %>
-      </turbo-frame>
+    <main class="flex-1">
+      <%= render 'shared/flash_message' %>
+      <div id="before_profile_edit_flash">
+        <%= render 'shared/before_profile_edit_flash' %>
+      </div>
       <%= yield %>
     </main>
 
     <!-- ウィジェット -->
     <% if logged_in? %>
-        <%= render 'shared/widget' %>
-    <% else %>
-      <div id="widget">
+      <div id="after-widget">
+        <%= render 'shared/widget', users: @recent_users %>
       </div>
+    <% else %>
+      <div id="no-widget"></div>
     <% end %>
   </div>
 
+  <!-- スマホ用ボトムメニューバー -->
+  <%= render 'shared/bottom_navbar' if logged_in? %>
+
   <!-- フッター -->
-  <footer class="bg-gray-200 w-full md:max-w-screen-xl md:mx-auto mt-auto">
-    <%= render 'shared/footer' %>
-  </footer>
+  <%= render 'shared/footer' %>
+
 </body>
 </html>

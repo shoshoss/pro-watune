@@ -1,0 +1,101 @@
+<nav id="bottom-navbar" class="sm:hidden fixed bottom-0 left-0 z-10 w-full bg-white border-t transition-opacity duration-300 border-t-1 border-gray-200" >
+  <ul class="py-1 flex justify-around">
+    <li class="flex-1 text-center">
+      <%= link_to posts_path(category: cookies[:selected_post_category] || 'recommended'),
+                  id: "bottom-navbar-home-link",
+                  method: :get,
+                  data: { action: "click->history#navigate" },
+                  class: "block py-2 #{active_if(posts_path)}" do %>
+        <i class="fa-solid fa-house text-2xl"></i>
+      <% end %>
+    </li>
+    <li class="flex-1 text-center">
+      <%= link_to profile_show_path(username_slug: current_user.username_slug, category: cookies["#{current_user.username_slug}_selected_category"]),
+                  id: "bottom-navbar-profile-link",
+                  method: :get,
+                  data: { action: "click->history#navigate" },
+                  class: "block py-2 #{active_if(profile_show_path(username_slug: current_user.username_slug))}" do %>
+        <i class="fas fa-user text-2xl"></i>
+      <% end %>
+    </li>
+    <li class="flex-1 text-center" data-controller="notification">
+      <%= link_to notifications_path, 
+                  method: :post, 
+                  data: { turbo_frame: "_top" }, 
+                  id: "bottom-navbar-notifications-link", 
+                  class: "flex grid justify-items-stretch block py-2 #{active_if(notifications_path)}" do %>
+        <div class="w-[27px] h-[27px] justify-self-center relative">
+          <i class="fas fa-bell text-2xl"></i>
+          <span class="absolute -top-[8px] -right-[6px] inline-block w-4 h-4 bg-orange-400 text-white text-xs rounded-full text-center" style="<%= @unread_count > 0 ? 'display: block;' : 'display: none;' %>">
+            <%= @unread_count %>
+          </span>
+        </div>
+      <% end %>
+    </li>
+    <li class="flex-1 text-center">
+      <%= link_to profile_show_path(username_slug: current_user.username_slug, category: 'posts_to_you'),
+                  method: :get,
+                  data: { action: "click->history#navigate" },
+                  id: "bottom-navbar-messages-link",
+                  class: "block py-2 #{active_if(profile_show_path(username_slug: current_user.username_slug, category: 'posts_to_you'))}" do %>
+        <i class="fa-regular fa-envelope text-2xl"></i>
+      <% end %>
+    </li>
+    <li class="flex-1 text-center">
+      <%= link_to edit_notification_settings_path,
+                  method: :get,
+                  data: { action: "click->history#navigate" },
+                  id: "bottom-navbar-settings-link",
+                  class: "block py-2 #{active_if(edit_notification_settings_path)}" do %>
+        <i class="fas fa-cog text-2xl"></i>
+      <% end %>
+    </li>
+  </ul>
+</nav>
+
+<!-- 投稿ボタン -->
+<% if params[:controller] == "posts" && params[:action] == "show" %>
+  <%= link_to new_reply_modal_path(username_slug: params[:username_slug], id: params[:id]),
+              id: "reply-button",
+              class: "sm:hidden z-50 fixed text-2xl right-5 bottom-16 w-[56px] h-[56px] rounded-full bg-sky-400-accent flex items-center justify-center text-white shadow-lg",
+              method: :get,
+              data: { turbo_frame: "reply_modal" } do %>
+    <i class="fa-regular fa-comment text-2xl"></i>
+  <% end %>
+<% else %>
+  <%= link_to new_post_path(privacy: 'open'),
+              method: :get,
+              data: { action: "click->history#navigate" },
+              class: "sm:hidden z-50 fixed text-2xl right-5 bottom-16 w-[56px] h-[56px] rounded-full bg-sky-400-accent flex items-center justify-center text-white shadow-lg",
+              id: "post-button" do %>
+    <i class="fa-solid fa-gift text-2xl"></i>
+  <% end %>
+<% end %>
+
+<script>
+  function handleNavbarOpacity() {
+    var navbar = document.getElementById('bottom-navbar');
+    var postButton = document.getElementById('post-button');
+    var replyButton = document.getElementById('reply-button');
+    var lastScrollTop = 0;
+
+    window.addEventListener('scroll', function () {
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      if (scrollTop > lastScrollTop) {
+        // スクロールダウン
+        navbar.style.opacity = '0.5';
+        if (postButton) postButton.style.opacity = '0.5';
+        if (replyButton) replyButton.style.opacity = '0.5';
+      } else {
+        // スクロールアップ
+        navbar.style.opacity = '1';
+        if (postButton) postButton.style.opacity = '1';
+        if (replyButton) replyButton.style.opacity = '1';
+      }
+      lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', handleNavbarOpacity);
+  document.addEventListener('turbo:load', handleNavbarOpacity);
+</script>

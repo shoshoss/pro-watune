@@ -1,0 +1,61 @@
+<turbo-frame id="main-content">
+<div id="about" class="flex flex-col max-w-[670px] justify-center text-gray-900 container mx-auto py-12 px-2" style="background-image: url('#'); background-size: cover; background-position: center;">
+  <section class="mb-12 text-center">
+    <div class="rounded-full bg-sky-400-accent bg-opacity-50 px-3 py-12 sm:p-8 mx-auto max-w-2xl">
+      <h2 class="text-3xl font-bold mb-4">アプリへの想い</h2>
+      <p class="text-lg font-semibold">
+        以前、体調を崩して退職した後、
+        <br>約一年間うつに近い状態で<br class="sm:hidden">苦しんだ経験から
+        <br>自己肯定の重要性を認識しました。
+        <br>この経験は、まず自分自身への感謝が<br class="sm:hidden">どれほど大切かを痛感しました。
+        <br>そして、大切な人からの応援や支えは<br class="sm:hidden">かけがえのないものでした。
+        <br>そこで自分や仲間の投稿を通じて
+        <br>少しでも自分を好きでいられるように、
+        <br>少しでも前向きになれるサービスを<br class="sm:hidden">提供したいと思い、
+        <br>本アプリを<br class="sm:hidden">開発させていただきました。
+      </p>
+    </div>
+  </section>
+  <section class="mb-12 text-center">
+    <div class="rounded-full bg-sky-400-accent bg-opacity-50 px-3 py-12 sm:p-8 mx-auto max-w-2xl">
+      <h2 class="text-3xl font-bold mb-4">アプリ名の由来</h2>
+      <p class="text-lg font-semibold">
+        Watune（ウェーチュン）は、
+        <br>Wave Tune（ウェーブチューン）
+        <br> 「Wave（波、波紋）」と<br class="sm:hidden">「Tune（旋律、メロディー）」を
+        <br>組み合わせた造語です。
+        <br>心地の良い前向きな音が
+        <br>波紋のように広がっている<br class="sm:hidden">という意味を込めています。
+      </p>
+    </div>
+  </section>
+  <section class="mb-12 text-center">
+    <div class="rounded-full bg-sky-400-accent bg-opacity-50 px-5 py-12 sm:p-12 mx-auto max-w-2xl">
+      <h2 class="text-3xl font-bold mb-4">対象ユーザー</h2>
+      <p class="text-lg font-semibold">
+        本アプリは、<br class="sm:hidden">前向きであり続けたい人々や
+        <br>切磋琢磨したい人々を<br class="sm:hidden">対象としています。
+        <br>学びのアウトプットや<br class="sm:hidden">アイデアの音声メモ、
+        <br>思い出の記録としても<br class="sm:hidden">ご利用いただけます。
+      </p>
+    </div>
+  </section>
+
+  <%= link_to "ウェーブ（投稿）を見てみる", posts_path, class: "mb-6 text-xl sm:text-2xl btn btn-accent bg-opacity-80 hover:bg-opacity-100 rounded-full transition-colors duration-300" %>
+  <% unless current_user %>
+    <%= link_to guest_login_path, method: :post, class: 'mb-6 trial-btn text-xl sm:text-2xl' do %>
+    お試しで始める<br>ログイン中で<br class="sm:hidden">データの引き継ぎ可能
+    <% end %>
+    <!-- Googleで新規登録のボタン -->
+    <div class="flex items-center justify-center mb-8">
+      <%= link_to auth_at_provider_path(provider: :google),
+                  method: :post,
+                  class: "bg-white bg-opacity-80 px-6 py-3 border flex gap-2 border-blue-200 dark:border-blue-300 rounded-lg text-blue-700 hover:border-blue-400 hover:text-blue-800 hover:shadow-outline transition duration-150 text-lg",
+                  data: { turbo: false } do %>
+        <img class="w-8 h-8" src="https://www.svgrepo.com/show/475656/google-color.svg" loading="lazy" alt="google logo">
+        <span class="text-xl">Googleで新規登録<br class="md:hidden">またはログイン</span>
+    <% end %>
+  <% end %>
+</div>
+
+</turbo-frame>

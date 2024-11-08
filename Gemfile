@@ -31,8 +31,13 @@ gem 'cssbundling-rails'
 # JSON APIを簡単に構築
 gem 'jbuilder'
 
-# 本番環境でAction Cableを実行するためにRedisアダプターを使用
-# gem 'redis', '>= 4.0.1'
+# Redisとの通信を行うための基本的なクライアントライブラリ
+gem 'redis', '>= 5.2'
+
+# Redisを利用してデータを一時的に保存するための設定を容易にするライブラリ
+gem 'redis-rails', '>= 5.0'
+
+gem 'sidekiq', '>= 7.2'
 
 # Redisで高度なデータ型を取得するためのKredis
 # gem 'kredis'
@@ -60,15 +65,37 @@ gem 'config', '~> 5.4'
 
 # ファイルのアップロードのためのcarrierwave
 gem 'carrierwave', '~> 3.0'
+gem 'carrierwave-audio', '~> 1.0'
+gem 'carrierwave-aws', '~> 1.6'
 
 # ページネーションのためのpagy
 gem 'pagy', '~> 8.3'
 
 gem 'aws-sdk-s3', '~> 1.1', require: false
 
+gem 'active_record_extended', '~> 3.2'
+
+# https://アプリ名.onrender.com」を、「https://www.独自ドメイン」にリダイレクトさせてドメインを統一
+gem 'rack-rewrite', '~> 1.5'
+
+# OGPメタタグの設定を効率的に行うため
+gem 'meta-tags', '~> 2.21'
+
+gem 'enum_help'
+
+gem 'rinku', '~> 2.0'
+
 group :development, :test do
+  # リクエストの速度を表示するためのrack-mini-profiler
+  gem 'rack-mini-profiler', '>= 3.3', require: false
+
+  # N+1クエリの検出や未使用のEager Loadの警告のためのbullet
+  gem 'bullet', '>= 7.1', require: false
+
   # デバッグ用のdebug
   gem 'debug', platforms: %i[mri windows]
+  gem 'flamegraph', '>= 0.9'
+  gem 'stackprof', '>= 0.2'
 
   # テスト用のダミーデータ生成のためのfaker
   gem 'faker', '>= 3.3'
@@ -80,9 +107,6 @@ end
 group :development do
   # 開発環境でのコンソール表示のためのweb-console
   gem 'web-console'
-
-  # リクエストの速度を表示するためのrack-mini-profiler
-  # gem 'rack-mini-profiler'
 
   # 開発環境でのコマンドの高速化のためのspring
   # gem 'spring'

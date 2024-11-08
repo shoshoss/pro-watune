@@ -2,16 +2,29 @@
 
 module ApplicationHelper
   include Pagy::Frontend
-
-  # kaminari
-  # def path_to_next_page(posts)
-  #   return nil unless posts.next_page
-  #   posts_path(page: posts.next_page)  # これは実際のルーティングに合わせて変更してください
-  # end
+  require 'rinku'
 
   def page_title(title = '')
-    base_title = 'ConGraWa APP'
+    base_title = 'Watune（ウェーチュン）'
     title.present? ? "#{title} | #{base_title}" : base_title
+  end
+
+  def format_text_with_links(text)
+    simple_format(Rinku.auto_link(h(text), :all, 'target="_blank" class="link"'))
+  end
+
+  def set_flash(key, message)
+    session[key] = message
+  end
+
+  def get_flash(key)
+    message = session[key]
+    session.delete(key)
+    message
+  end
+
+  def before_profile_edit_flash
+    flash[:before_profile_edit] || {}
   end
 
   def flash_class(type)
@@ -27,5 +40,71 @@ module ApplicationHelper
     else
       'alert alert-default'    # デフォルト（グレー）の背景
     end
+  end
+
+  # 投稿一覧
+  # \nだけ置換
+  def nl2br(input)
+    (sanitize input).gsub("\n", '<br>')
+  end
+
+  # プロフィール画面 paramsの値に応じてアクティブクラスを適用
+
+  # タブがアクティブかどうかを決定するクラスを返す
+  def active_tab_class(*categories, initial_category:)
+    active_category = params[:category] || initial_category
+
+    return '' unless categories.include?(active_category)
+
+    category_classes = {
+      'all_my_posts' => 'c-tab-active c-tab-active-all-my-posts',
+      'only_me' => 'c-tab-active c-tab-active-all-my-posts',
+      'my_posts_following' => 'c-tab-active c-tab-active-all-my-posts',
+      'my_posts_open' => 'c-tab-active c-tab-active-all-my-posts',
+      'posts_to_you' => 'c-tab-active c-tab-active-posts-to-you',
+      'all_likes_chance' => 'c-tab-active c-tab-active-all-likes-chance',
+      'my_likes_chance' => 'c-tab-active c-tab-active-all-likes-chance',
+      'public_likes_chance' => 'c-tab-active c-tab-active-all-likes-chance',
+      'bookmarked' => 'c-tab-active c-tab-active-bookmarked',
+      'liked' => 'c-tab-active c-tab-active-liked',
+      'followings' => 'c-tab-active',
+      'followers' => 'c-tab-active'
+    }
+
+    category_classes[active_category] || 'c-tab-active'
+  end
+
+  # 投稿画面 paramsの値に応じてアクティブクラスを適用
+  def active_bottom(privacy_value)
+    case privacy_value
+    when 'only_me'
+      params[:privacy] == 'only_me' ? 'btn-choice-only_me-active' : 'btn-choice-only_me'
+    when 'selected_users'
+      params[:privacy] == 'selected_users' ? 'btn-choice-selected_users-active' : 'btn-choice-selected_users'
+    when 'open'
+      params[:privacy] == 'open' ? 'btn-choice-open-active' : 'btn-choice-open'
+    else
+      ''
+    end
+  end
+
+  def active_if(path)
+    current_page?(path) ? 'font-bold border-b-4 border-sky-400-accent text-blue-500' : 'font-medium border-b-2 border-gray-200'
+  end
+
+  # ユーザー数と投稿数を表示
+  def format_count(count)
+    if count >= 1_000_000
+      "#{(count / 1_000_000.0).round(1)}M"
+    elsif count >= 1_000
+      "#{(count / 1_000.0).round(1)}K"
+    else
+      count.to_s
+    end
+  end
+
+  # ウィジェットがメインコンテンツと同じように表示されないように
+  def hide_widget_on_users_index
+    controller_name == 'users' && action_name == 'index' ? 'hidden' : ''
   end
 end

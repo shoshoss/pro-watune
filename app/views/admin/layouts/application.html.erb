@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= page_title(yield(:title)) %> | 管理画面</title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <!-- ES Module Shims -->
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.8.2/dist/es-module-shims.js" data-turbo-track="reload"></script>
+  
+  <!-- Import Maps -->
+  <%= javascript_importmap_tags %>
+  
+</head>
+<body class="font-sans bg-gray-100 min-h-screen flex flex-col">
+
+  <!-- 管理者用ヘッダー -->
+  <%= render 'admin/shared/header' %>
+
+  <!-- 管理者用コンテンツコンテナ -->
+  <div class="container mx-auto p-4 flex-grow">
+    <%= render 'shared/flash_message' %>
+    <%= yield %>
+  </div>
+
+  <!-- 管理者用フッター -->
+  <%= render 'admin/shared/footer' %>
+
+</body>
+</html>
