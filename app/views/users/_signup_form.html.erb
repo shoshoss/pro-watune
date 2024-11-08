@@ -2,7 +2,7 @@
 <h1 class="text-4xl font-bold mt-4 mb-8 text-center">
   <%= t('users.new_modal.title') %>
 </h1>
-<div id="signup_modal_flash">
+<div id="signup_flash">
   <%= render 'shared/flash_message' %>
 </div>
 <%= form_with model: @user, url: create_signup_path, method: :post, data: { turbo: false } do |f| %>
@@ -22,14 +22,23 @@
 
   <div class="card-body mx-auto">
     <div class="form-control mb-2">
-      <%= f.label :email, class: "label-text text-lg mb-1" %>
+      <%= f.label :email, class: "label-text text-lg font-semibold mb-1" %>
       <%= f.email_field :email, placeholder: "example@watune.com", class: "input input-bordered input-info text-lg", required: true, autocomplete: "email" %>
     </div>
     <div class="form-control mb-2">
-      <%= f.label :password, class: "label-text text-lg mb-1" do %>
+      <%= f.label :password, class: "label-text text-lg font-semibold mb-1" do %>
         パスワード <span class="text-base">※8文字以上</span>
       <% end %>
       <%= f.password_field :password, class: "input input-bordered input-info text-lg", required: true, autocomplete: "password" %>
+    </div>
+    <div class="form-control mb-2">
+      <%= f.label :username_slug, "ユーザー名（自分のURL）", class: "label-text text-lg font-semibold mb-1" %>
+      <div class="flex items-center">
+        <div class="flex-none text-lg text-gray-600 mx-1">https://www.watune.com/</div>
+        <%= f.text_field :username_slug, placeholder: "self_url_123", id: "new_username", class: "input input-bordered input-info text-lg", required: true %>
+      </div>
+      <div class="flex-none text-md text-gray-600 mx-1">・3文字以上15文字以内</div>
+      <div class="flex-none text-md text-gray-600 mx-1">・英数字または_(アンダースコア)のみ使用可能</div>
     </div>
     <div class="form-control mt-4">
       <%= f.submit "登録完了", class: "btn btn-outline btn-accent text-xl" %>
