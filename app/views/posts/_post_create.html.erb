@@ -1,0 +1,15 @@
+<%= turbo_frame_tag dom_id(post) do %>
+  <div data-controller="audio" data-action="click->audio#navigateToPost" data-url="<%= user_post_path(username_slug: post.user.username_slug, id: post.id) %>"
+       data-post-id="<%= post.id %>"
+       id="<%= dom_id(post) %>"
+       class="cursor-pointer flex hover:bg-sky-100 overflow-hidden border-b py-[12px] px-[16px] <%= 'bg-orange-100' if unread_notification %>">
+
+    <%= render 'posts/shared/avatar', post: post %>
+    <div class="flex-grow">
+      <%= render 'posts/shared/user_info', post: post %>
+      <%= render 'posts/shared/body', post: post %>
+      <%= render 'posts/shared/create_audio_player', post: post %>
+      <%= render 'posts/shared/footer', post: post %>
+    </div>
+  </div>
+<% end %>

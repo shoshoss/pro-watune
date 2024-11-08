@@ -1,24 +1,125 @@
-# app/controllers/profiles_controller.rb
 class ProfilesController < ApplicationController
-  before_action :require_login
+  skip_before_action :require_login, only: %i[show]
+  before_action :set_current_user, only: %i[edit update]
+  before_action :set_user, only: %i[show]
+  before_action :set_posts, only: %i[show], if: -> { @user.present? }
+  before_action :authorize_view!, only: %i[show]
 
-  def edit
-    @user = current_user
+  # プロフィール表示アクション
+  def show
+    if @user.nil?
+      redirect_to root_path, alert: 'ユーザーが見つかりません。'
+      return
+    end
+
+    # クッキーに現在のカテゴリを保存
+    cookies["#{@user.username_slug}_selected_category"] =
+      { value: params[:category] || default_category, expires: 1.year.from_now }
+
+    respond_to do |format|
+      format.html
+      format.turbo_stream
+    end
   end
 
+  # プロフィール編集アクション
+  def edit
+    respond_to do |format|
+      format.html
+      format.turbo_stream
+    end
+  end
+
+  # プロフィール更新アクション
   def update
-    @user = current_user
-    if @user.update(profile_params)
-      redirect_to profile_path, status: :see_other, notice: 'プロファイルが更新されました。'
+    display_name_param = user_params[:display_name]
+    if @user.update(user_params) && display_name_param.blank?
+      @user.update(display_name: "ウェーチュン#{@user.id}")
+      flash[:notice] = t('defaults.flash_message.updated_with_default_name', item: 'プロフィール')
+    elsif @user.update(user_params)
+      flash[:notice] = t('defaults.flash_message.updated', item: 'プロフィール')
+      redirect_to profile_show_path(username_slug: @user.username_slug)
     else
-      flash.now[:error] = 'プロファイルの更新に失敗しました。'
+      flash.now[:alert] = t('defaults.flash_message.update_failed', item: 'プロフィール')
       render :edit, status: :unprocessable_entity
     end
   end
 
   private
 
-  def profile_params
-    params.require(:user).permit(:display_name, :username_slug, :self_introduction)
+  # ユーザーを設定
+  def set_user
+    @user = User.find_by(username_slug: params[:username_slug])
+    redirect_to(root_path, alert: 'ユーザーが見つかりません') unless @user
+  end
+
+  # 現在のユーザーを設定
+  def set_current_user
+    @user = current_user
+  end
+
+  # 許可されたパラメータを設定
+  def user_params
+    params.require(:user).permit(:display_name, :email, :avatar, :username_slug, :self_introduction)
+  end
+
+  # 投稿をフィルタリング
+  def filtered_posts(category)
+    user_posts_scope = @user.posts
+    base_scope = Post.all
+
+    scopes = {
+      'all_my_posts' => user_posts_scope,
+      'only_me' => user_posts_scope.where(privacy: 'only_me'),
+      'my_posts_following' => Post.my_posts_following(@user, user_posts_scope),
+      'my_posts_open' => user_posts_scope.where(privacy: 'open'),
+      'posts_to_you' => Post.posts_to_you(@user),
+      'bookmarked' => base_scope.joins(:bookmarks).where(bookmarks: { user_id: @user.id }).order('bookmarks.created_at DESC'),
+      'liked' => base_scope.joins(:likes).where(likes: { user_id: @user.id }).order('likes.created_at DESC'),
+      'shared_with_you' => Post.shared_with_you(current_user, @user)
+    }
+
+    posts = scopes[category] || Post.none
+    posts.order(created_at: :desc)
+  end
+
+  # フィルタリングされた投稿を取得
+  def set_posts
+    category = params[:category] || cookies["#{@user.username_slug}_selected_category"] || default_category
+
+    # まず、関連データをロードしてから5件の投稿を取得
+    @pagy, @posts = pagy_countless(filtered_posts(category)
+                                    .includes(:user,
+                                              { post_users: :user },
+                                              { audio_attachment: :blob },
+                                              :bookmarks,
+                                              :likes,
+                                              { reposts: :user }),
+                                   items: 3)
+  end
+
+  # プロフィール表示の許可を確認
+  def authorize_view!
+    category = params[:category] || cookies["#{@user.username_slug}_selected_category"] || default_category
+    return if category_accessible?(category)
+
+    redirect_to profile_show_path(username_slug: @user.username_slug, category: 'my_posts_open'), alert: 'この投稿は非公開です。'
+  end
+
+  # 特定のカテゴリーへのアクセスを許可するかどうかを確認
+  def category_accessible?(category)
+    case category
+    when 'only_me'
+      current_user == @user
+    when 'selected_users'
+      @user.following?(current_user)
+    else
+      true
+    end
+  end
+
+  # デフォルトのカテゴリーを設定
+  def default_category
+    current_user == @user ? 'all_my_posts' : 'my_posts_open'
   end
 end

@@ -9,12 +9,10 @@ export default class extends Controller {
   startTime;
   recordingInterval;
 
-  // 初期設定: コントローラが接続されたときに呼ばれる
+  // 初期設定 コントローラが接続されたときに呼ばれる
   connect() {
     this.element.setAttribute("open", true);
-
-    // モーダルが開いたときにバックグラウンドをクリックして閉じるイベントを追加
-    // this.element.addEventListener("click", this.closeBackground.bind(this));
+    this.checkForm(); // フォームの初期状態をチェック
   }
 
   closeModal() {
@@ -22,25 +20,31 @@ export default class extends Controller {
     this.element.close();
   }
 
-  closeBackground(event) {
-    // バックグラウンドをクリックしたかどうかをチェック
-    if (
-      event.target === this.dialogTarget &&
-      this.dialogTarget.hasAttribute("open")
-    ) {
-      console.log("Dialog closed");
-      // モーダルを閉じる
-      this.closeModal();
-    }
-  }
-
   afterClose(event) {
     if (!event.detail.success) {
       // フォームのバリデーションエラーの場合はここで何もしない
       return;
     }
+    this.closeModal();
+  }
 
-    Turbo.visit(window.location.href, { action: "replace" });
+  // フォームの状態をチェックし、投稿ボタンの有効/無効を切り替えるメソッド
+  checkForm() {
+    const textArea = this.element.querySelector("#body");
+    const hasText = textArea && textArea.value.trim().length > 0;
+    const soundClips = this.element.querySelector(".sound-clips");
+    const hasAudio = soundClips.querySelector("audio") !== null;
+
+    const submitButton = this.element.querySelector('input[type="submit"]');
+    if (hasText || hasAudio) {
+      submitButton.disabled = false;
+      submitButton.classList.remove("opacity-50");
+      submitButton.classList.remove("cursor-not-allowed");
+    } else {
+      submitButton.disabled = true;
+      submitButton.classList.add("opacity-50");
+      submitButton.classList.add("cursor-not-allowed");
+    }
   }
 
   // 録音開始
@@ -96,6 +100,7 @@ export default class extends Controller {
     // 経過時間をミリ秒から秒に変換し、切り捨てを行う
     const durationInSeconds = Math.floor((Date.now() - this.startTime) / 1000);
     document.querySelector(".duration-field").value = durationInSeconds;
+    this.checkForm(); // フォームの状態を再チェック
   }
 
   // タイマー更新
@@ -115,20 +120,27 @@ export default class extends Controller {
 
   // 録音停止後の処理
   handleRecordingStop(chunks) {
+    // 録音データをBlobに変換
     const blob = new Blob(chunks, { type: this.mediaRecorder.mimeType });
+
+    // Blobから生成されたURLを取得
     const audioURL = window.URL.createObjectURL(blob);
-    this.createSoundClip(audioURL);
+    this.previewAudioURL = audioURL; // プレビュー用のオーディオURLを設定
+    this.previewAudioType = this.mediaRecorder.mimeType; // プレビュー用のMIMEタイプを設定
 
-    // MIMEタイプから適切なファイル拡張子を決定
-    const fileExtension =
-      this.mediaRecorder.mimeType.split("/")[1].split(";")[0] === "webm"
-        ? "webm"
-        : "mp4";
+    // プレビュー用のサウンドクリップを作成
+    this.createSoundClip(audioURL, this.mediaRecorder.mimeType);
 
+    // MIMEタイプからファイル拡張子を決定
+    const mimeType = this.mediaRecorder.mimeType;
+    const fileExtension = mimeType.split("/")[1].split(";")[0];
+
+    // 録音データをファイルに変換
     const file = new File([blob], `recording.${fileExtension}`, {
-      type: this.mediaRecorder.mimeType,
+      type: mimeType,
     });
 
+    // DataTransferオブジェクトを使用してファイル入力にファイルを設定
     const dt = new DataTransfer();
     dt.items.add(file);
     const fileInput = document.querySelector('input[type="file"]');
@@ -137,10 +149,13 @@ export default class extends Controller {
     // Submitボタンを有効化
     const submitButton = fileInput.form.querySelector('input[type="submit"]');
     submitButton.disabled = false;
+
+    // フォームの状態を再チェック
+    this.checkForm();
   }
 
   // 音声クリップを生成して表示するメソッド
-  createSoundClip(audioURL) {
+  createSoundClip(audioURL, mimeType) {
     const clipContainer = document.createElement("div");
     clipContainer.className =
       "clip flex flex-col items-center w-full max-w-screen-lg mx-auto my-2 p-2 border border-gray-200 rounded overflow-hidden";
@@ -148,14 +163,17 @@ export default class extends Controller {
     const audio = document.createElement("audio");
     audio.controls = true;
     audio.src = audioURL;
+    audio.type = mimeType;
     audio.className = "w-full";
 
-    // 削除ボタン
+    // 削除ボタンを作成
     const deleteButton = this.createDeleteButton(clipContainer);
 
-    clipContainer.appendChild(audio);
+    // クリップコンテナにオーディオと削除ボタンを追加
     clipContainer.appendChild(deleteButton);
+    clipContainer.appendChild(audio);
 
+    // 既存のサウンドクリップをクリアし、新しいクリップを追加
     this.element.querySelector(".sound-clips").innerHTML = "";
     this.element.querySelector(".sound-clips").appendChild(clipContainer);
   }
@@ -165,11 +183,12 @@ export default class extends Controller {
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "削除";
     deleteButton.className =
-      "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mt-2 self-end"; // 右端に配置
+      "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mb-2 flex justify-center"; // 右端に配置
     deleteButton.onclick = () => {
       clipContainer.remove();
       this.element.querySelector(".record").disabled = false;
       this.element.querySelector(".timer").textContent = "00:00"; // タイマーをリセット
+      this.checkForm(); // フォームの状態を再チェック
     };
 
     return deleteButton;
@@ -198,17 +217,19 @@ export default class extends Controller {
 
       analyser.getByteFrequencyData(dataArray); // 周波数データを取得
 
-      this.canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+      this.canvasCtx.clearRect(0, 0, WIDTH, HEIGHT); // 画面をクリア
 
       let maxRadius = Math.max(WIDTH, HEIGHT) / 2;
       let step = (maxRadius / bufferLength) * 2;
 
       for (let i = 0; i < bufferLength; i++) {
         let radius = step * i;
-        let amplitude = dataArray[i] / 128.0; // 初期256
-        let color = `hsla(${200 + amplitude * 20}, 100%, 50%, ${
-          0.75 + 0.25 * amplitude // 透明度を動的に変更 初期:0.5,0.5
-        })`; // 波紋の色をより海色に近づける
+        let amplitude = dataArray[i] / 256.0; // 振幅を0-1に正規化
+
+        // 振幅に応じて青色の明るさを調整 (大きいほど明るく)
+        let hue = 200; // 固定の青色
+        let lightness = 50 + amplitude * 50; // 振幅に応じて明るさを調整 (50% - 100%)
+        let color = `hsl(${hue}, 100%, ${lightness}%)`; // 青色の明るさを調整
 
         this.canvasCtx.beginPath();
         this.canvasCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);

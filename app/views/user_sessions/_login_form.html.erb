@@ -5,9 +5,7 @@
 <div id="notification" class="mb-4">
   <%= render 'shared/flash_message' %>
 </div>
-<%= form_with url: create_login_modal_path,
-    data: { controller: "login-modal", 
-            action: "turbo:submit-end->login-modal#afterClose" } do |f| %>
+<%= form_with url: create_login_modal_path, local: true, data: { controller: "login-modal", action: "turbo:submit-end->login-modal#afterClose" } do |f| %>
   <!-- Googleでログインのボタン -->
   <div class="flex items-center justify-center mb-8">
       <%= link_to auth_at_provider_path(provider: :google),
@@ -24,20 +22,20 @@
   <div class="card-body mx-auto">
     <!-- メールアドレス入力 -->
     <div class="form-control">
-      <%= f.label :email, t('helpers.label.email'), class: "label-text mb-1" %>
-      <%= f.email_field :email, placeholder: "example@congrawa.com", class: "input input-bordered text-lg", required: true, autocomplete: "email" %>
+      <%= f.label :email, t('helpers.label.email'), class: "label-text text-lg mb-1" %>
+      <%= f.email_field :email, placeholder: "example@watune.com", class: "input input-bordered text-lg", required: true, autocomplete: "email", value: params[:email] %>
     </div>
 
     <!-- パスワード入力 -->
     <div class="form-control mt-2">
-      <%= f.label :password, t('helpers.label.password'), class: "label-text mb-1" %>
-      <%= f.password_field :password, class: "input input-bordered text-lg", required: true, autocomplete: "current-password" %>
+      <%= f.label :password, t('helpers.label.password'), class: "label-text text-lg mb-1" %>
+      <%= f.password_field :password, class: "input input-bordered text-lg", required: true, autocomplete: "current-password", value: params[:password] %>
     </div>
 
     <!-- ログインボタン -->
     <div class="form-control mt-4 lg:mt-6">
       <%= f.submit t('user_sessions.new_modal.login'),
-          class: "btn btn-primary w-full" %>
+          class: "btn btn-outline btn-primary text-xl" %>
     </div>
   </div>
 <% end %>
@@ -53,6 +51,7 @@
   <%= link_to t('user_sessions.new_modal.to_signup_page'),
               new_signup_modal_path,
               class: 'text-lg text-gray-600 hover:underline',
+              method: :get,
               data: { turbo_frame: "signup_modal",
               action: "click->login-modal#closeModal" } %>
 </div>

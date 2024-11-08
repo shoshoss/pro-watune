@@ -1,21 +1,73 @@
-<aside class="bg-gradient-to-br from-blue-500 to-blue-900 p-5 w-64 hidden md:block sticky top-0 h-screen overflow-y-auto">
-  <div class="flex flex-col items-center mb-10 pt-2">
-    <%= image_tag 'sample.jpg', alt: 'User icon', class: "w-24 h-24 rounded-full" %>
-    <h2 class="mt-4 text-xl font-semibold text-white">Username</h2>
+<aside class="px-5 w-[260px] hidden md:block sticky top-0 overflow-y-auto">
+  <div class="flex flex-col items-center mb-5 pt-2">
+    <%= link_to profile_show_path(username_slug: current_user.username_slug, category: cookies["#{current_user.username_slug}_selected_category"] || 'all_my_posts'),
+                method: :get,
+                data: { turbo_frame: "_top"},
+                id: "sidebar-profile-avatar-link",
+                class: "flex items-center space-x-4 p-3 hover:bg-sky-100 rounded-full #{active_if(profile_show_path(current_user.username_slug))}" do %>
+      <%= image_tag (current_user.avatar.presence || '/logo-watune-en.png'), class: 'rounded-full h-32 w-32' %>
+    <% end %>
   </div>
-  <ul class="px-2 space-y-2">
-    <%= render 'shared/sidebar_option', text: 'ホーム', icon: 'fa-home', active: true %>
-    <%= render 'shared/sidebar_option', text: '話題を検索', icon: 'fa-search' %>
-    <%= render 'shared/sidebar_option', text: '通知', icon: 'fa-bell' %>
-    <%= render 'shared/sidebar_option', text: 'メッセージ', icon: 'fa-envelope' %>
-    <%= render 'shared/sidebar_option', text: 'ブックマーク', icon: 'fa-bookmark' %>
-    <%= render 'shared/sidebar_option', text: 'リスト', icon: 'fa-stream' %>
-    <%= render 'shared/sidebar_option', text: 'プロフィール', icon: 'fa-user' %>
-    <%= render 'shared/sidebar_option', text: 'もっとみる', icon: 'fa-ellipsis-h' %>
+  <ul class="space-y-2">
+    <!-- みんなのWave -->
+    <li>
+      <%= link_to posts_path,
+                  method: :get,
+                  data: { 
+                    action: "click->history#navigate",
+                    category: cookies[:selected_post_category] || 'recommended'
+                  },
+                  id: "sidebar-posts-link",
+                  class: "flex items-center space-x-4 p-3 hover:bg-sky-100 rounded-full #{active_if(posts_path)}" do %>
+        <i class="fa-solid fa-house text-2xl"></i>
+        <h2 class="text-lg flex-grow">ホーム</h2>
+      <% end %>
+    </li>
+    <!-- プロフィール -->
+    <li>
+      <%= link_to profile_show_path(username_slug: current_user.username_slug, category: cookies["#{current_user.username_slug}_selected_category"] || 'all_my_posts'),
+                  method: :get,
+                  data: { turbo_frame: "_top"},
+                  id: "sidebar-profile-link",
+                  class: "flex items-center space-x-4 p-3 hover:bg-sky-100 rounded-full #{active_if(profile_show_path(current_user.username_slug))}" do %>
+        <i class="fas fa-user text-2xl"></i>
+        <h2 class="text-lg flex-grow">プロフィール</h2>
+      <% end %>
+    </li>
+    <!-- 通知 -->
+    <li data-controller="notification">
+      <%= link_to notifications_path,
+                  method: :post,
+                  data: { turbo_frame: "_top", action: "click->notification#specialLinkHandler" },
+                  id: "sidebar-notifications-link",
+                  class: "text-2xl flex items-center space-x-4 p-3 hover:bg-sky-100 rounded-full #{active_if(notifications_path)}" do %>
+        <div class="justify-self-center relative">
+          <i class="fas fa-bell"></i>
+          <span class="absolute -top-[7px] -right-[3px] inline-block w-4 h-4 bg-orange-400 text-white text-xs rounded-full text-center <%= @unread_count.to_i > 0 ? '' : 'hidden' %>">
+            <%= @unread_count.to_i %>
+          </span>
+        </div>
+        <h2 class="text-lg flex-grow">通知</h2>
+      <% end %>
+    </li>
+    <!-- 通知設定 -->
+    <li>
+      <%= link_to edit_notification_settings_path,
+          method: :get,
+          data: { turbo_frame: "_top"},
+          id: "sidebar-settings-link",
+          class: "flex items-center space-x-4 p-3 hover:bg-sky-100 rounded-full #{active_if(edit_notification_settings_path)}" do %>
+        <i class="fas fa-cog text-2xl"></i>
+        <h2 class="text-lg flex-grow">通知設定</h2>
+      <% end %>
+    </li>
   </ul>
-  <div class="mt-auto">
-    <button class="w-full bg-twitter text-white font-bold py-3 px-4 rounded-full transition-colors duration-300 hover:bg-twitter-dark">
-      ツイートする
-    </button>
+  <div class="mt-auto py-5">
+    <%= link_to t('header.post_audio'),
+                  new_post_path(privacy: 'open'),
+                  method: :get,
+                  data: { turbo_frame: "_top"},
+                  id: "sidebar-new-post-link",
+                  class: "flex text-white font-bold text-2xl btn btn-info rounded-full bg-opacity-80" %>
   </div>
 </aside>

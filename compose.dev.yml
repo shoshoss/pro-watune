@@ -9,18 +9,17 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_HOST_AUTH_METHOD: md5
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   web:
     build:
       context: .
       dockerfile: Dockerfile
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    command: ./entrypoint.sh
     stdin_open: true
     tty: true
     volumes:
       - ./:/app
-      - bundle_data:/usr/local/bundle:cached
       - node_modules:/app/node_modules
     environment:
       TZ: Asia/Tokyo
@@ -28,6 +27,8 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       SENDER_ADDRESS: ${SENDER_ADDRESS}
       SELENIUM_DRIVER_URL: http://chrome:4444/wd/hub
+      RAILS_MASTER_KEY: ${RAILS_DEVELOPMENT_KEY}
+      RAILS_ENV: development
     ports:
       - "3000:3000"
     depends_on:
@@ -41,5 +42,4 @@ services:
 
 volumes:
   postgres_data:
-  bundle_data:
   node_modules:

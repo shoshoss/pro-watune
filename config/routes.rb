@@ -1,11 +1,22 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
+  root 'static_pages#root'
+  get 'top', to: 'static_pages#top'
+  get 'about', to: 'static_pages#about'
+  get 'privacy_policy', to: 'static_pages#privacy_policy'
+  get 'terms_of_use', to: 'static_pages#terms_of_use'
+  # モーダル用のプライバシーと利用規約
+  get 'privacy_modal', to: 'static_pages#privacy_modal'
+  get 'tou_modal', to: 'static_pages#tou_modal'
 
-  root 'static_pages#top'
+  resources :users, only: %i[index new create destroy] do
+    resource :friendships, only: %i[create destroy]
+  end
+  get ':username_slug/following', to: 'friendships#index', defaults: { category: 'following' }, as: 'user_following'
+  get ':username_slug/followers', to: 'friendships#index', defaults: { category: 'followers' }, as: 'user_followers'
 
-  resources :users, only: %i[new create]
+  get 'guest_login', to: 'users#guest_login', as: 'guest_login'
   # モーダル用の新規登録ルーティング
   get 'signup_modal', to: 'users#new_modal', as: 'new_signup_modal'
   post 'signup_modal', to: 'users#create_modal', as: 'create_signup_modal'
@@ -22,12 +33,50 @@ Rails.application.routes.draw do
   get 'login_modal', to: 'user_sessions#new_modal', as: 'new_login_modal'
   post 'login_modal', to: 'user_sessions#create_modal', as: 'create_login_modal'
 
-  # プロフィールのルーティング
-  resource :profile, only: %i[edit update]
+  resources :notifications, only: %i[index]
+  resource :notification_settings, only: %i[edit update]
 
   # パスワードリセットのルーティング
   resources :password_resets, only: %i[new create edit update]
 
   # 投稿のルーティング
-  resources :posts, only: %i[index new create edit update destroy]
+  resources :waves, controller: 'posts', as: 'posts', except: [:show] do
+    collection do
+      get :privacy_settings
+      get :latest, to: 'posts#latest' # 最新データ取得のルートを追加
+    end
+    resources :likes, only: %i[create destroy]
+    resources :bookmarks, only: %i[create destroy]
+    resources :reposts, only: %i[create destroy]
+  end
+
+  get '/:username_slug/status/:id', to: 'posts#show', as: :user_post
+
+  post '/:username_slug/status/:id/replies', to: 'replies#create', as: 'user_post_replies'
+  get '/:username_slug/status/:id/reply_modal', to: 'replies#new_modal', as: 'new_reply_modal'
+  post '/:username_slug/status/:id/reply_modal', to: 'replies#create_modal', as: 'create_reply_modal'
+
+  # PostUserのルーティング（投稿受信者管理）
+  resources :post_users, only: %i[show create destroy]
+
+  # プロフィールのルーティング
+  resource :profile, only: %i[edit update]
+  # プロフィールモーダルのルーティング
+  get '/profiles/:username_slug/modal', to: 'profiles#modal', as: 'profile_modal'
+
+  # 管理者用ルーティング
+  namespace :admin do
+    root 'dashboards#index'
+    resource :dashboard, only: %i[index]
+    resources :test_posts
+    get 'login' => 'user_sessions#new', :as => :login
+    post 'login' => 'user_sessions#create'
+    delete 'logout' => 'user_sessions#destroy', :as => :logout
+  end
+
+  # 開発用ツール
+  mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
+
+  # プロフィールの詳細のルーティング（他のルートに影響しないよう、最後に配置すること）
+  get '/:username_slug', to: 'profiles#show', as: :profile_show
 end

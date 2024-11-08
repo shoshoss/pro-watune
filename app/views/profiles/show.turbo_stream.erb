@@ -1,0 +1,11 @@
+<%= turbo_stream.replace "main-content" do %>
+  <%= render partial: 'profiles/show', locals: { user: @user, posts: @posts, pagy: @pagy, initial_category: @initial_category, notifications: @notifications } %>
+<% end %>
+
+<%= turbo_stream.update "after-widget" do %>
+  <%= render 'shared/widget', users: @recent_users %>
+<% end %>
+
+<%= turbo_stream.update "flash" do %>
+  <%= render 'shared/flash_message' %>
+<% end %>
