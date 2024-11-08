@@ -21,6 +21,10 @@ Rails.application.routes.draw do
   get 'signup_modal', to: 'users#new_modal', as: 'new_signup_modal'
   post 'signup_modal', to: 'users#create_modal', as: 'create_signup_modal'
 
+  # 通常の新規登録ルーティング
+  get 'signup', to: 'users#new', as: 'new_signup'
+  post 'signup', to: 'users#create', as: 'create_signup'
+
   # get と post のリクエストをまとめるために match を使用
   match 'oauth/callback', to: 'oauths#callback', via: %i[get post]
   get 'oauth/:provider', to: 'oauths#oauth', as: :auth_at_provider

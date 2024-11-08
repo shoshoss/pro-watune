@@ -44,9 +44,10 @@ class UsersController < ApplicationController
       @user = User.new(user_params)
       if @user.save
         login(user_params[:email], user_params[:password])
-        flash[:notice] = I18n.t('flash_messages.users.signup_success')
+        redirect_to profile_path(username_slug: @user.username_slug), status: :see_other, notice: t('flash_messages.users.signup_success')
       else
-        flash[:danger] = I18n.t('flash_messages.users.signup_failure')
+        flash[:danger] = t('flash_messages.users.signup_failure')
+        render :new, status: :unprocessable_entity
       end
     end
   end
