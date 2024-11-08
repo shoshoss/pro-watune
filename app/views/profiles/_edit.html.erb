@@ -35,10 +35,10 @@
           </div>
 
           <div class="form-control mt-2">
-            <%= f.label :username_slug, 'ユーザー名（オリジナルURL）', class: "label-text text-lg font-semibold mb-1", for: "user_username_slug" %>
+            <%= f.label :username_slug, 'ユーザー名（自分のURL）', class: "label-text text-lg font-semibold mb-1", for: "edit_username" %>
             <div class="flex items-center">
               <div class="flex-none text-lg text-gray-600 mx-1">https://www.watune.com/</div>
-              <%= f.text_field :username_slug, id: "user_username_slug", class: "flex-1 input-style", maxlength: 15, pattern: "[a-zA-Z0-9_]{3,15}", title: "3文字以上15文字以内で、英数字または_(アンダースコア)のみ使用できます。" %>
+              <%= f.text_field :username_slug, placeholder: "self_url_123", id: "edit_username", class: "flex-1 input-style", maxlength: 15, pattern: "[a-zA-Z0-9_]{3,15}", title: "3文字以上15文字以内で、英数字または_(アンダースコア)のみ使用できます。" %>
             </div>
             <div class="flex-none text-md text-gray-600 mx-1">・3文字以上15文字以内</div>
             <div class="flex-none text-md text-gray-600 mx-1">・英数字または_(アンダースコア)のみ使用可能</div>

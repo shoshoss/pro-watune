@@ -13,17 +13,17 @@ class UsersController < ApplicationController
     if current_user&.guest?
       @user = current_user
       if @user.update(user_params.merge(guest: false))
-        flash[:notice] = I18n.t('flash_messages.users.signup_success')
+        flash[:notice] = t('flash_messages.users.signup_success')
       else
-        flash[:danger] = I18n.t('flash_messages.users.signup_failure')
+        flash[:danger] = t('flash_messages.users.signup_failure')
       end
     else
       @user = User.new(user_params)
       if @user.save
         login(user_params[:email], user_params[:password])
-        flash[:notice] = I18n.t('flash_messages.users.signup_success')
+        flash[:notice] = t('flash_messages.users.signup_success')
       else
-        flash[:danger] = I18n.t('flash_messages.users.signup_failure')
+        flash[:danger] = t('flash_messages.users.signup_failure')
       end
     end
   end
@@ -36,9 +36,9 @@ class UsersController < ApplicationController
     if current_user&.guest?
       @user = current_user
       if @user.update(user_params.merge(guest: false))
-        flash[:notice] = I18n.t('flash_messages.users.guest_login_success')
+        flash[:notice] = t('flash_messages.users.guest_login_success')
       else
-        flash[:danger] = I18n.t('flash_messages.users.signup_failure')
+        flash[:danger] = t('flash_messages.users.signup_failure')
       end
     else
       @user = User.new(user_params)
