@@ -1,8 +1,8 @@
 <% if @user.errors.any? %>
-  <%= turbo_stream.replace 'signup_modal_flash', partial: 'shared/flash_message', locals: { flash: { danger: I18n.t('flash_messages.users.signup_failure') } } %>
+  <%= turbo_stream.replace 'signup_flash', partial: 'shared/flash_message', locals: { flash: { danger: I18n.t('flash_messages.users.signup_failure') } } %>
   <%= turbo_stream.replace 'error_messages', partial: 'shared/error_messages', locals: { object: @user } %>
 <% else %>
-  <%= turbo_stream.replace 'signup_modal', partial: 'profiles/edit_modal', locals: { user: @user } %>
+  <%= turbo_stream.replace 'main-content', partial: 'profiles/edit', locals: { user: @user } %>
   <%= turbo_stream.replace 'no-sidebar', partial: 'shared/sidebar' %>
   <%= turbo_stream.replace 'no-widget', partial: 'shared/widget', locals: { users: @recent_users, pagy: @pagy } %>
   <%= turbo_stream.replace 'before_login_header', partial: 'shared/header' %>
