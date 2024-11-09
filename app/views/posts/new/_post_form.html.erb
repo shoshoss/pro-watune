@@ -47,7 +47,9 @@
     </div>
 
     <div class="form-control pt-2">
-      <%= f.label :custom_category, '追加カテゴリー', class: "block text-lg font-semibold", for: "custom_category" %>
+      <%= f.label :custom_category, class: "block text-lg font-semibold", for: "custom_category" do %>
+        追加カテゴリー <span class="text-base font-normal">※15文字まで</span>
+      <% end %>
       <%= f.text_field :custom_category, id: 'custom_category', class: "block mt-1 p-2 text-base border-2 border-gray-300 rounded-lg", placeholder: "必要に応じて入力" %>
     </div>
 
