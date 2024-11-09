@@ -31,11 +31,18 @@ class ProfilesController < ApplicationController
   # プロフィール更新アクション
   def update
     display_name_param = user_params[:display_name]
-    if @user.update(user_params) && display_name_param.blank?
-      @user.update(display_name: "ウェーチュン#{@user.id}")
-      flash[:notice] = t('defaults.flash_message.updated_with_default_name', item: 'プロフィール')
-    elsif @user.update(user_params)
-      flash[:notice] = t('defaults.flash_message.updated', item: 'プロフィール')
+
+    if @user.update(user_params)
+      # `username_slug`が更新された場合、セッションの`trial_username_slug`を更新
+      session[:trial_username_slug] = @user.username_slug if current_user.guest?
+
+      if display_name_param.blank?
+        @user.update(display_name: "ウェーチュン#{@user.id}")
+        flash[:notice] = t('defaults.flash_message.updated_with_default_name', item: 'プロフィール')
+      else
+        flash[:notice] = t('defaults.flash_message.updated', item: 'プロフィール')
+      end
+
       redirect_to profile_show_path(username_slug: @user.username_slug)
     else
       flash.now[:alert] = t('defaults.flash_message.update_failed', item: 'プロフィール')
