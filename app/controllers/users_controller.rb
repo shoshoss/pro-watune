@@ -38,7 +38,7 @@ class UsersController < ApplicationController
       @user.update!(guest: false)
       if @user.update(user_params.merge(guest: false))
         flash[:notice] = 'データの引き継ぎに成功しました！'
-        redirect_to profile_show_path(username_slug: @user.username_slug, category: "all_my_posts"), status: :see_other
+        redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts'), status: :see_other
       else
         flash[:danger] = 'データの引き継ぎに失敗しました。<br>再度お試しください。'
         render :new, status: :unprocessable_entity
@@ -48,7 +48,7 @@ class UsersController < ApplicationController
       if @user.save
         login(user_params[:email], user_params[:password])
         flash[:notice] = t('flash_messages.users.signup_success')
-        redirect_to profile_show_path(username_slug: @user.username_slug, category: "all_my_posts"), status: :see_other
+        redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts'), status: :see_other
       else
         flash[:danger] = t('flash_messages.users.signup_failure')
         render :new, status: :unprocessable_entity
@@ -61,7 +61,7 @@ class UsersController < ApplicationController
     @user = User.create!(email:, password: SecureRandom.hex(10), guest: true)
     auto_login(@user)
     flash[:notice] = 'お試しログインに成功しました！'
-    redirect_to profile_show_path(username_slug: @user.username_slug, category: "all_my_posts")
+    redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts')
   end
 
   def destroy
