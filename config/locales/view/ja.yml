@@ -89,7 +89,9 @@ ja:
       signup_success: "ありがとうございます。<br>新規登録が完了しました！"
       signup_failure: "新規登録に失敗しました。"
       guest_login_success: "ありがとうございます。<br>お試しログインしました！<br>画面上部にある「引き継ぎ登録」より<br>データを引き継げます。"
-      guest_login_failure: "お試しログインに失敗しました。再度お試しください。"
+      guest_login_failure: "お試しログインに失敗しました。<br>再度お試しください。"
+      data_handling_over_success: "ありがとうございます。<br>データの引き継ぎに成功しました。"
+      data_handling_over_failure: "データの引き継ぎに失敗しました。<br>再度お試しください。"
 
   posts:
     new:
