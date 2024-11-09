@@ -54,11 +54,11 @@ Rails.application.routes.draw do
     resources :reposts, only: %i[create destroy]
   end
 
-  get '/:username_slug/status/:id', to: 'posts#show', as: :user_post
+  get '/self/:username_slug/status/:id', to: 'posts#show', as: :user_post
 
-  post '/:username_slug/status/:id/replies', to: 'replies#create', as: 'user_post_replies'
-  get '/:username_slug/status/:id/reply_modal', to: 'replies#new_modal', as: 'new_reply_modal'
-  post '/:username_slug/status/:id/reply_modal', to: 'replies#create_modal', as: 'create_reply_modal'
+  post '/self/:username_slug/status/:id/replies', to: 'replies#create', as: 'user_post_replies'
+  get '/self/:username_slug/status/:id/reply_modal', to: 'replies#new_modal', as: 'new_reply_modal'
+  post '/self/:username_slug/status/:id/reply_modal', to: 'replies#create_modal', as: 'create_reply_modal'
 
   # PostUserのルーティング（投稿受信者管理）
   resources :post_users, only: %i[show create destroy]
@@ -82,5 +82,5 @@ Rails.application.routes.draw do
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
 
   # プロフィールの詳細のルーティング（他のルートに影響しないよう、最後に配置すること）
-  get '/:username_slug', to: 'profiles#show', as: :profile_show
+  get '/self/:username_slug', to: 'profiles#show', as: :profile_show
 end

@@ -31,7 +31,7 @@ class User < ApplicationRecord
 
   # 予約されたusername_slugを設定
   RESERVED_USERNAMES = %w[
-    admin support blog home user dashboard privacy_policy terms_of_use
+    my self other admin support blog home user dashboard privacy_policy terms_of_use
     privacy_modal tou_modal signup_modal signup oauth login logout
     login_modal password_resets posts profile explore notification
     notifications message messages lists bookmarks communities
@@ -90,11 +90,9 @@ class User < ApplicationRecord
     guest
   end
 
-  private
-
   # ユーザー名スラグを生成するメソッド
   def generate_username_slug
-    return if username_slug.present?
+    return if username_slug.present? && !guest?
 
     loop do
       # 3文字以上、15文字以内のランダムな文字列を生成
@@ -102,6 +100,8 @@ class User < ApplicationRecord
       break unless User.exists?(username_slug:)
     end
   end
+
+  private
 
   # デフォルトの表示名を設定するメソッド
   def set_default_display_name
