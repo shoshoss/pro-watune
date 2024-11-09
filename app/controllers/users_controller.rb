@@ -29,23 +29,26 @@ class UsersController < ApplicationController
   end
 
   def new
-    @user = User.new
+    @user = User.new(username_slug: session[:trial_username_slug])
   end
 
   def create
     if current_user&.guest?
       @user = current_user
+      @user.update!(guest: false)
       if @user.update(user_params.merge(guest: false))
-        flash[:notice] = t('flash_messages.users.guest_login_success')
+        flash[:notice] = 'データの引き継ぎに成功しました！'
+        redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts'), status: :see_other
       else
-        flash[:danger] = t('flash_messages.users.signup_failure')
+        flash[:danger] = 'データの引き継ぎに失敗しました。<br>再度お試しください。'
+        render :new, status: :unprocessable_entity
       end
     else
       @user = User.new(user_params)
       if @user.save
         login(user_params[:email], user_params[:password])
-        redirect_to profile_path(username_slug: @user.username_slug), status: :see_other,
-                                                                      notice: t('flash_messages.users.signup_success')
+        flash[:notice] = t('flash_messages.users.signup_success')
+        redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts'), status: :see_other
       else
         flash[:danger] = t('flash_messages.users.signup_failure')
         render :new, status: :unprocessable_entity
@@ -57,19 +60,8 @@ class UsersController < ApplicationController
     email = generate_unique_guest_email
     @user = User.create!(email:, password: SecureRandom.hex(10), guest: true)
     auto_login(@user)
-    set_flash(:before_profile_edit_flash, I18n.t('flash_messages.users.guest_login_success'))
-    redirect_to posts_path(category: 'recommended')
-    respond_to do |format|
-      format.html
-      format.turbo_stream
-    end
-  rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.error I18n.t('flash_messages.users.guest_login_failure') + ": #{e.message}"
-    flash.now[:alert] = I18n.t('flash_messages.users.guest_login_failure')
-    respond_to do |format|
-      format.html
-      format.turbo_stream
-    end
+    flash[:notice] = 'お試しログインに成功しました！'
+    redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts')
   end
 
   def destroy
