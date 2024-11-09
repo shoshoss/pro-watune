@@ -5,7 +5,7 @@ class Post < ApplicationRecord
 
   # ユーザーとの関係
   belongs_to :user
-  belongs_to :category, optional: true
+  belongs_to :category
 
   # リプライ関係
   has_many :replies, class_name: 'Post', foreign_key: :post_reply_id, inverse_of: :parent_post
@@ -119,6 +119,15 @@ class Post < ApplicationRecord
   # リポストが作成されたときに最新活動日時を更新
   after_create :update_latest_activity
   after_update :update_latest_activity, if: :saved_change_to_created_at?
+
+  # カスタムカテゴリーを含むカテゴリー名を生成するメソッド
+  def combined_category
+    if category&.add_category_name.present?
+      "#{fixed_category_i18n} / #{category.add_category_name}"
+    else
+      fixed_category_i18n
+    end
+  end
 
   private
 
