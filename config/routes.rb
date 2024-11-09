@@ -54,11 +54,11 @@ Rails.application.routes.draw do
     resources :reposts, only: %i[create destroy]
   end
 
-  get '/self/:username_slug/status/:id', to: 'posts#show', as: :user_post
+  get '/:username_slug/status/:id', to: 'posts#show', as: :user_post
 
-  post '/self/:username_slug/status/:id/replies', to: 'replies#create', as: 'user_post_replies'
-  get '/self/:username_slug/status/:id/reply_modal', to: 'replies#new_modal', as: 'new_reply_modal'
-  post '/self/:username_slug/status/:id/reply_modal', to: 'replies#create_modal', as: 'create_reply_modal'
+  post '/:username_slug/status/:id/replies', to: 'replies#create', as: 'user_post_replies'
+  get '/:username_slug/status/:id/reply_modal', to: 'replies#new_modal', as: 'new_reply_modal'
+  post '/:username_slug/status/:id/reply_modal', to: 'replies#create_modal', as: 'create_reply_modal'
 
   # PostUserのルーティング（投稿受信者管理）
   resources :post_users, only: %i[show create destroy]
