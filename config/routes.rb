@@ -82,5 +82,5 @@ Rails.application.routes.draw do
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
 
   # プロフィールの詳細のルーティング（他のルートに影響しないよう、最後に配置すること）
-  get '/:username_slug', to: 'profiles#show', as: :profile_show
+  get '/my/:username_slug', to: 'profiles#show', as: :profile_show
 end
