@@ -65,6 +65,7 @@ Rails.application.routes.draw do
 
   # プロフィールのルーティング
   resource :profile, only: %i[edit update]
+  get '/star/:username_slug', to: 'profiles#show', as: :profile_show
   # プロフィールモーダルのルーティング
   get '/profiles/:username_slug/modal', to: 'profiles#modal', as: 'profile_modal'
 
@@ -82,5 +83,5 @@ Rails.application.routes.draw do
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
 
   # プロフィールの詳細のルーティング（他のルートに影響しないよう、最後に配置すること）
-  get '/star/:username_slug', to: 'profiles#show', as: :profile_show
+  get '/:username_slug', to: 'profiles#show'
 end
