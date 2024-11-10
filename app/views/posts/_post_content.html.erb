@@ -5,8 +5,16 @@
        data-url="<%= @post && post == @post ? '' : user_post_path(username_slug: post.user.username_slug, id: post.id) %>"
        data-post-id="<%= post.id %>"
        id="<%= dom_id(post) %>"
-       class="cursor-pointer flex hover:bg-sky-100 overflow-hidden border-b py-[12px] px-[16px] <%= 'bg-orange-100' if unread_notification %>">
+       class="cursor-pointer hover:bg-sky-100 overflow-hidden border-b py-[12px] px-[16px] <%= 'bg-orange-100' if unread_notification %>">
 
-    <%= render 'posts/post_body', post: post %>
+    <!-- カテゴリ名を表示 -->
+    <div class="text-sm text-gray-500 mb-2">
+      <%= post.combined_category %>
+    </div>
+  
+    <div class="flex">
+      <%= render 'posts/post_body', post: post %>
+    </div>
   </div>
 <% end %>
+
