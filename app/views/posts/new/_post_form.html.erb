@@ -48,7 +48,7 @@
 
     <div class="form-control pt-2">
       <%= f.label :custom_category, class: "block text-lg font-semibold", for: "custom_category" do %>
-        追加カテゴリー <span class="text-base font-normal">※15文字まで</span>
+        追加カテゴリー <span class="text-base font-normal">※15文字までOK!</span>
       <% end %>
       <%= f.text_field :custom_category, id: 'custom_category', class: "block mt-1 p-2 text-base border-2 border-gray-300 rounded-lg", placeholder: "必要に応じて入力" %>
     </div>
@@ -57,15 +57,15 @@
     <div class="form-control pt-2">
       <div>
         <%= f.label :body, class: "label-text text-lg font-semibold", for: "body" do %>
-          投稿内容 <span class="text-base font-normal">※3150文字まで</span>
+          投稿内容 <span class="text-base font-normal">※315文字までOK!</span>
         <% end %>
       </div>
       <%= f.text_area :body, id: 'body', class: "block mt-1 p-2 text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-sky-500 resize-none overflow-y-auto", rows: "3", data: { action: "input->post-create#checkForm", "post-create-target" => "body" } %>
-      <div class="text-sm text-gray-500 mt-1" data-post-create-target="characterCount">0 / 3150 文字</div>
+      <div class="text-sm text-gray-500 mt-1" data-post-create-target="characterCount">0 / 315 文字</div>
     </div>
 
     <div class="main-controls pt-2">
-      <p class="block text-lg font-semibold">音声 <span class="text-base font-normal">※3分15秒まで</span></p>
+      <p class="block text-lg font-semibold">音声 <span class="text-base font-normal">※3時間までOK!(笑)</span></p>
       <section>
         <canvas class="visualizer w-full rounded-lg h-24" style="background-color: #05aaff;"></canvas>
       </section>
@@ -84,8 +84,13 @@
       <!-- 音声クリップはここに表示 -->
       </section>
 
-      <%= f.file_field :audio, direct_upload: true, class: "hidden" %>
-      <%= f.hidden_field :duration, class: "duration-field" %>
+      <div class="form-control mt-2 pt-2 bg-gray-50 p-4 rounded-md shadow-md">
+        <label for="post_audio" class="text-lg font-semibold">音声ファイルを選択</label>
+        <p class="text-sm text-gray-600 mb-2">音声ファイルのアップロードも可能です。</p>
+        <%= f.file_field :audio, id: "post_audio", direct_upload: true, class: "border p-2 w-full rounded" %>
+        
+        <%= f.hidden_field :duration, id: "post_duration", class: "duration-field" %>
+      </div>
     </div>
 
   </div>

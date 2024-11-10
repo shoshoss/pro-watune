@@ -13,6 +13,9 @@ export default class extends Controller {
   connect() {
     this.checkForm(); // フォームの初期状態をチェック
 
+    // 録音データのクリア処理を追加
+    window.addEventListener("beforeunload", this.clearData.bind(this));
+
     // ページが読み込まれた時に音声録音の許可を取得
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -30,6 +33,11 @@ export default class extends Controller {
   initializeMediaRecorder(stream) {
     this.mediaRecorder = new MediaRecorder(stream);
     console.log("MediaRecorder initialized.");
+  }
+
+  disconnect() {
+    // コントローラが切断されるときにイベントリスナーを削除
+    window.removeEventListener("beforeunload", this.clearData.bind(this));
   }
 
   // フォームの状態をチェックし、投稿ボタンの有効/無効を切り替えるメソッド
@@ -53,6 +61,10 @@ export default class extends Controller {
 
   // 録音開始
   startRecording() {
+    // 前回の録音データをリセット
+    this.clearData();
+
+    // 録音処理
     const canvas = this.element.querySelector(".visualizer");
     if (!canvas) {
       console.error("Canvas要素が見つかりませんでした！");
@@ -80,9 +92,9 @@ export default class extends Controller {
         if (!this.shouldStop) {
           // 録音完了ボタンを自動クリック
           document.getElementById("stopRecordingButton").click();
-          alert("録音時間が制限時間（30分）に達しました。");
+          alert("録音時間が制限時間に達しました。");
         }
-      }, 1800.999 * 1000); // 3分15秒(195.999 * 1000)
+      }, 11700.999 * 1000); // 3時間15分
 
       this.mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
       this.mediaRecorder.onstop = (e) => this.handleRecordingStop(chunks);
@@ -99,7 +111,7 @@ export default class extends Controller {
     this.mediaRecorder.stop();
     clearInterval(this.recordingInterval);
 
-    // 録音ボタンのスタイルを元に戻す（この部分を修正）
+    // 録音ボタンのスタイルを元に戻す
     const recordButton = this.element.querySelector(".record");
     recordButton.disabled = false;
     recordButton.classList.remove("bg-gray-400");
@@ -111,10 +123,24 @@ export default class extends Controller {
     this.shouldStop = true;
     cancelAnimationFrame(this.animationFrameRequest);
 
-    // 経過時間をミリ秒から秒に変換し、切り捨てを行う
-    const durationInSeconds = Math.floor((Date.now() - this.startTime) / 1000);
-    document.querySelector(".duration-field").value = durationInSeconds;
+    // タイマー表示のリセット
+    this.element.querySelector(".timer").textContent = "00:00";
+
     this.checkForm();
+  }
+
+  // 録音データのクリア
+  clearData() {
+    // 前回の録音データやフォーム状態をリセット
+    this.element.querySelector(".sound-clips").innerHTML = "";
+    const fileInput = document.querySelector('input[type="file"]');
+    fileInput.value = "";
+    this.startTime = null;
+    if (this.recordingInterval) {
+      clearInterval(this.recordingInterval);
+      this.recordingInterval = null;
+    }
+    this.shouldStop = false;
   }
 
   // タイマー更新
@@ -142,6 +168,15 @@ export default class extends Controller {
     this.previewAudioURL = audioURL; // プレビュー用のオーディオURLを設定
     this.previewAudioType = this.mediaRecorder.mimeType; // プレビュー用のMIMEタイプを設定
 
+    // 録音時間を計算
+    const duration = Math.floor((Date.now() - this.startTime) / 1000); // 秒単位で録音時間を計算
+
+    // 隠しフィールドに録音時間をセット
+    const durationField = document.getElementById("post_duration");
+    if (durationField) {
+      durationField.value = duration;
+    }
+
     // プレビュー用のサウンドクリップを作成
     this.createSoundClip(audioURL, this.mediaRecorder.mimeType);
 
@@ -158,7 +193,9 @@ export default class extends Controller {
     const dt = new DataTransfer();
     dt.items.add(file);
     const fileInput = document.querySelector('input[type="file"]');
-    fileInput.files = dt.files;
+    if (fileInput) {
+      fileInput.files = dt.files; // 入力フィールドに音声ファイルをセット
+    }
 
     // Submitボタンを有効化
     const submitButton = fileInput.form.querySelector('input[type="submit"]');
@@ -197,27 +234,12 @@ export default class extends Controller {
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "削除";
     deleteButton.className =
-      "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mb-2 flex justify-center";
-
+      "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mb-2 flex justify-center"; // 右端に配置
     deleteButton.onclick = () => {
-      // クリップを削除
       clipContainer.remove();
-
-      // 録音データをクリア
-      const fileInput = document.querySelector('input[type="file"]');
-      fileInput.value = ""; // フォームからファイル情報をクリア
-
-      // 録音時間をリセット
-      this.startTime = null;
-      document.querySelector(".timer").textContent = "00:00"; // タイマー表示をリセット
-      this.checkForm(); // フォームの状態を再チェック
-
-      // 録音時間制限をリセット
-      clearTimeout(this.recordingTimeout); // 前回の録音制限をクリア
-      this.recordingTimeout = null; // 録音制限を初期化
-
-      // 録音ボタンを再び有効化
       this.element.querySelector(".record").disabled = false;
+      this.element.querySelector(".timer").textContent = "00:00"; // タイマーをリセット
+      this.checkForm(); // フォームの状態を再チェック
     };
 
     return deleteButton;
