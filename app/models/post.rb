@@ -5,7 +5,7 @@ class Post < ApplicationRecord
 
   # ユーザーとの関係
   belongs_to :user
-  belongs_to :category
+  belongs_to :category, optional: true
 
   # リプライ関係
   has_many :replies, class_name: 'Post', foreign_key: :post_reply_id, inverse_of: :parent_post
