@@ -125,7 +125,7 @@ class Post < ApplicationRecord
     if category&.add_category_name.present?
       "#{fixed_category_i18n} / #{category.add_category_name}"
     else
-      fixed_category_i18n
+      "#{fixed_category_i18n} / あなたに感謝"
     end
   end
 
