@@ -80,9 +80,9 @@ export default class extends Controller {
         if (!this.shouldStop) {
           // 録音完了ボタンを自動クリック
           document.getElementById("stopRecordingButton").click();
-          alert("録音時間が制限時間（3分15秒）に達しました。");
+          alert("録音時間が制限時間（30分）に達しました。");
         }
-      }, 195.999 * 1000); // 3分15秒
+      }, 1800.999 * 1000); // 3分15秒(195.999 * 1000)
 
       this.mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
       this.mediaRecorder.onstop = (e) => this.handleRecordingStop(chunks);
@@ -197,12 +197,27 @@ export default class extends Controller {
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "削除";
     deleteButton.className =
-      "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mb-2 flex justify-center"; // 右端に配置
+      "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mb-2 flex justify-center";
+
     deleteButton.onclick = () => {
+      // クリップを削除
       clipContainer.remove();
-      this.element.querySelector(".record").disabled = false;
-      this.element.querySelector(".timer").textContent = "00:00"; // タイマーをリセット
+
+      // 録音データをクリア
+      const fileInput = document.querySelector('input[type="file"]');
+      fileInput.value = ""; // フォームからファイル情報をクリア
+
+      // 録音時間をリセット
+      this.startTime = null;
+      document.querySelector(".timer").textContent = "00:00"; // タイマー表示をリセット
       this.checkForm(); // フォームの状態を再チェック
+
+      // 録音時間制限をリセット
+      clearTimeout(this.recordingTimeout); // 前回の録音制限をクリア
+      this.recordingTimeout = null; // 録音制限を初期化
+
+      // 録音ボタンを再び有効化
+      this.element.querySelector(".record").disabled = false;
     };
 
     return deleteButton;
