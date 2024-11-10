@@ -21,20 +21,23 @@
   <div class="card-body mx-auto">
     <div class="form-control mb-2">
       <%= f.label :email, class: "label-text text-lg font-semibold mb-1" %>
-      <%= f.email_field :email, placeholder: "example@watune.com", class: "input input-bordered input-info text-lg", required: true, autocomplete: "email" %>
+      <%= f.email_field :email, placeholder: "example@watune.com", class: "input-style", autocomplete: "email", required: true %>
     </div>
     <div class="form-control mb-2">
       <%= f.label :password, class: "label-text text-lg font-semibold mb-1" do %>
         パスワード <span class="text-base">※8文字以上</span>
       <% end %>
-      <%= f.password_field :password, class: "input input-bordered input-info text-lg", required: true, autocomplete: "password" %>
+      <%= f.password_field :password, class: "input-style", required: true, autocomplete: "password", required: true %>
     </div>
     <div class="form-control mb-2">
       <%= f.label :username_slug, "ユーザー名（自分のURL）", class: "label-text text-lg font-semibold mb-1" %>
-      <div class="flex items-center">
-        <div class="flex-none text-lg text-gray-600 mx-1">https://www.watune.com/my/</div>
-        <%= f.text_field :username_slug, placeholder: "self_url_123", id: "new_username", class: "input input-bordered input-info text-lg", required: true %>
+      <div class="flex items-center flex-wrap sm:flex-nowrap">
+        <div class="flex-none text-lg text-gray-600 mx-1">
+          https://www.watune.com/star/<br class="sm:hidden">
+        </div>
+        <%= f.text_field :username_slug, placeholder: "my_url_123", id: "new_username", class: "input-style w-64", maxlength: 15, pattern: "[a-zA-Z0-9_]{3,15}", title: "3文字以上15文字以内で、英数字または_(アンダースコア)のみ使用できます。" %>
       </div>
+      <div class="flex-none text-md text-gray-600 mx-1">・任意（入力しなくてもよく、後で変更可能です。）</div>
       <div class="flex-none text-md text-gray-600 mx-1">・3文字以上15文字以内</div>
       <div class="flex-none text-md text-gray-600 mx-1">・英数字または_(アンダースコア)のみ使用可能</div>
     </div>
