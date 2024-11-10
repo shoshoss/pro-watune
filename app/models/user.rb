@@ -31,7 +31,7 @@ class User < ApplicationRecord
 
   # 予約されたusername_slugを設定
   RESERVED_USERNAMES = %w[
-    star stars timeline question questions file files ranking
+    article articles star stars timeline question questions file files ranking
     community communities town towns group groups my self other admin support
     blog home user dashboard privacy_policy terms_of_use
     privacy_modal tou_modal signup_modal signup oauth login logout
