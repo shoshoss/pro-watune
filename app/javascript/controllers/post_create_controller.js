@@ -113,8 +113,9 @@ export default class extends Controller {
 
     // 録音ボタンのスタイルを元に戻す
     const recordButton = this.element.querySelector(".record");
-    recordButton.disabled = false;
-    recordButton.classList.remove("bg-gray-400");
+    clearInterval(this.recordingInterval);
+    this.element.querySelector(".record").disabled = false;
+    this.element.querySelector(".stop").disabled = true;
     recordButton.classList.add("bg-blue-500", "hover:bg-blue-700");
 
     const stopButton = this.element.querySelector(".stop");
