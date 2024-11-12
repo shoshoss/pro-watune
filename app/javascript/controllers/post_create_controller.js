@@ -125,7 +125,7 @@ export default class extends Controller {
     cancelAnimationFrame(this.animationFrameRequest);
 
     // タイマー表示のリセット
-    this.element.querySelector(".timer").textContent = "00:00";
+    // this.element.querySelector(".timer").textContent = "00:00";
 
     this.checkForm();
   }
