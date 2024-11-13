@@ -29,7 +29,7 @@
       <div class="form-control">
         <div class="flex items-center">
           <%= f.label :display_name, '名前', class: "label-text text-lg font-semibold", for: "user_display_name" %>
-          <div class="flex-none text-lg text-gray-600">（50文字以内）</div>
+          <div class="flex-none text-lg text-gray-600">（35文字以内）</div>
         </div>
         <%= f.text_field :display_name, id: "user_display_name", class: "input-style", placeholder: "ウェーチュン#{user.id}", value: (user.display_name if @user.display_name.present? && @user.display_name != "ウェーチュン#{@user.id}") %>
       </div>

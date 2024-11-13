@@ -27,7 +27,7 @@ class User < ApplicationRecord
   validates :password, presence: true, length: { minimum: 8, message: :too_short },
                        if: -> { new_record? || changes[:crypted_password] } # パスワード
   validates :reset_password_token, presence: true, uniqueness: true, allow_nil: true # パスワードリセットトークン
-  validates :display_name, length: { maximum: 50 } # 表示名は最大50文字
+  validates :display_name, length: { maximum: 35 } # 表示名は最大35文字
 
   # 予約されたusername_slugを設定
   RESERVED_USERNAMES = %w[
