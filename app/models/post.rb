@@ -21,6 +21,8 @@ class Post < ApplicationRecord
 
   # 投稿とユーザーの関係
   has_many :post_users, dependent: :destroy
+
+  # 特定の役割に基づく受信者
   has_many :direct_recipients, -> { where(post_users: { role: 'direct_recipient' }) }, through: :post_users, source: :user
   has_many :community_recipients, -> { where(post_users: { role: 'community_recipient' }) }, through: :post_users, source: :user
 

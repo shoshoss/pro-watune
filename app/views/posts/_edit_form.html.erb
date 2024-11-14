@@ -6,44 +6,30 @@
 <%= render 'shared/error_messages', object: f.object %>
 <div class="card-body mx-auto">
   <!-- 送信先設定 -->
+  <% current_privacy = params[:privacy] || post.privacy %>
+  <% if current_privacy == 'selected_users' %>
+  <div class="form-control pt-2">
+    <p class="font-semibold text-base text-black">ユーザーの選択の変更はできません。</p>
+  </div>
+  <% else %>
+
   <%= turbo_frame_tag "privacy-settings" do %>
   <div class="form-control">
     <label for="post_privacy" class="block text-lg font-semibold">送信先</label>
     <div class="flex flex-col space-y-2 pt-2">
       <div class="flex space-x-4">
-        <% current_privacy = params[:privacy] || post.privacy %>
-
         <div class="flex-1 text-center">
-          <%= link_to '自分', edit_post_path(post, privacy: 'only_me'), class: "btn-choice #{active_bottom('only_me')} #{'btn-choice-only_me-active' if current_privacy == 'only_me'} w-full", data: { turbo_frame: "privacy-settings", turbo_action: :advance } %>
+          <%= link_to '自分', edit_post_path(post, privacy: 'only_me', selected_user_ids: []), class: "btn-choice #{active_bottom('only_me')} #{'btn-choice-only_me-active' if current_privacy == 'only_me'} w-full", data: { turbo_frame: "privacy-settings", turbo_action: :advance } %>
           <p class="text-sm text-gray-600 mt-1">自分のみが<br class="sm:hidden">閲覧可能</p>
         </div>
 
         <div class="flex-1 text-center">
-          <%= link_to '選択', edit_post_path(post, privacy: 'selected_users', selected_user_ids: params[:selected_user_ids]), class: "btn-choice #{active_bottom('selected_users')} #{'btn-choice-selected_users-active' if current_privacy == 'selected_users'} w-full", data: { turbo_frame: "privacy-settings", turbo_action: :advance } %>
-          <p class="text-sm text-gray-600 mt-1">フォローした<br class="sm:hidden">ユーザーで<br class="md:hidden">選択した<br class="sm:hidden">ユーザーと<br class="sm:hidden">自分のみ<br class="sm:hidden">閲覧可能</p>
-        </div>
-
-        <div class="flex-1 text-center">
-          <%= link_to '全体', edit_post_path(post, privacy: 'open'), class: "btn-choice #{active_bottom('open')} #{'btn-choice-open-active' if current_privacy == 'open'} w-full", data: { turbo_frame: "privacy-settings", turbo_action: :advance } %>
+          <%= link_to '全体', edit_post_path(post, privacy: 'open', selected_user_ids: []), class: "btn-choice #{active_bottom('open')} #{'btn-choice-open-active' if current_privacy == 'open'} w-full", data: { turbo_frame: "privacy-settings", turbo_action: :advance } %>
           <p class="text-sm text-gray-600 mt-1">ホームに<br class="sm:hidden">公開され<br class="md:hidden">全ての<br class="sm:hidden">ユーザーが<br class="sm:hidden">閲覧可能</p>
         </div>
-
       </div>
     </div>
     <input type="hidden" name="post[privacy]" id="post_privacy" value="<%= current_privacy %>">
-  </div>
-
-  <% if params[:privacy] == 'selected_users' || post.privacy == 'selected_users' %>
-  <div class="form-control pt-2">
-    <%= f.label :recipient_ids, '仲間を選択', class: "block text-lg font-semibold" %>
-    <div class="flex flex-col max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-2">
-      <% current_user.following_ordered_by_sent_posts.each do |following| %>
-      <label class="inline-flex items-center m-2">
-        <%= check_box_tag 'post[recipient_ids][]', following.id, params[:selected_user_ids]&.include?(following.id.to_s), class: 'form-checkbox h-5 w-5 text-blue-600' %>
-        <span class="ml-2 text-gray-700"><%= following.display_name %> (@<%= following.username_slug %>)</span>
-      </label>
-      <% end %>
-    </div>
   </div>
   <% end %>
   <% end %>
