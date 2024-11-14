@@ -6,6 +6,7 @@
 <%= render 'shared/error_messages', object: f.object %>
 <div class="card-body mx-auto">
   <!-- 送信先設定 -->
+  <%= turbo_frame_tag "privacy-settings" do %>
   <div class="form-control">
     <label for="post_privacy" class="block text-lg font-semibold">送信先</label>
     <div class="flex flex-col space-y-2 pt-2">
@@ -32,6 +33,20 @@
     <input type="hidden" name="post[privacy]" id="post_privacy" value="<%= current_privacy %>">
   </div>
 
+  <% if params[:privacy] == 'selected_users' || post.privacy == 'selected_users' %>
+  <div class="form-control pt-2">
+    <%= f.label :recipient_ids, '仲間を選択', class: "block text-lg font-semibold" %>
+    <div class="flex flex-col max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-2">
+      <% current_user.following_ordered_by_sent_posts.each do |following| %>
+      <label class="inline-flex items-center m-2">
+        <%= check_box_tag 'post[recipient_ids][]', following.id, params[:selected_user_ids]&.include?(following.id.to_s), class: 'form-checkbox h-5 w-5 text-blue-600' %>
+        <span class="ml-2 text-gray-700"><%= following.display_name %> (@<%= following.username_slug %>)</span>
+      </label>
+      <% end %>
+    </div>
+  </div>
+  <% end %>
+  <% end %>
 
 
   <!-- 投稿内容 -->
