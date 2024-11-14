@@ -1,14 +1,48 @@
-<%= form_with model: @post, method: :patch, data: { controller: "post-edit-modal", action: "turbo:submit-end->post-edit-modal#afterClose" } do |f| %>
-  <%= render 'shared/error_messages', object: f.object %>
-  <div class="card-body mx-auto">
-    <div class="form-control pt-2">
-      <%= f.label :body, class: "block text-lg font-semibold" %>
-      <%= f.text_area :body, class: "block mt-1 p-2 text-base md:text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-sky-400-accent-accent resize-none overflow-y-auto", rows: "10", style: "resize: vertical;" %>
+<h1 class="text-4xl font-bold mt-4 text-center">
+  <%= "投稿の編集" %>
+</h1>
+
+<%= form_with model: post, method: :patch, data: { controller: "post-edit-modal", action: "turbo:submit-end->post-edit-modal#afterClose" } do |f| %>
+<%= render 'shared/error_messages', object: f.object %>
+<div class="card-body mx-auto">
+  <!-- 送信先設定 -->
+  <div class="form-control">
+    <label for="post_privacy" class="block text-lg font-semibold">送信先</label>
+    <div class="flex flex-col space-y-2 pt-2">
+      <div class="flex space-x-4">
+        <% current_privacy = params[:privacy] || post.privacy %>
+
+        <div class="flex-1 text-center">
+          <%= link_to '自分', edit_post_path(post, privacy: 'only_me'), class: "btn-choice #{active_bottom('only_me')} #{'btn-choice-only_me-active' if current_privacy == 'only_me'} w-full", data: { turbo_frame: "privacy-settings", turbo_action: :advance } %>
+          <p class="text-sm text-gray-600 mt-1">自分のみが<br class="sm:hidden">閲覧可能</p>
+        </div>
+
+        <div class="flex-1 text-center">
+          <%= link_to '選択', edit_post_path(post, privacy: 'selected_users', selected_user_ids: params[:selected_user_ids]), class: "btn-choice #{active_bottom('selected_users')} #{'btn-choice-selected_users-active' if current_privacy == 'selected_users'} w-full", data: { turbo_frame: "privacy-settings", turbo_action: :advance } %>
+          <p class="text-sm text-gray-600 mt-1">フォローした<br class="sm:hidden">ユーザーで<br class="md:hidden">選択した<br class="sm:hidden">ユーザーと<br class="sm:hidden">自分のみ<br class="sm:hidden">閲覧可能</p>
+        </div>
+
+        <div class="flex-1 text-center">
+          <%= link_to '全体', edit_post_path(post, privacy: 'open'), class: "btn-choice #{active_bottom('open')} #{'btn-choice-open-active' if current_privacy == 'open'} w-full", data: { turbo_frame: "privacy-settings", turbo_action: :advance } %>
+          <p class="text-sm text-gray-600 mt-1">ホームに<br class="sm:hidden">公開され<br class="md:hidden">全ての<br class="sm:hidden">ユーザーが<br class="sm:hidden">閲覧可能</p>
+        </div>
+
+      </div>
     </div>
-    <div class="form-control mt-4 lg:mt-6">
-      <%= f.submit nil, class: "btn text-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50" %>
-    </div>
+    <input type="hidden" name="post[privacy]" id="post_privacy" value="<%= current_privacy %>">
   </div>
+
+
+
+  <!-- 投稿内容 -->
+  <div class="form-control pt-2">
+    <%= f.label :body, class: "block text-lg font-semibold" %>
+    <%= f.text_area :body, class: "block mt-1 p-2 text-base md:text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-sky-400-accent-accent resize-none overflow-y-auto", rows: "10", style: "resize: vertical;" %>
+  </div>
+  <div class="form-control mt-4 lg:mt-6">
+    <%= f.submit nil, class: "btn text-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50" %>
+  </div>
+</div>
 <% end %>
 
 <script>

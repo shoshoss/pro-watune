@@ -170,9 +170,7 @@ export default class extends Controller {
     this.previewAudioType = this.mediaRecorder.mimeType; // プレビュー用のMIMEタイプを設定
 
     // 録音時間を計算
-    const duration = Math.floor((Date.now() - this.startTime) / 1000); // 秒単位で録音時間を計算
-
-    // 隠しフィールドに録音時間をセット
+    const duration = Math.floor((Date.now() - this.startTime) / 1000);
     const durationField = document.getElementById("post_duration");
     if (durationField) {
       durationField.value = duration;
@@ -181,21 +179,20 @@ export default class extends Controller {
     // プレビュー用のサウンドクリップを作成
     this.createSoundClip(audioURL, this.mediaRecorder.mimeType);
 
-    // MIMEタイプからファイル拡張子を決定
-    const mimeType = this.mediaRecorder.mimeType;
-    const fileExtension = mimeType.split("/")[1].split(";")[0];
-
-    // 録音データをファイルに変換
+    // ファイルを作成して保存
+    const fileExtension = this.mediaRecorder.mimeType
+      .split("/")[1]
+      .split(";")[0];
     const file = new File([blob], `recording.${fileExtension}`, {
-      type: mimeType,
+      type: this.mediaRecorder.mimeType,
     });
 
-    // DataTransferオブジェクトを使用してファイル入力にファイルを設定
+    // ファイル入力にセット
     const dt = new DataTransfer();
     dt.items.add(file);
     const fileInput = document.querySelector('input[type="file"]');
     if (fileInput) {
-      fileInput.files = dt.files; // 入力フィールドに音声ファイルをセット
+      fileInput.files = dt.files;
     }
 
     // Submitボタンを有効化
@@ -244,6 +241,49 @@ export default class extends Controller {
     };
 
     return deleteButton;
+  }
+
+  // MP3変換メソッド
+  async convertToMp3(audioBlob) {
+    const audioContext = new AudioContext();
+    const audioData = await audioBlob.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(audioData);
+
+    // Web Audio APIのワークレットプロセッサを使用してMP3エンコード
+    const mp3Encoder = new window.lamejs.Mp3Encoder(
+      1,
+      audioBuffer.sampleRate,
+      128
+    );
+    const samples = this.getChannelData(audioBuffer);
+    const mp3Data = [];
+
+    const chunkSize = 1152;
+
+    for (let i = 0; i < samples.length; i += chunkSize) {
+      const chunk = samples.slice(i, i + chunkSize);
+      const mp3buf = mp3Encoder.encodeBuffer(chunk);
+      if (mp3buf.length > 0) {
+        mp3Data.push(mp3buf);
+      }
+    }
+
+    const finalMp3buf = mp3Encoder.flush();
+    if (finalMp3buf.length > 0) {
+      mp3Data.push(finalMp3buf);
+    }
+
+    return new Blob(mp3Data, { type: "audio/mp3" });
+  }
+
+  // オーディオチャンネルデータ取得メソッド
+  getChannelData(audioBuffer) {
+    const samples = new Float32Array(audioBuffer.length);
+    const channel = audioBuffer.getChannelData(0);
+    for (let i = 0; i < audioBuffer.length; i++) {
+      samples[i] = channel[i];
+    }
+    return samples;
   }
 
   // 可視化処理

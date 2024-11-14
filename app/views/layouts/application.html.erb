@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  
+
   <title><%= page_title(yield(:title)) %></title>
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
@@ -11,7 +12,10 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-10YY0QQ95M"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
     gtag('js', new Date());
     gtag('config', 'G-10YY0QQ95M');
   </script>
@@ -20,6 +24,8 @@
   <script async src="https://ga.jspm.io/npm:es-module-shims@1.8.2/dist/es-module-shims.js" data-turbo-track="reload"></script>
   <%= javascript_importmap_tags %>
   <script src="https://kit.fontawesome.com/630314d173.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lame.js/1.2.0/lame.min.js"></script>
+
 
   <!-- スタイルシートのリンク -->
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
@@ -50,7 +56,7 @@
   <%= show_meta_tags %>
   <!-- username_slugをJavaScriptに渡す ログインユーザのプロフィールの読み込みのため -->
   <% if current_user %>
-    <meta name="current-user-username-slug" content="<%= current_user.username_slug %>">
+  <meta name="current-user-username-slug" content="<%= current_user.username_slug %>">
   <% end %>
 </head>
 
@@ -58,26 +64,26 @@
 
   <!-- ヘッダー -->
   <% if logged_in? %>
-    <header class="z-15 bg-white w-full max-w-screen-xl mx-auto border border-gray-200">
-        <%= render 'shared/header' %>
-    </header>
+  <header class="z-15 bg-white w-full max-w-screen-xl mx-auto border border-gray-200">
+    <%= render 'shared/header' %>
+  </header>
   <% else %>
-    <header class="sticky top-0 z-20 bg-white w-full max-w-screen-xl mx-auto border border-gray-200">
-      <div id="before_login_header">
-        <%= render 'shared/before_login_header' %>
-      </div>
-    </header>
+  <header class="sticky top-0 z-20 bg-white w-full max-w-screen-xl mx-auto border border-gray-200">
+    <div id="before_login_header">
+      <%= render 'shared/before_login_header' %>
+    </div>
+  </header>
   <% end %>
 
   <!-- コンテンツコンテナ -->
   <div class="flex-1 flex flex-col md:flex-row max-w-screen-xl mx-auto w-full">
     <!-- サイドバー -->
     <% if logged_in? %>
-      <div id="after-sidebar">
-        <%= render 'shared/sidebar' %>
-      </div>
+    <div id="after-sidebar">
+      <%= render 'shared/sidebar' %>
+    </div>
     <% else %>
-      <div id="no-sidebar"></div>
+    <div id="no-sidebar"></div>
     <% end %>
 
     <!-- メインコンテンツ -->
@@ -91,11 +97,11 @@
 
     <!-- ウィジェット -->
     <% if logged_in? %>
-      <div id="after-widget">
-        <%= render 'shared/widget', users: @recent_users %>
-      </div>
+    <div id="after-widget">
+      <%= render 'shared/widget', users: @recent_users %>
+    </div>
     <% else %>
-      <div id="no-widget"></div>
+    <div id="no-widget"></div>
     <% end %>
   </div>
 
@@ -106,4 +112,5 @@
   <%= render 'shared/footer' %>
 
 </body>
+
 </html>
