@@ -22,7 +22,11 @@
               <span class="file-upload-label bg-gray-200 text-gray-700 p-2 rounded cursor-pointer" onclick="document.getElementById('user_avatar').click()">ファイルを選択</span>
               <br class="block sm:hidden mb-2">
               <span id="file-name" class="file-name text-gray-600 sm:ml-2">選択されていません</span>
-              <img id="preview-avatar" src="<%= user.avatar.attached? ? url_for(user.avatar) : '/logo-watune-en.png' %>" class="mt-4 rounded-full mx-auto my-2 border w-32 h-32">
+              
+              <%# ここを変更: img要素をlabelで囲む %>
+              <label for="user_avatar" class="block cursor-pointer">
+                <img id="preview-avatar" src="<%= user.avatar.attached? ? url_for(user.avatar) : '/logo-watune-en.png' %>" class="mt-4 rounded-full mx-auto my-2 border w-32 h-32">
+              </label>
             </div>
           </div>
 
@@ -37,12 +41,13 @@
           <div class="form-control mt-2">
             <%= f.label :username_slug, 'ユーザー名（自分のURL）', class: "label-text text-lg font-semibold mb-1", for: "user_username_slug" %>
             <div class="flex items-center flex-wrap sm:flex-nowrap">
-              <div class="flex-none text-lg text-gray-600 mx-1">
-                https://www.watune.com/star/<br class="sm:hidden">
-                <%= f.text_field :username_slug, placeholder: "my_url_123", id: "user_username_slug", class: "flex-none input-style w-150", maxlength: 15, pattern: "[a-zA-Z0-9_]{3,15}", title: "3文字以上15文字以内で、英数字または_(アンダースコア)のみ使用できます。" %>
+              <div class="text-base text-gray-600 mx-1 flex-shrink-0">
+                https://www.watune.com/star/
+              </div>
+              <div class="mt-1 sm:mt-0 flex-grow">
+                <%= f.text_field :username_slug, placeholder: "my_url_123", id: "edit_username", class: "input-style w-full sm:w-64", maxlength: 15, pattern: "[a-zA-Z0-9_]{3,15}", title: "3文字以上15文字以内で、英数字または_(アンダースコア)のみ使用できます。" %>
               </div>
             </div>
-            <div class="flex-none text-md text-gray-600 mx-1">・任意（入力しなくてもよく、後で変更可能です。）</div>
             <div class="flex-none text-md text-gray-600 mx-1">・3文字以上15文字以内</div>
             <div class="flex-none text-md text-gray-600 mx-1">・英数字または_(アンダースコア)のみ使用可能</div>
           </div>
