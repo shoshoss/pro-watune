@@ -1,3 +1,4 @@
+<%# app/views/notifications/_notification.html.erb %>
 <div class="notification <%= 'bg-orange-100' if notification.unread %>">
   <% if notification.action == 'like' %>
     <div class="flex items-center p-2">
@@ -10,7 +11,13 @@
       <% end %>
       <span class="text-[15px]">さんがあなたの投稿にいいねしました。</span>
     </div>
-    <%= render partial: 'notifications/post', locals: { post: notification.notifiable } %>
+    <% if notification.notifiable.present? && notification.notifiable.user.present? %>
+      <%= render partial: 'notifications/post', locals: { post: notification.notifiable } %>
+    <% else %>
+      <div class="px-4 py-2 text-gray-500 italic border-b">
+        <i class="fas fa-info-circle"></i> この投稿は削除されました
+      </div>
+    <% end %>
   <% elsif notification.action == 'reply' %>
     <div class="flex items-center p-2">
       <i class="fas fa-reply text-blue-500 min-w-[30px] min-h-[30px] max-w-[30px] max-h-[30px]"></i>
@@ -22,7 +29,13 @@
       <% end %>
       <span class="text-[15px]">さんがあなたへ返信しました。</span>
     </div>
-    <%= render partial: 'notifications/post', locals: { post: notification.notifiable } %>
+    <% if notification.notifiable.present? && notification.notifiable.user.present? %>
+      <%= render partial: 'notifications/post', locals: { post: notification.notifiable } %>
+    <% else %>
+      <div class="px-4 py-2 text-gray-500 italic border-b">
+        <i class="fas fa-info-circle"></i> この投稿は削除されました
+      </div>
+    <% end %>
   <% elsif notification.action == 'repost' %>
     <div class="flex items-center p-2">
       <i class="fa-solid fa-retweet text-green-500 min-w-[30px] min-h-[30px] max-w-[30px] max-h-[30px]"></i>
@@ -34,7 +47,13 @@
       <% end %>
       <span class="text-[15px]">さんがあなたの投稿をリウェーブしました。</span>
     </div>
-    <%= render partial: 'notifications/post', locals: { post: notification.notifiable } %>
+    <% if notification.notifiable.present? && notification.notifiable.user.present? %>
+      <%= render partial: 'notifications/post', locals: { post: notification.notifiable } %>
+    <% else %>
+      <div class="px-4 py-2 text-gray-500 italic border-b">
+        <i class="fas fa-info-circle"></i> この投稿は削除されました
+      </div>
+    <% end %>
   <% elsif notification.action == 'follow' %>
     <div class="flex items-center p-2">
       <i class="fas fa-user-plus text-green-500 min-w-[30px] min-h-[30px] max-w-[30px] max-h-[30px]"></i>
@@ -57,7 +76,9 @@
       <% end %>
       <span class="text-[15px]">さんがあなたへ投稿しました。</span>
     </div>
-    <%= render partial: 'notifications/post', locals: { post: notification.notifiable } %>
+    <% if notification.notifiable.present? %>
+      <%= render partial: 'notifications/post', locals: { post: notification.notifiable } %>
+    <% end %>
   <% else %>
     新しい通知があります。
   <% end %>
