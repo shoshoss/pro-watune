@@ -65,7 +65,7 @@
     </div>
 
     <div class="main-controls pt-2">
-      <p class="block text-lg font-semibold">音声 <span class="text-base font-normal">※3時間までOK!(笑)</span></p>
+      <p class="block text-lg font-semibold">音声 <span class="text-base font-normal">※3時間くらいまでOK!</span></p>
       <section>
         <canvas class="visualizer w-full rounded-lg h-24" style="background-color: #05aaff;"></canvas>
       </section>
@@ -84,9 +84,7 @@
       <!-- 音声クリップはここに表示 -->
       </section>
 
-      <div class="form-control mt-2 pt-2 bg-gray-50 p-4 rounded-md shadow-md">
-        <label for="post_audio" class="text-lg font-semibold">音声ファイルを選択</label>
-        <p class="text-sm text-gray-600 mb-2">音声ファイルのアップロードも可能です。</p>
+      <div class="hidden">
         <%= f.file_field :audio, id: "post_audio", direct_upload: true, class: "border p-2 w-full rounded" %>
         
         <%= f.hidden_field :duration, id: "post_duration", class: "duration-field" %>
