@@ -3,9 +3,9 @@ class PostsController < ApplicationController
   include ActionView::RecordIdentifier
 
   skip_before_action :require_login, only: %i[index show]
-  before_action :set_post, only: %i[show edit update destroy]
-  before_action :set_current_user_post, only: %i[edit update destroy]
-  before_action :set_followings_by_post_count, only: %i[new edit create update]
+  before_action :set_post, only: %i[show edit edit_modal update update_modal destroy]
+  before_action :set_current_user_post, only: %i[edit edit_modal update update_modal destroy]
+  before_action :set_followings_by_post_count, only: %i[new edit edit_modal create update update_modal]
   before_action :authorize_view!, only: [:show]
 
   # 投稿一覧を表示するアクション
@@ -58,6 +58,8 @@ class PostsController < ApplicationController
   # 投稿を編集するフォームを表示するアクション
   def edit; end
 
+  def edit_modal; end
+
   # 新しい投稿を作成するアクション
   def create
     @post = current_user.posts.build(post_params.except(:recipient_ids, :custom_category))
@@ -77,7 +79,19 @@ class PostsController < ApplicationController
       assign_custom_category if post_params[:custom_category].present?
       cache_headers(@post.audio) if @post.audio.attached?
 
-      PostCreationJob.perform_later(@post.id, post_params[:recipient_ids], @post.privacy) if post_params[:recipient_ids].present?
+      flash[:notice] = t('defaults.flash_message.updated', item: Post.model_name.human, default: '投稿が更新されました。')
+      redirect_to profile_show_path(username_slug: @post.user.username_slug, category: 'all_my_posts'), status: :see_other
+    else
+      flash.now[:danger] = t('defaults.flash_message.not_updated', item: Post.model_name.human, default: '投稿の更新に失敗しました。')
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def update_modal
+    if @post.update(post_params.except(:recipient_ids))
+      assign_custom_category if post_params[:custom_category].present?
+      cache_headers(@post.audio) if @post.audio.attached?
+
       flash[:notice] = t('defaults.flash_message.updated', item: Post.model_name.human, default: '投稿が更新されました。')
     else
       flash.now[:danger] = t('defaults.flash_message.not_updated', item: Post.model_name.human, default: '投稿の更新に失敗しました。')
