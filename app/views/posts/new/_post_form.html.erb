@@ -9,15 +9,15 @@
         <div class="flex flex-col space-y-2 pt-2">
           <div class="flex space-x-4">
             <div class="flex-1 text-center">
-              <%= link_to '自分', new_post_path(privacy: 'only_me'), class: "btn-choice #{active_bottom('only_me')} w-full", method: :get, data: { turbo_frame: "privacy-settings", turbo_action: :advance, turbo: true } %>
+              <%= link_to '自分', new_post_path(privacy: 'only_me'), class: "btn-choice #{active_bottom('only_me')} w-full", method: :get, data: { turbo_frame: "privacy-settings" } %>
               <p class="text-sm text-gray-600 mt-1">自分のみが<br class="sm:hidden">閲覧可能</p>
             </div>
             <div class="flex-1 text-center">
-              <%= link_to '選択', new_post_path(privacy: 'selected_users', selected_user_ids: params[:selected_user_ids]), class: "btn-choice #{active_bottom('selected_users')} w-full", method: :get, data: { turbo_frame: "privacy-settings", turbo_action: :advance, turbo: true } %>
+              <%= link_to '選択', new_post_path(privacy: 'selected_users', selected_user_ids: params[:selected_user_ids]), class: "btn-choice #{active_bottom('selected_users')} w-full", method: :get, data: { turbo_frame: "privacy-settings" } %>
               <p class="text-sm text-gray-600 mt-1">フォローした<br class="sm:hidden">ユーザーで<br class="md:hidden">選択した<br class="sm:hidden">ユーザーと<br class="sm:hidden">自分のみ<br class="sm:hidden">閲覧可能</p>
             </div>
             <div class="flex-1 text-center">
-              <%= link_to '全体', new_post_path(privacy: 'open'), class: "btn-choice #{active_bottom('open')} w-full", method: :get, data: { turbo_frame: "privacy-settings", turbo_action: :advance, turbo: true } %>
+              <%= link_to '全体', new_post_path(privacy: 'open'), class: "btn-choice #{active_bottom('open')} w-full", method: :get, data: { turbo_frame: "privacy-settings" } %>
               <p class="text-sm text-gray-600 mt-1">ホームに<br class="sm:hidden">公開され<br class="md:hidden">全ての<br class="sm:hidden">ユーザーが<br class="sm:hidden">閲覧可能</p>
             </div>
           </div>
