@@ -1,5 +1,5 @@
 namespace :audio do
-  desc "Convert existing audio files to MP3 and save them to converted_audio"
+  desc 'Convert existing audio files to MP3 and save them to converted_audio'
   task convert_existing: :environment do
     require 'ffmpeg'
 
@@ -27,10 +27,10 @@ namespace :audio do
         post.update(duration: movie.duration)
 
         # 一時ファイルを削除
-        File.delete(converted_path) if File.exist?(converted_path)
+        FileUtils.rm_f(converted_path)
 
         puts "Post ID #{post.id} converted successfully."
-      rescue => e
+      rescue StandardError => e
         puts "Failed to convert Post ID #{post.id}: #{e.message}"
       end
     end
