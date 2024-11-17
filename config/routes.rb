@@ -45,8 +45,11 @@ Rails.application.routes.draw do
 
   # 投稿のルーティング
   resources :waves, controller: 'posts', as: 'posts', except: [:show] do
+    member do
+      get 'edit_modal'
+      patch 'update_modal'
+    end
     collection do
-      get :privacy_settings
       get :latest, to: 'posts#latest' # 最新データ取得のルートを追加
     end
     resources :likes, only: %i[create destroy]

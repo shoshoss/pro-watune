@@ -129,6 +129,19 @@ class Post < ApplicationRecord
     end
   end
 
+  def reply?
+    post_reply_id.present?
+  end
+  
+  def parent_post?
+    replies.exists?
+  end
+  
+  # 返信関連の投稿かどうかをチェックするメソッドを追加
+  def reply_related?
+    reply? || parent_post?
+  end
+
   private
 
   def update_latest_activity

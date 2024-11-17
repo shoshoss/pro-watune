@@ -1,39 +1,55 @@
-<%= form_with model: @post, method: :patch, data: { controller: "post-edit-modal", action: "turbo:submit-end->post-edit-modal#afterClose" } do |f| %>
+<%# app/views/posts/_edit_form.html.erb %>
+<h1 class="text-3xl font-bold mt-4 text-center">
+  <%= "投稿の編集" %>
+</h1>
+
+<%= form_with model: post, method: :patch, data: { turbo: false }  do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
   <div class="card-body mx-auto">
-    <div class="form-control pt-2">
-      <%= f.label :body, class: "block text-lg font-semibold" %>
-      <%= f.text_area :body, class: "block mt-1 p-2 text-base md:text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-sky-400-accent-accent resize-none overflow-y-auto", rows: "10", style: "resize: vertical;" %>
-    </div>
-    <div class="form-control mt-4 lg:mt-6">
-      <%= f.submit nil, class: "btn text-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50" %>
-    </div>
+    <!-- 送信先設定 -->
+    <% current_privacy = params[:privacy] || post.privacy %>
+    <% if current_privacy == 'selected_users' %>
+      <div class="form-control pt-2">
+        <p class="font-semibold text-base text-black">ユーザーの選択の変更はできません。</p>
+      </div>
+    <% else %>
+      <%= turbo_frame_tag "edit_form_#{post.id}" do %>
+        <div class="form-control">
+          <label for="post_privacy" class="block text-lg font-semibold">送信先</label>
+          <div class="flex flex-col space-y-2 pt-2">
+            <div class="flex space-x-4">
+              <div class="flex-1 text-center">
+                <%= link_to '自分', 
+                    edit_post_path(post, privacy: 'only_me'), 
+                    class: "btn-choice #{active_bottom('only_me')} #{'btn-choice-only_me-active' if current_privacy == 'only_me'} w-full",
+                    data: { turbo_frame: "edit_form_#{post.id}" } %>
+                <p class="text-sm text-gray-600 mt-1">自分のみが<br class="sm:hidden">閲覧可能</p>
+              </div>
+
+              <div class="flex-1 text-center">
+                <%= link_to '全体', 
+                    edit_post_path(post, privacy: 'open'), 
+                    class: "btn-choice #{active_bottom('open')} #{'btn-choice-open-active' if current_privacy == 'open'} w-full",
+                    data: { turbo_frame: "edit_form_#{post.id}" } %>
+                <p class="text-sm text-gray-600 mt-1">ホームに<br class="sm:hidden">公開され<br class="md:hidden">全ての<br class="sm:hidden">ユーザーが<br class="sm:hidden">閲覧可能</p>
+              </div>
+            </div>
+          </div>
+          <%= f.hidden_field :privacy, value: current_privacy %>
+        </div>
+      <% end %>
+
+        <!-- 投稿内容 -->
+        <div class="form-control pt-2">
+          <%= f.label :body, class: "block text-lg font-semibold" %>
+          <%= f.text_area :body, 
+              class: "block mt-1 p-2 text-base md:text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-sky-400-accent-accent resize-none overflow-y-auto", 
+              rows: "10", 
+              style: "resize: vertical;" %>
+        </div>
+        <div class="form-control mt-4 lg:mt-6">
+          <%= f.submit nil, class: "btn text-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50" %>
+        </div>
+    <% end %>
   </div>
 <% end %>
-
-<script>
-  document.addEventListener('input', function(event) {
-    if (event.target.tagName.toLowerCase() !== 'textarea') return;
-
-    const textarea = event.target;
-    const modalBox = document.querySelector('.modal-box');
-    const maxModalHeight = window.innerHeight;
-
-    // モーダル全体の高さが画面の高さを超えた場合の処理 (sm以上)
-    if (window.innerWidth >= 640 && modalBox.scrollHeight >= maxModalHeight) {
-      // テキストエリアの高さを固定し、スクロール可能にする
-      textarea.classList.add('overflow-y-auto');
-    } else if (window.innerWidth < 640 && textarea.scrollHeight >= 300) {
-      // スマホの場合、テキストエリアの高さが300pxに達した場合
-      textarea.classList.add('overflow-y-auto');
-    } else {
-      textarea.classList.remove('overflow-y-auto');
-      // テキストエリアの高さを調整
-      textarea.style.height = 'auto';
-      textarea.style.height = textarea.scrollHeight + 'px';
-      // モーダルの高さを調整
-      modalBox.style.height = 'auto';
-      modalBox.style.height = modalBox.scrollHeight + 'px';
-    }
-  });
-</script>
