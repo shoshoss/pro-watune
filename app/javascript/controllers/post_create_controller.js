@@ -132,16 +132,57 @@ export default class extends Controller {
 
   // 録音データのクリア
   clearData() {
-    // 前回の録音データやフォーム状態をリセット
+    // サウンドクリップのクリア
     this.element.querySelector(".sound-clips").innerHTML = "";
+
+    // ファイル入力のクリア
     const fileInput = document.querySelector('input[type="file"]');
-    fileInput.value = "";
+    if (fileInput) {
+      // DataTransferオブジェクトをリセット
+      const dt = new DataTransfer();
+      fileInput.files = dt.files; // 空のファイルリストを設定
+      fileInput.value = ""; // 値もクリア
+    }
+
+    // durationフィールドのクリア
+    const durationField = document.getElementById("post_duration");
+    if (durationField) {
+      durationField.value = "";
+    }
+
+    // タイマーのリセット
+    const timerElement = this.element.querySelector(".timer");
+    if (timerElement) {
+      timerElement.textContent = "00:00";
+    }
+
+    // 録音関連の状態をリセット
     this.startTime = null;
     if (this.recordingInterval) {
       clearInterval(this.recordingInterval);
       this.recordingInterval = null;
     }
     this.shouldStop = false;
+
+    // オーディオリソースの解放
+    if (this.previewAudioURL) {
+      URL.revokeObjectURL(this.previewAudioURL);
+      this.previewAudioURL = null;
+    }
+
+    // ボタンの状態をリセット
+    const recordButton = this.element.querySelector(".record");
+    if (recordButton) {
+      recordButton.disabled = false;
+    }
+
+    // Submitボタンの状態を更新
+    const submitButton = this.element.querySelector('input[type="submit"]');
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.classList.add("opacity-50");
+      submitButton.classList.add("cursor-not-allowed");
+    }
   }
 
   // タイマー更新
@@ -237,9 +278,7 @@ export default class extends Controller {
     deleteButton.className =
       "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mb-2 flex justify-center"; // 右端に配置
     deleteButton.onclick = () => {
-      clipContainer.remove();
-      this.element.querySelector(".record").disabled = false;
-      this.element.querySelector(".timer").textContent = "00:00"; // タイマーをリセット
+      this.clearData(); // clearDataメソッドを呼び出して完全にクリア
       this.checkForm(); // フォームの状態を再チェック
     };
 

@@ -84,7 +84,7 @@
       <!-- 音声クリップはここに表示 -->
       </section>
 
-      <div class="form-control mt-2 pt-2 bg-gray-50 p-4 rounded-md shadow-md">
+      <div class="hidden form-control mt-2 pt-2 bg-gray-50 p-4 rounded-md shadow-md">
         <%= f.file_field :audio, id: "post_audio", direct_upload: true, class: "border p-2 w-full rounded" %>
         
         <%= f.hidden_field :duration, id: "post_duration", class: "duration-field" %>
