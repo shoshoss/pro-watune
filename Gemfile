@@ -87,8 +87,6 @@ gem 'rinku', '~> 2.0'
 
 gem 'rack-cors', '~> 2.0'
 
-gem 'streamio-ffmpeg', '~> 3.0'
-
 group :development, :test do
   # リクエストの速度を表示するためのrack-mini-profiler
   gem 'rack-mini-profiler', '>= 3.3', require: false
