@@ -109,12 +109,9 @@
                                             },
                                             class: "mb-6 text-xl sm:text-2xl btn btn-accent bg-opacity-80 hover:bg-opacity-100 rounded-full transition-colors duration-300" %>
       <% unless current_user %>
-        <%= link_to guest_login_path, method: :post, class: 'mb-6 trial-btn text-xl sm:text-2xl' do %>
-          お試しで始める<br>ログイン中で<br class="sm:hidden">データの引き継ぎ可能
-        <% end %>
         <!-- Googleで新規登録のボタン -->
         <div class="flex items-center justify-center mb-8">
-          <%= link_to auth_at_provider_path(provider: :google), method: :post, class: "bg-white bg-opacity-80 px-6 py-3 border flex gap-2 border-blue-200 dark:border-blue-300 rounded-lg text-blue-700 hover:border-blue-400 hover:text-blue-800 hover:shadow-outline transition duration-150 text-lg", data: { turbo: false } do %>
+          <%= link_to auth_at_provider_path(provider: :google), method: :post, class: "btn-google", data: { turbo: false } do %>
             <img class="w-8 h-8" src="https://www.svgrepo.com/show/475656/google-color.svg" loading="lazy" alt="google logo">
             <span class="text-xl">Googleで新規登録<br class="md:hidden">またはログイン</span>
           <% end %>
