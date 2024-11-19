@@ -9,7 +9,7 @@ module PostsHelper
     'favorite' => 'fa fa-heart text-red-500',
     'learn' => 'fas fa-graduation-cap text-green-500',
     'child' => 'fa fa-smile-o text-pink-400',
-    'fast_talking' => 'fa-solid fa-bolt text-yellow-400-accent',
+    'fast_talking' => 'fa-solid fa-bolt text-yellow-400-accent'
   }.freeze
 
   CATEGORY_NAMES = {
@@ -22,7 +22,7 @@ module PostsHelper
     'favorite' => 'その他の好きなこと・もの',
     'learn' => '学び・気づき',
     'child' => '子供の声',
-    'fast_talking' => '早口言葉',
+    'fast_talking' => '早口言葉'
   }.freeze
 
   # カテゴリに対応するアイコンのクラスを返すメソッド
