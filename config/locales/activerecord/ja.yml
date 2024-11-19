@@ -61,12 +61,12 @@ ja:
         admin: 管理者
     post:
       fixed_category:
-        praise_gratitude: 褒めや感謝
+        discuss: 相談したいこと
+        respect: 尊敬する人
+        praise_gratitude: 褒め・感謝
         music: 音楽
-        app_praise: アプリレビュー
-        skill: 特技や技術
-        learn: 学習
+        food: 食事・スイーツ
+        favorite: その他の好きなこと・もの
+        learn: 学び・気づき
         child: 子どもの声
-        favorite: 好きなことや自己紹介
-        monologue: ひとりごと
-        other: その他
+        fast_talking: 早口言葉

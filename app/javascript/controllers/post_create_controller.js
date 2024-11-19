@@ -92,9 +92,9 @@ export default class extends Controller {
         if (!this.shouldStop) {
           // 録音完了ボタンを自動クリック
           document.getElementById("stopRecordingButton").click();
-          alert("録音時間が制限時間に達しました。");
+          alert("録音時間が制限時間（3分15秒）に達しました。");
         }
-      }, 11700.999 * 1000); // 3時間15分
+      }, 195.999 * 1000); // 3分15秒まで
 
       this.mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
       this.mediaRecorder.onstop = (e) => this.handleRecordingStop(chunks);
