@@ -3,42 +3,54 @@
     <%= render 'shared/error_messages', object: f.object %>
 
     <!-- 送信先設定 -->
-    <%= turbo_frame_tag "privacy-settings" do %>
+    <%= turbo_frame_tag "sending_privacy" do %>
       <div class="form-control">
         <label for="post_privacy" class="block text-lg font-semibold">送信先</label>
         <div class="flex flex-col space-y-2 pt-2">
           <div class="flex space-x-4">
             <div class="flex-1 text-center">
-              <%= link_to '自分', new_post_path(privacy: 'only_me'), class: "btn-choice #{active_bottom('only_me')} w-full", method: :get, data: { turbo_frame: "privacy-settings" } %>
+              <%= link_to '自分', new_post_path(privacy: 'only_me'), 
+                  class: "btn-choice #{active_bottom('only_me')} w-full", 
+                  data: { turbo_frame: "sending_privacy",
+                          turbo: true } %>
               <p class="text-sm text-gray-600 mt-1">自分のみが<br class="sm:hidden">閲覧可能</p>
             </div>
             <div class="flex-1 text-center">
-              <%= link_to '選択', new_post_path(privacy: 'selected_users', selected_user_ids: params[:selected_user_ids]), class: "btn-choice #{active_bottom('selected_users')} w-full", method: :get, data: { turbo_frame: "privacy-settings" } %>
-              <p class="text-sm text-gray-600 mt-1">フォローした<br class="sm:hidden">ユーザーで<br class="md:hidden">選択した<br class="sm:hidden">ユーザーと<br class="sm:hidden">自分のみ<br class="sm:hidden">閲覧可能</p>
+              <%= link_to '選択', new_post_path(privacy: 'selected_users', selected_user_ids: params[:selected_user_ids]), 
+                  class: "btn-choice #{active_bottom('selected_users')} w-full", 
+                  data: { turbo_frame: "sending_privacy",
+                          turbo: true } %>
+              <p class="text-sm text-gray-600 mt-1">フォローした<br class="sm:hidden">ユーザーで選択した<br class="sm:hidden">ユーザーのみ閲覧可能</p>
             </div>
             <div class="flex-1 text-center">
-              <%= link_to '全体', new_post_path(privacy: 'open'), class: "btn-choice #{active_bottom('open')} w-full", method: :get, data: { turbo_frame: "privacy-settings" } %>
-              <p class="text-sm text-gray-600 mt-1">ホームに<br class="sm:hidden">公開され<br class="md:hidden">全ての<br class="sm:hidden">ユーザーが<br class="sm:hidden">閲覧可能</p>
+              <%= link_to '全体', new_post_path(privacy: 'open'), 
+                  class: "btn-choice #{active_bottom('open')} w-full", 
+                  data: { turbo_frame: "sending_privacy",
+                          turbo: true } %>
+              <p class="text-sm text-gray-600 mt-1">ホームに<br class="sm:hidden">公開</p>
             </div>
           </div>
         </div>
         <input type="hidden" name="post[privacy]" id="post_privacy" value="<%= params[:privacy] || post.privacy %>">
       </div>
 
+    <!-- 選択ユーザー部分 -->
       <% if params[:privacy] == 'selected_users' || post.privacy == 'selected_users' %>
         <div class="form-control pt-2">
           <%= f.label :recipient_ids, '仲間を選択', class: "block text-lg font-semibold" %>
           <div class="flex flex-col max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-2">
             <% current_user.following_ordered_by_sent_posts.each do |following| %>
               <label class="inline-flex items-center m-2">
-                <%= check_box_tag 'post[recipient_ids][]', following.id, params[:selected_user_ids]&.include?(following.id.to_s), class: 'form-checkbox h-5 w-5 text-blue-600' %>
+                <%= check_box_tag 'post[recipient_ids][]', following.id, 
+                    params[:selected_user_ids]&.include?(following.id.to_s), 
+                    class: 'form-checkbox h-5 w-5 text-blue-600' %>
                 <span class="ml-2 text-gray-700"><%= following.display_name %> (@<%= following.username_slug %>)</span>
               </label>
             <% end %>
           </div>
         </div>
       <% end %>
-    <% end %>
+    <% end %>`
 
     <!-- カテゴリー設定 -->
     <div class="form-control pt-2">
@@ -65,7 +77,7 @@
     </div>
 
     <div class="main-controls pt-2">
-      <p class="block text-lg font-semibold">音声 <span class="text-base font-normal">※3時間くらいまでOK!</span></p>
+      <p class="block text-lg font-semibold">音声 <span class="text-base font-normal">※3分15秒までOK!</span></p>
       <section>
         <canvas class="visualizer w-full rounded-lg h-24" style="background-color: #05aaff;"></canvas>
       </section>
