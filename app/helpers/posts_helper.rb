@@ -15,10 +15,10 @@ module PostsHelper
     'recommended' => 'おすすめ',
     'praise_gratitude' => '褒めや感謝',
     'music' => '音楽',
-    'learn' => '学習',
+    'learn' => '学び',
     'child' => '子供の声',
     'skill' => '特技や技術',
-    'favorite' => '好きなことや自己紹介',
+    'favorite' => 'その他の好きなコトやモノ',
     'monologue' => 'ひとりごと',
     'other' => 'その他'
   }.freeze
