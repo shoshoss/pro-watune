@@ -46,28 +46,30 @@ class Post < ApplicationRecord
   # enum access_mode: { legacy_id: 0, uuid: 10, custom_token: 20 }
 
   DISPLAY_ORDER = %w[
-    discuss
     respect
     praise_gratitude
     music
     food
-    learn
     favorite
-    child
+    goal
+    learn
     fast_talking
+    child
+    other
   ].freeze
 
   # カテゴリー設定
   enum fixed_category: {
-    discuss: 1000,
     respect: 100,
     praise_gratitude: 0,
     music: 10,
     food: 15,
-    learn: 20,
     favorite: 50,
+    goal: 888,
+    learn: 20,
+    fast_talking: 30,
     child: 40,
-    fast_talking: 30
+    other: 1000
   }
 
   # 定義した順序でカテゴリーを返すクラスメソッド

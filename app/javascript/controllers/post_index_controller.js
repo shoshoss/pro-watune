@@ -148,13 +148,15 @@ export default class extends Controller {
     const currentCategory = this.getCurrentCategory();
     const tabIds = [
       "recommended",
+      "respect",
       "praise_gratitude",
       "music",
+      "food",
+      "favorite",
+      "goal",
       "learn",
       "child",
-      "skill",
-      "favorite",
-      "monologue",
+      "fast_talking",
       "other",
     ];
 
