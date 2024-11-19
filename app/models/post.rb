@@ -46,7 +46,7 @@ class Post < ApplicationRecord
   # enum access_mode: { legacy_id: 0, uuid: 10, custom_token: 20 }
 
   DISPLAY_ORDER = %w[
-    discuss 
+    discuss
     respect
     praise_gratitude
     music
@@ -67,7 +67,7 @@ class Post < ApplicationRecord
     learn: 20,
     favorite: 50,
     child: 40,
-    fast_talking: 30,
+    fast_talking: 30
   }
 
   # 定義した順序でカテゴリーを返すクラスメソッド
