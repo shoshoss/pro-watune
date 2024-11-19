@@ -1,26 +1,28 @@
 module PostsHelper
   CATEGORY_ICONS = {
-    'recommended' => 'fa fa-star text-yellow-400-accent',
+    'recommended' => 'fa-solid fa-retweet text-green-500',
+    'discuss' => 'fa-solid fa-comments text-blue-500',
+    'respect' => 'fa fa-star text-yellow-400-accent',
     'praise_gratitude' => 'fa fa-sun text-orange-400',
     'music' => 'fa fa-music text-blue-500',
+    'food' => 'fa-solid fa-utensils text-orange-400',
+    'favorite' => 'fa fa-heart text-red-500',
     'learn' => 'fas fa-graduation-cap text-green-500',
     'child' => 'fa fa-smile-o text-pink-400',
-    'skill' => 'fa-solid fa-lightbulb text-yellow-400-accent',
-    'favorite' => 'fa fa-heart text-red-500',
-    'monologue' => 'fa fa-comment-dots text-teal-500',
-    'other' => 'fa fa-ellipsis-h text-gray-500'
+    'fast_talking' => 'fa-solid fa-bolt text-yellow-400-accent',
   }.freeze
 
   CATEGORY_NAMES = {
     'recommended' => 'おすすめ',
-    'praise_gratitude' => '褒めや感謝',
+    'discuss' => '相談したいこと',
+    'respect' => '尊敬する人',
+    'praise_gratitude' => '褒め・感謝',
     'music' => '音楽',
-    'learn' => '学び',
+    'food' => '食事・スイーツ',
+    'favorite' => 'その他の好きなこと・もの',
+    'learn' => '学び・気づき',
     'child' => '子供の声',
-    'skill' => '特技や技術',
-    'favorite' => 'その他の好きなコトやモノ',
-    'monologue' => 'ひとりごと',
-    'other' => 'その他'
+    'fast_talking' => '早口言葉',
   }.freeze
 
   # カテゴリに対応するアイコンのクラスを返すメソッド
