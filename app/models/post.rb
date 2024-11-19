@@ -51,6 +51,8 @@ class Post < ApplicationRecord
     music: 10,
     learn: 20,
     favorite: 50,
+    favorite: 80,
+    favorite: 70,
     child: 40,
     skill: 30,
     monologue: 60,
