@@ -1,6 +1,10 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
+  static values = {
+    maxRecordingTime: { type: Number, default: 195.999 }, // 3分15秒
+  };
+
   audioCtx;
   canvasCtx;
   mediaRecorder;
@@ -8,6 +12,8 @@ export default class extends Controller {
   animationFrameRequest;
   startTime;
   recordingInterval;
+  totalRecordingTime = 0;
+  previewAudioURL;
 
   // 初期設定 コントローラが接続されたときに呼ばれる
   connect() {
@@ -47,8 +53,11 @@ export default class extends Controller {
     const soundClips = this.element.querySelector(".sound-clips");
     const hasAudio = soundClips.querySelector("audio") !== null;
 
+    const durationField = document.getElementById("post_duration");
+    const hasDuration = durationField && durationField.value !== "";
+
     const submitButton = this.element.querySelector('input[type="submit"]');
-    if (hasText || hasAudio) {
+    if (hasText || (hasAudio && hasDuration)) {
       submitButton.disabled = false;
       submitButton.classList.remove("opacity-50");
       submitButton.classList.remove("cursor-not-allowed");
@@ -61,10 +70,8 @@ export default class extends Controller {
 
   // 録音開始
   startRecording() {
-    // 前回の録音データをリセット
     this.clearData();
 
-    // 録音処理
     const canvas = this.element.querySelector(".visualizer");
     if (!canvas) {
       console.error("Canvas要素が見つかりませんでした！");
@@ -79,22 +86,36 @@ export default class extends Controller {
     if (this.mediaRecorder) {
       let chunks = [];
 
+      // 録音開始時刻を設定
+      this.startTime = Date.now();
+      this.totalRecordingTime = 0;
+
       // 録音ボタンの制御
       this.element.querySelector(".record").disabled = true;
       this.element.querySelector(".stop").disabled = false;
       this.element.querySelector('input[type="submit"]').disabled = true;
       this.shouldStop = false;
-      this.startTime = Date.now();
-      this.recordingInterval = setInterval(() => this.updateTimer(), 1000);
 
-      // 録音時間制限の設定を修正
-      setTimeout(() => {
-        if (!this.shouldStop) {
-          // 録音完了ボタンを自動クリック
-          document.getElementById("stopRecordingButton").click();
-          alert("録音時間が制限時間（3分15秒）に達しました。");
+      // タイマーの更新と制限時間のチェック
+      this.recordingInterval = setInterval(() => {
+        if (!this.startTime) return; // startTimeがnullの場合は処理を中止
+
+        const currentTime = Date.now();
+        const elapsedTime = (currentTime - this.startTime) / 1000;
+
+        // 制限時間のチェック
+        if (elapsedTime >= this.maxRecordingTimeValue) {
+          const stopButton = document.getElementById("stopRecordingButton");
+          if (stopButton) {
+            stopButton.click();
+            alert("録音時間が制限時間（3分15秒）に達しました。");
+            clearInterval(this.recordingInterval); // インターバルをクリア
+          }
+          return;
         }
-      }, 195.999 * 1000); // 3分15秒まで
+
+        this.updateTimer(elapsedTime);
+      }, 1000);
 
       this.mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
       this.mediaRecorder.onstop = (e) => this.handleRecordingStop(chunks);
@@ -186,13 +207,14 @@ export default class extends Controller {
   }
 
   // タイマー更新
-  updateTimer() {
-    const elapsedTime = Date.now() - this.startTime;
-    const seconds = Math.floor((elapsedTime / 1000) % 60);
-    const minutes = Math.floor(elapsedTime / 1000 / 60);
-    this.element.querySelector(".timer").textContent = `${this.pad(
-      minutes
-    )}:${this.pad(seconds)}`;
+  updateTimer(elapsedSeconds) {
+    const timerElement = this.element.querySelector(".timer");
+    if (!timerElement) return;
+
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = Math.floor(elapsedSeconds % 60);
+
+    timerElement.textContent = `${this.pad(minutes)}:${this.pad(seconds)}`;
   }
 
   // 数字を2桁に整形するメソッド
@@ -241,7 +263,9 @@ export default class extends Controller {
 
     // Submitボタンを有効化
     const submitButton = fileInput.form.querySelector('input[type="submit"]');
-    submitButton.disabled = false;
+    if (submitButton) {
+      submitButton.disabled = false;
+    }
 
     // フォームの状態を再チェック
     this.checkForm();
@@ -259,27 +283,28 @@ export default class extends Controller {
     audio.type = mimeType;
     audio.className = "w-full";
 
-    // 削除ボタンを作成
-    const deleteButton = this.createDeleteButton(clipContainer);
+    const deleteButton = this.createDeleteButton();
 
-    // クリップコンテナにオーディオと削除ボタンを追加
     clipContainer.appendChild(deleteButton);
     clipContainer.appendChild(audio);
 
-    // 既存のサウンドクリップをクリアし、新しいクリップを追加
-    this.element.querySelector(".sound-clips").innerHTML = "";
-    this.element.querySelector(".sound-clips").appendChild(clipContainer);
+    const soundClips = this.element.querySelector(".sound-clips");
+    if (soundClips) {
+      soundClips.innerHTML = "";
+      soundClips.appendChild(clipContainer);
+    }
   }
 
   // 削除ボタンを生成するメソッド
-  createDeleteButton(clipContainer) {
+  createDeleteButton() {
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "削除";
     deleteButton.className =
-      "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mb-2 flex justify-center"; // 右端に配置
+      "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mb-2 flex justify-center";
+
     deleteButton.onclick = () => {
-      this.clearData(); // clearDataメソッドを呼び出して完全にクリア
-      this.checkForm(); // フォームの状態を再チェック
+      this.clearData();
+      this.checkForm();
     };
 
     return deleteButton;
