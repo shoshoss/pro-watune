@@ -61,12 +61,14 @@ ja:
         admin: 管理者
     post:
       fixed_category:
-        discuss: 相談したいこと
         respect: 尊敬する人
         praise_gratitude: 褒め・感謝
         music: 音楽
         food: 食事・スイーツ
         favorite: その他の好きなこと・もの
+        happy: 最幸（最高）な出来事
+        goal: 攻略したいこと（目標）
         learn: 学び・気づき
-        child: 子どもの声
         fast_talking: 早口言葉
+        child: 子どもの声
+        other: その他

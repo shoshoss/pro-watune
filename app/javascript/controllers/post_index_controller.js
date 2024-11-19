@@ -153,10 +153,11 @@ export default class extends Controller {
       "music",
       "food",
       "favorite",
+      "happy",
       "goal",
       "learn",
-      "child",
       "fast_talking",
+      "child",
       "other",
     ];
 
