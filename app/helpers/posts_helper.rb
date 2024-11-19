@@ -5,6 +5,7 @@ module PostsHelper
     'music' => 'fa fa-music text-blue-500',
     'food' => 'fa-solid fa-utensils text-orange-400',
     'favorite' => 'fa fa-heart text-red-500',
+    'happy' => 'fa-solid fa-crown text-pink-400',
     'goal' => 'fa fa-fire text-orange-500',
     'learn' => 'fas fa-graduation-cap text-green-500',
     'fast_talking' => 'fa-solid fa-bolt text-yellow-400-accent',
@@ -18,11 +19,12 @@ module PostsHelper
     'music' => '音楽',
     'food' => '食事・スイーツ',
     'favorite' => 'その他の好きなこと・もの',
+    'happy' => '最幸（最高）な出来事',
     'goal' => '攻略したいこと（目標）',
     'learn' => '学び・気づき',
     'fast_talking' => '早口言葉',
     'child' => '子供の声',
-    'other' => 'その他の残したい音声 / 相談'
+    'other' => 'その他'
   }.freeze
 
   # カテゴリに対応するアイコンのクラスを返すメソッド

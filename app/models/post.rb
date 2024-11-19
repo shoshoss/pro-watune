@@ -51,6 +51,7 @@ class Post < ApplicationRecord
     music
     food
     favorite
+    happy
     goal
     learn
     fast_talking
@@ -65,6 +66,7 @@ class Post < ApplicationRecord
     music: 10,
     food: 15,
     favorite: 50,
+    happy: 4444,
     goal: 888,
     learn: 20,
     fast_talking: 30,
