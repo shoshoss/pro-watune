@@ -127,10 +127,23 @@ class Post < ApplicationRecord
 
   # カスタムカテゴリーを設定するメソッド
   def assign_custom_category(custom_category_name)
-    return if custom_category_name.blank?
+    if custom_category_name.blank?
+      # カスタムカテゴリーを削除する場合
+      self.category = nil
+    else
+      # カスタムカテゴリーを設定または更新
+      custom_category = Category.find_or_create_by(
+        category_name: fixed_category, 
+        add_category_name: custom_category_name
+      )
+      self.category = custom_category
+    end
+    save
+  end
 
-    custom_category = Category.find_or_create_by(category_name: fixed_category, add_category_name: custom_category_name)
-    self.category = custom_category
+  # カスタムカテゴリー名を取得するメソッド
+  def custom_category_name
+    category&.add_category_name
   end
 
   scope :reposted, -> { joins(:reposts).distinct }
@@ -169,6 +182,14 @@ class Post < ApplicationRecord
   def update_latest_activity
     latest_time = [created_at, reposts.maximum(:created_at)].compact.max
     update(latest_activity: latest_time)
+  end
+
+  def custom_category_length
+    return unless category&.add_category_name.present?
+  
+    if category.add_category_name.length > 50
+      errors.add(:custom_category, "は50文字以内で入力してください")
+    end
   end
 
   # def set_default_access_mode
