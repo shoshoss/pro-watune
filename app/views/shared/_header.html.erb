@@ -108,7 +108,7 @@
                         user_path(current_user),
                         id: "header-delete-account-link",
                         method: :delete,
-                        data: { turbo_method: :delete, turbo_confirm: '本当に退会しますか（アカウント削除）？' }, class: 'btn btn-danger btn-sm text-sm' %>
+                        data: { turbo_method: :delete, turbo_confirm: '退会すると、すべての投稿データも削除されます。本当に退会しますか？' }, class: 'btn btn-danger btn-sm text-sm' %>
           </li>
         </ul>
       </div>
