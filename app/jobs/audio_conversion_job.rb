@@ -16,13 +16,13 @@ class AudioConversionJob < ApplicationJob
       temp_original.rewind
 
       # MP3への変換を試みる
-      result = system("ffmpeg", 
-                     "-i", temp_original.path, 
-                     "-c:a", "libmp3lame", 
-                     "-b:a", "128k",
-                     temp_converted.path)
+      result = system('ffmpeg',
+                      '-i', temp_original.path,
+                      '-c:a', 'libmp3lame',
+                      '-b:a', '128k',
+                      temp_converted.path)
 
-      if result && File.exist?(temp_converted.path) && File.size(temp_converted.path) > 0
+      if result && File.exist?(temp_converted.path) && File.size(temp_converted.path).positive?
         post.audio.attach(
           io: File.open(temp_converted.path),
           filename: "#{SecureRandom.uuid}.mp3",
@@ -32,7 +32,7 @@ class AudioConversionJob < ApplicationJob
       else
         Rails.logger.error "音声変換失敗: Post ID #{post_id} - 元の形式のまま保存します"
       end
-    rescue => e
+    rescue StandardError => e
       Rails.logger.error "音声変換エラー: Post ID #{post_id} - #{e.message}"
     ensure
       temp_original.close!
