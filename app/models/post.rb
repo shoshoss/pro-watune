@@ -133,7 +133,7 @@ class Post < ApplicationRecord
     else
       # カスタムカテゴリーを設定または更新
       custom_category = Category.find_or_create_by(
-        category_name: fixed_category, 
+        category_name: fixed_category,
         add_category_name: custom_category_name
       )
       self.category = custom_category
@@ -182,14 +182,6 @@ class Post < ApplicationRecord
   def update_latest_activity
     latest_time = [created_at, reposts.maximum(:created_at)].compact.max
     update(latest_activity: latest_time)
-  end
-
-  def custom_category_length
-    return unless category&.add_category_name.present?
-  
-    if category.add_category_name.length > 50
-      errors.add(:custom_category, "は50文字以内で入力してください")
-    end
   end
 
   # def set_default_access_mode
