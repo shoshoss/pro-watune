@@ -14,13 +14,6 @@ module PostsAllHelper
     end
   end
 
-  # カスタムカテゴリーを設定するメソッド
-  def assign_custom_category
-    custom_category = Category.find_or_create_by(category_name: post_params[:fixed_category],
-                                                 add_category_name: post_params[:custom_category])
-    @post.category = custom_category
-  end
-
   # プライバシー設定に基づくリダイレクト先を決定する
   # def redirect_based_on_privacy
   #   cookies[:selected_post_category] = post_params[:fixed_category] if post_params[:fixed_category].present?

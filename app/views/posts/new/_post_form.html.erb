@@ -1,3 +1,4 @@
+<%# app/views/posts/new/_post_form.html.erb %>
 <%= form_with model: post, data: { turbo: false } do |f| %>
   <div class="p-2">
     <%= render 'shared/error_messages', object: f.object %>
@@ -60,9 +61,13 @@
 
     <div class="form-control pt-2">
       <%= f.label :custom_category, class: "block text-lg font-semibold", for: "custom_category" do %>
-        追加カテゴリー <span class="text-base font-normal">※15文字までOK!</span>
+        追加カテゴリー <span class="text-base font-normal">※50文字までOK!</span>
       <% end %>
-      <%= f.text_field :custom_category, id: 'custom_category', class: "block mt-1 p-2 text-base border-2 border-gray-300 rounded-lg", placeholder: "必要に応じて入力" %>
+      <%= f.text_field :custom_category,
+                       id: 'custom_category',
+                       class: "block mt-1 p-2 text-base border-2 border-gray-300 rounded-lg",
+                       maxlength: 50,
+                       placeholder: "必要に応じて入力" %>
     </div>
 
     <!-- 投稿内容 -->
