@@ -11,9 +11,9 @@ class User < ApplicationRecord
   after_initialize :set_default_notification_settings, if: :new_record?
 
   # 関連付け
-  has_many :authentications, dependent: :destroy # 認証情報を複数保持
+  has_many :post_users, dependent: :destroy # 投稿ユーザーと関連付け
   has_many :posts, dependent: :destroy # 投稿と関連付け
-  has_many :post_users, through: :posts # 投稿ユーザーと関連付け
+  has_many :authentications, dependent: :destroy # 認証情報を複数保持
   has_many :sent_notifications, class_name: 'Notification', foreign_key: 'sender_id', dependent: :destroy,
                                 inverse_of: :sender # 送信された通知
   has_many :received_notifications, class_name: 'Notification', foreign_key: 'recipient_id', dependent: :destroy,
