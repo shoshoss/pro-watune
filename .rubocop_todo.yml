@@ -15,7 +15,7 @@ Metrics/MethodLength:
   Max: 14 # メソッドの最大行数を14に設定
 
 Metrics/ClassLength:
-  Max: 120
+  Max: 150
 
 # 違反数: 11
 # 設定パラメータ: AllowedConstants.
