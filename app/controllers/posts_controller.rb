@@ -63,7 +63,7 @@ class PostsController < ApplicationController
   # 新しい投稿を作成するアクション
   def create
     @post = current_user.posts.build(post_params.except(:recipient_ids, :custom_category))
-    assign_custom_category if post_params[:custom_category].present?
+    @post.assign_custom_category(post_params[:custom_category]) if post_params[:custom_category].present?
 
     if @post.save
       handle_successful_create
@@ -75,7 +75,7 @@ class PostsController < ApplicationController
 
   # 投稿を更新するアクション
   def update
-    if @post.update(post_params.except(:recipient_ids))
+    if @post.update(post_params.except(:recipient_ids, :custom_category))
       assign_custom_category if post_params[:custom_category].present?
       cache_headers(@post.audio) if @post.audio.attached?
 
@@ -88,8 +88,8 @@ class PostsController < ApplicationController
   end
 
   def update_modal
-    if @post.update(post_params.except(:recipient_ids))
-      assign_custom_category if post_params[:custom_category].present?
+    if @post.update(post_params.except(:recipient_ids, :custom_category))
+      @post.assign_custom_category(post_params[:custom_category]) if post_params[:custom_category].present?
       cache_headers(@post.audio) if @post.audio.attached?
 
       flash[:notice] = t('defaults.flash_message.updated', item: Post.model_name.human, default: '投稿が更新されました。')

@@ -44,6 +44,26 @@
       <% end %>
     <% end %>
 
+    <!-- カテゴリー設定 -->
+    <div class="form-control pt-2">
+      <%= f.label :fixed_category, 'カテゴリー', class: "block text-lg font-semibold" %>
+      <%= f.select :fixed_category, 
+          Post.fixed_categories_i18n.invert.map { |key, value| [key, value] }, 
+          { include_blank: false }, 
+          class: "block mt-1 p-2 text-base border-2 border-gray-300 rounded-lg" %>
+    </div>
+
+    <div class="form-control pt-2">
+      <%= f.label :custom_category, class: "block text-lg font-semibold" do %>
+        追加カテゴリー <span class="text-base font-normal">※50文字までOK!</span>
+      <% end %>
+      <%= f.text_field :custom_category, 
+                        value: @post.category&.add_category_name,  # 既存の追加カテゴリーを表示
+                        class: "block mt-1 p-2 text-base border-2 border-gray-300 rounded-lg",
+                        maxlength: 50,
+                        placeholder: "必要に応じて入力" %>
+    </div>
+
     <!-- 投稿内容 -->
     <div class="form-control pt-2">
       <%= f.label :body, class: "block text-lg font-semibold" %>
