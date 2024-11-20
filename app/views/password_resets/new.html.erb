@@ -4,7 +4,7 @@
   <div class="max-w-lg w-full py-5 bg-white rounded-lg shadow-lg">
       <h1 class="text-3xl font-bold mt-4 mb-4 text-center">パスワードリセット</h1>
       <div class="text-lg text-center px-5">メールアドレスを入力しますと<br>パスワードのリセット方法に<br>関するメールが送信されます。</div>
-      <%= form_with url: password_resets_path do |f| %>
+      <%= form_with url: password_resets_path, data: { turbo: false } do |f| %>
         <div class="card-body mx-auto">
           <!-- メールアドレス入力 -->
           <div class="form-control">
