@@ -52,6 +52,8 @@
   <% if current_user %>
     <meta name="current-user-username-slug" content="<%= current_user.username_slug %>">
   <% end %>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 </head>
 
 <body id="main-body" class="font-sans bg-white flex flex-col min-h-screen" data-controller="history">

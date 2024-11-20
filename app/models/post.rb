@@ -184,6 +184,21 @@ class Post < ApplicationRecord
     update(latest_activity: latest_time)
   end
 
+  def audio_attached?
+    audio.attached?
+  end
+
+  def validate_audio
+    if audio.blob.byte_size > 100.megabytes
+      errors.add(:audio, 'は100MB以下にしてください')
+    end
+
+    # mp3, m4a, webmを許可
+    unless ['audio/mpeg', 'audio/mp4', 'audio/webm'].include?(audio.blob.content_type)
+      errors.add(:audio, 'はMP3, M4A, またはWebM形式のみ対応しています')
+    end
+  end
+
   # def set_default_access_mode
   #   self.access_mode ||= :uuid  # 新規投稿はuuidに設定
   # end
