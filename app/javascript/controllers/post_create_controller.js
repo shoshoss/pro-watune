@@ -1,3 +1,4 @@
+// app/javascript/controllers/post_create_controller.js
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
@@ -37,8 +38,37 @@ export default class extends Controller {
 
   // MediaRecorderの初期化処理を行うメソッド
   initializeMediaRecorder(stream) {
-    this.mediaRecorder = new MediaRecorder(stream);
-    console.log("MediaRecorder initialized.");
+    try {
+      // 利用可能な形式を確認
+      const options = this.getSupportedAudioFormat();
+      this.mediaRecorder = new MediaRecorder(stream, options);
+      console.log(`録音形式: ${this.mediaRecorder.mimeType}`);
+    } catch (error) {
+      console.warn(
+        "推奨形式が使用できません。デフォルト設定を使用します:",
+        error
+      );
+      this.mediaRecorder = new MediaRecorder(stream);
+    }
+  }
+
+  getSupportedAudioFormat() {
+    // 優先順位順にフォーマットをチェック
+    const formats = [
+      { mimeType: "audio/mpeg", bitRate: 128000 },
+      { mimeType: "audio/webm;codecs=opus", bitRate: 128000 },
+    ];
+
+    for (const format of formats) {
+      if (MediaRecorder.isTypeSupported(format.mimeType)) {
+        return {
+          mimeType: format.mimeType,
+          bitsPerSecond: format.bitRate,
+        };
+      }
+    }
+
+    return {}; // デフォルト設定を使用
   }
 
   disconnect() {
@@ -222,92 +252,161 @@ export default class extends Controller {
   }
 
   // 録音停止後の処理
-  handleRecordingStop(chunks) {
-    // 録音データのバリデーション
+  async handleRecordingStop(chunks) {
     if (!chunks || chunks.length === 0) {
-      console.error("録音データが取得できませんでした");
-      alert("録音に失敗しました。もう一度お試しください。");
+      this.showError("録音データが取得できませんでした");
       return;
     }
 
     try {
-      // 録音データをBlobに変換
-      const blob = new Blob(chunks, { type: this.mediaRecorder.mimeType });
-      const audioURL = window.URL.createObjectURL(blob);
-      this.previewAudioURL = audioURL;
-      this.previewAudioType = this.mediaRecorder.mimeType;
+      this.showLoading("音声を処理中...");
 
-      // 録音時間を計算
-      const duration = Math.floor((Date.now() - this.startTime) / 1000);
+      // 音声データの形式を確認
+      const mimeType = this.mediaRecorder.mimeType;
+      let audioFile;
 
-      // durationのバリデーション
-      if (duration <= 0 || duration > this.maxRecordingTimeValue) {
-        throw new Error("Invalid recording duration");
+      if (mimeType.includes("mpeg")) {
+        // すでにMP3形式の場合
+        audioFile = new File(chunks, `recording-${Date.now()}.mp3`, {
+          type: "audio/mpeg",
+        });
+      } else {
+        // WebMまたは他の形式の場合、MP3に変換を試みる
+        try {
+          const blob = new Blob(chunks, { type: mimeType });
+          audioFile = await this.convertToMp3(blob);
+          console.log("MP3変換成功");
+        } catch (conversionError) {
+          console.warn("MP3変換失敗:", conversionError);
+          // 変換失敗時は元の形式のまま
+          audioFile = new File(chunks, `recording-${Date.now()}.webm`, {
+            type: mimeType,
+          });
+        }
       }
 
-      // 隠しフィールドに録音時間をセット
+      // 録音時間の設定
+      const duration = Math.floor((Date.now() - this.startTime) / 1000);
+      if (duration <= 0 || duration > this.maxRecordingTimeValue) {
+        throw new Error("録音時間が不正です");
+      }
+
+      // フィールドの設定
       const durationField = document.getElementById("post_duration");
       if (durationField) {
         durationField.value = duration;
-      } else {
-        throw new Error("Duration field not found");
       }
 
-      // プレビュー用のサウンドクリップを作成
-      this.createSoundClip(audioURL, this.mediaRecorder.mimeType);
+      // プレビューの設定
+      const audioURL = URL.createObjectURL(audioFile);
+      this.previewAudioURL = audioURL;
+      this.createSoundClip(audioURL, audioFile.type);
 
-      // ファイル作成と保存
-      const mimeType = this.mediaRecorder.mimeType;
-      const fileExtension = mimeType.split("/")[1].split(";")[0];
-      const file = new File([blob], `recording.${fileExtension}`, {
-        type: mimeType,
-      });
-
-      // ファイル入力の設定
+      // フォームへのファイル設定
       const fileInput = document.querySelector('input[type="file"]');
       if (fileInput) {
         const dt = new DataTransfer();
-        dt.items.add(file);
+        dt.items.add(audioFile);
         fileInput.files = dt.files;
-
-        // Submitボタンの有効化
-        const submitButton = fileInput.form.querySelector(
-          'input[type="submit"]'
-        );
-        if (submitButton) {
-          submitButton.disabled = false;
-        } else {
-          throw new Error("Submit button not found");
-        }
-      } else {
-        throw new Error("File input not found");
       }
 
-      // フォームの状態を再チェック
+      this.hideLoading();
       this.checkForm();
     } catch (error) {
-      console.error("録音データの処理中にエラーが発生しました:", error);
-
-      // エラーの種類に応じたメッセージ
-      let errorMessage = "録音データの処理中にエラーが発生しました。";
-      if (error.message === "Invalid recording duration") {
-        errorMessage = "録音時間が不正です。";
-      } else if (error.message.includes("not found")) {
-        errorMessage = "必要な要素が見つかりません。";
-      }
-
-      // ユーザーへのエラー通知
-      alert(errorMessage + "もう一度お試しください。");
-
-      // エラー時のクリーンアップ
+      console.error("音声処理エラー:", error);
+      this.hideLoading();
+      this.showError("音声の処理に失敗しました。もう一度お試しください。");
       this.clearData();
-
-      // リソースの解放
-      if (this.previewAudioURL) {
-        URL.revokeObjectURL(this.previewAudioURL);
-        this.previewAudioURL = null;
-      }
     }
+  }
+
+  // WebMからMP3への変換処理
+  async convertToMp3(webmBlob) {
+    try {
+      // WebMをAudioBufferに変換
+      const arrayBuffer = await webmBlob.arrayBuffer();
+      const audioContext = new AudioContext();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+      // AudioBufferからPCMデータを取得
+      const samples = new Int16Array(audioBuffer.length);
+      const channel = audioBuffer.getChannelData(0);
+
+      // Float32をInt16に変換
+      for (let i = 0; i < audioBuffer.length; i++) {
+        samples[i] = Math.min(1, Math.max(-1, channel[i])) * 0x7fff;
+      }
+
+      // MP3エンコード
+      const mp3encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, 128);
+      const mp3Data = [];
+
+      const blockSize = 1152; // MP3フレームサイズ
+      for (let i = 0; i < samples.length; i += blockSize) {
+        const mono = samples.subarray(i, i + blockSize);
+        const mp3buf = mp3encoder.encodeBuffer(mono);
+        if (mp3buf.length > 0) {
+          mp3Data.push(new Int8Array(mp3buf));
+        }
+      }
+
+      // 最後のフレームを処理
+      const mp3buf = mp3encoder.flush();
+      if (mp3buf.length > 0) {
+        mp3Data.push(new Int8Array(mp3buf));
+      }
+
+      // MP3ファイルの作成
+      const blob = new Blob(mp3Data, { type: "audio/mpeg" });
+      return new File([blob], `recording-${Date.now()}.mp3`, {
+        type: "audio/mpeg",
+      });
+    } catch (error) {
+      console.error("MP3変換エラー:", error);
+      throw new Error("音声の変換に失敗しました");
+    }
+  }
+
+  // ローディング表示の改善
+  showLoading(message = "処理中...") {
+    const loadingHtml = `
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm mx-4">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+        <p class="text-gray-700 text-lg">${message}</p>
+      </div>
+    </div>
+  `;
+    document.body.insertAdjacentHTML("beforeend", loadingHtml);
+  }
+
+  // ローディング非表示のメソッド
+  hideLoading() {
+    const overlay = document.getElementById("loading-overlay");
+    if (overlay) {
+      overlay.remove();
+    }
+  }
+
+  // エラー表示のメソッド
+  showError(message) {
+    const errorHtml = `
+    <div id="error-message" 
+         class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg" 
+         role="alert">
+      <strong class="font-bold">エラー: </strong>
+      <span class="block sm:inline">${message}</span>
+    </div>
+  `;
+    document.body.insertAdjacentHTML("beforeend", errorHtml);
+
+    // 5秒後に自動で消える
+    setTimeout(() => {
+      const errorMessage = document.getElementById("error-message");
+      if (errorMessage) {
+        errorMessage.remove();
+      }
+    }, 5000);
   }
 
   // 音声クリップを生成して表示するメソッド
