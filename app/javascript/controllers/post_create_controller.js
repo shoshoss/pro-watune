@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
   static values = {
-    maxRecordingTime: { type: Number, default: 4.9999 }, // 3分15秒
+    maxRecordingTime: { type: Number, default: 3.9999 }, // 3分15秒
   };
 
   audioCtx;
@@ -286,16 +286,13 @@ export default class extends Controller {
       }
 
       // 録音時間の設定
-      const duration = Math.floor((Date.now() - this.startTime) / 1000);
-      if (duration <= 0) {
-        // 制限時間超過のチェックを削除
-        throw new Error("録音時間が不正です");
-      }
+      const actualDuration = await this.getAudioDuration(audioFile);
+      console.log("Actual duration:", actualDuration);
 
       // フィールドの設定
       const durationField = document.getElementById("post_duration");
       if (durationField) {
-        durationField.value = duration;
+        durationField.value = Math.floor(actualDuration); // 秒単位で四捨五入
       }
 
       // プレビューの設定
@@ -495,5 +492,44 @@ export default class extends Controller {
     };
 
     draw();
+  }
+  // 音声ファイルの実際の長さを取得するメソッド
+  async getAudioDuration(audioFile) {
+    return new Promise((resolve, reject) => {
+      const audio = new Audio();
+      const objectUrl = URL.createObjectURL(audioFile);
+
+      audio.addEventListener("loadedmetadata", () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(audio.duration);
+      });
+
+      audio.addEventListener("error", (error) => {
+        URL.revokeObjectURL(objectUrl);
+        reject(error);
+      });
+
+      audio.src = objectUrl;
+    });
+  }
+
+  // 音声ファイルの実際の長さを取得するメソッド
+  async getAudioDuration(audioFile) {
+    return new Promise((resolve, reject) => {
+      const audio = new Audio();
+      const objectUrl = URL.createObjectURL(audioFile);
+
+      audio.addEventListener("loadedmetadata", () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(audio.duration);
+      });
+
+      audio.addEventListener("error", (error) => {
+        URL.revokeObjectURL(objectUrl);
+        reject(error);
+      });
+
+      audio.src = objectUrl;
+    });
   }
 }
