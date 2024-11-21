@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
   static values = {
-    maxRecordingTime: { type: Number, default: 195.999 }, // 3分15秒
+    maxRecordingTime: { type: Number, default: 4.9999 }, // 3分15秒
   };
 
   audioCtx;
@@ -287,7 +287,8 @@ export default class extends Controller {
 
       // 録音時間の設定
       const duration = Math.floor((Date.now() - this.startTime) / 1000);
-      if (duration <= 0 || duration > this.maxRecordingTimeValue) {
+      if (duration <= 0) {
+        // 制限時間超過のチェックを削除
         throw new Error("録音時間が不正です");
       }
 
