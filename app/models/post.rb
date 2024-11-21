@@ -33,6 +33,8 @@ class Post < ApplicationRecord
 
   # 音声添付ファイル
   has_one_attached :audio # ActiveStorageを利用してこれらのファイルを管理する場合
+  validate :validate_audio, if: :audio_attached?
+
   # mount_uploader :audio, AudioUploader
 
   # バリデーション
@@ -189,12 +191,19 @@ class Post < ApplicationRecord
   end
 
   def validate_audio
-    errors.add(:audio, 'は100MB以下にしてください') if audio.blob.byte_size > 100.megabytes
+    errors.add(:audio, 'は200MB以下にしてください') if audio.blob.byte_size > 100.megabytes
 
-    # mp3, m4a, webmを許可
-    return if ['audio/mpeg', 'audio/mp4', 'audio/webm'].include?(audio.blob.content_type)
-
-    errors.add(:audio, 'はMP3, M4A, またはWebM形式のみ対応しています')
+    # ファイル形式の検証
+    allowed_types = ['audio/mpeg', 'audio/mp4', 'audio/webm']
+    unless allowed_types.include?(audio.blob.content_type)
+      errors.add(:audio, 'はMP3, M4A, またはWebM形式のみ対応しています')
+    end
+    
+     # 音声の長さの検証
+     max_duration = 3601 # 1時間（秒）
+     if respond_to?(:duration) && duration && duration > max_duration
+       errors.add(:audio, 'は1時間以内にしてください')
+     end
   end
 
   # def set_default_access_mode

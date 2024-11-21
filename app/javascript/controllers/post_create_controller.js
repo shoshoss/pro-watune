@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
   static values = {
-    maxRecordingTime: { type: Number, default: 3.9999 }, // 3分15秒
+    maxRecordingTime: { type: Number, default: 4.9999 }, // 1時間
   };
 
   audioCtx;
@@ -138,7 +138,7 @@ export default class extends Controller {
           const stopButton = document.getElementById("stopRecordingButton");
           if (stopButton) {
             stopButton.click();
-            alert("録音時間が制限時間（3分15秒）に達しました。");
+            alert("録音時間が制限時間（1時間）に達しました。");
             clearInterval(this.recordingInterval); // インターバルをクリア
           }
           return;
