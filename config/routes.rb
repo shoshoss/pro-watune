@@ -1,3 +1,4 @@
+# config/routes.rb
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
@@ -48,6 +49,7 @@ Rails.application.routes.draw do
     member do
       get 'edit_modal'
       patch 'update_modal'
+      patch :convert_audio
     end
     collection do
       get :latest, to: 'posts#latest' # 最新データ取得のルートを追加

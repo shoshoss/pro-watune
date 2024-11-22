@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
   static values = {
-    maxRecordingTime: { type: Number, default: 4.9999 }, // 1時間
+    maxRecordingTime: { type: Number, default: 3600.9999 }, // 1時間
   };
 
   audioCtx;
