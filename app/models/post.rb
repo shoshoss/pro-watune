@@ -195,15 +195,13 @@ class Post < ApplicationRecord
 
     # ファイル形式の検証
     allowed_types = ['audio/mpeg', 'audio/mp4', 'audio/webm']
-    unless allowed_types.include?(audio.blob.content_type)
-      errors.add(:audio, 'はMP3, M4A, またはWebM形式のみ対応しています')
-    end
-    
-     # 音声の長さの検証
-     max_duration = 3601 # 1時間（秒）
-     if respond_to?(:duration) && duration && duration > max_duration
-       errors.add(:audio, 'は1時間以内にしてください')
-     end
+    errors.add(:audio, 'はMP3, M4A, またはWebM形式のみ対応しています') unless allowed_types.include?(audio.blob.content_type)
+
+    # 音声の長さの検証
+    max_duration = 3601 # 1時間（秒）
+    return unless respond_to?(:duration) && duration && duration > max_duration
+
+    errors.add(:audio, 'は1時間以内にしてください')
   end
 
   # def set_default_access_mode
