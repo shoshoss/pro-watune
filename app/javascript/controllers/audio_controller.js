@@ -25,7 +25,7 @@ export default class extends Controller {
       const volumeControl = document.getElementById(`volume-${audioId}`);
       const volumeValue = document.getElementById(`volume-value-${audioId}`);
       if (volumeControl) {
-        const defaultVolume = 50;
+        const defaultVolume = 100;
         volumeControl.value = defaultVolume;
         audio.volume = defaultVolume / 100;
 
@@ -33,13 +33,10 @@ export default class extends Controller {
           volumeValue.textContent = `${defaultVolume}%`;
         }
 
-        // イベントリスナーを追加
-        volumeControl.addEventListener("input", (e) => {
-          const value = e.target.value;
-          audio.volume = value / 100;
-          if (volumeValue) {
-            volumeValue.textContent = `${value}%`;
-          }
+        // スライダーの値の変更を監視
+        volumeControl.addEventListener("input", () => {
+          const value = parseInt(volumeControl.value);
+          volumeValue.textContent = `${value}%`;
         });
       }
 
@@ -50,7 +47,7 @@ export default class extends Controller {
     });
   }
 
-  // 新規追加: 再生速度変更
+  // 再生速度変更
   changeSpeed(event) {
     const speedControl = event.currentTarget;
     const audioId = speedControl.dataset.audioId;
@@ -60,7 +57,7 @@ export default class extends Controller {
     }
   }
 
-  // 新規追加: 音量変更
+  // 音量変更
   changeVolume(event) {
     const volumeControl = event.currentTarget;
     const audioId = volumeControl.dataset.audioId;
@@ -69,7 +66,7 @@ export default class extends Controller {
 
     if (audio) {
       const value = parseInt(volumeControl.value);
-      audio.volume = Math.min(value / 100, 1.5);
+      audio.volume = value / 100;
 
       if (volumeValue) {
         volumeValue.textContent = `${value}%`;
