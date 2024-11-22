@@ -69,10 +69,7 @@ export default class extends Controller {
 
     if (audio) {
       const value = parseInt(volumeControl.value);
-      audio.volume = value / 100; // 0-100のレンジを0-1に変換
-
-      // 現在の音量を保存
-      audio.dataset.currentVolume = value;
+      audio.volume = Math.min(value / 100, 1.5);
 
       if (volumeValue) {
         volumeValue.textContent = `${value}%`;
