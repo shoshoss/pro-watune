@@ -1,3 +1,4 @@
+// app/javascript/controllers/audio_controller.js
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
@@ -5,6 +6,48 @@ export default class extends Controller {
 
   connect() {
     this.updateAllIconsToPlay(); // 初期化時に全アイコンを再生ボタンに設定
+    this.initializeControls();
+  }
+
+  // 新規追加: コントロールの初期化
+  initializeControls() {
+    document.querySelectorAll("audio").forEach((audio) => {
+      const audioId = audio.id.split("-")[1];
+
+      // 速度コントロールの初期化
+      const speedControl = document.getElementById(`speed-${audioId}`);
+      if (speedControl) {
+        speedControl.value = "1.0";
+        audio.playbackRate = 1.0;
+      }
+
+      // 音量コントロールの初期化
+      const volumeControl = document.getElementById(`volume-${audioId}`);
+      if (volumeControl) {
+        volumeControl.value = "1.0";
+        audio.volume = 1.0;
+      }
+    });
+  }
+
+  // 新規追加: 再生速度変更
+  changeSpeed(event) {
+    const speedControl = event.currentTarget;
+    const audioId = speedControl.dataset.audioId;
+    const audio = document.getElementById(`audio-${audioId}`);
+    if (audio) {
+      audio.playbackRate = parseFloat(speedControl.value);
+    }
+  }
+
+  // 新規追加: 音量変更
+  changeVolume(event) {
+    const volumeControl = event.currentTarget;
+    const audioId = volumeControl.dataset.audioId;
+    const audio = document.getElementById(`audio-${audioId}`);
+    if (audio) {
+      audio.volume = parseFloat(volumeControl.value);
+    }
   }
 
   // すべての音声アイコンを再生ボタンに設定
@@ -159,6 +202,11 @@ export default class extends Controller {
       "a",
       "button",
       "audio",
+      "select", // 速度調整用のセレクトボックスを追加
+      ".speed-control", // クラスでも指定可能
+      ".volume-control", // クラスでも指定可能
+      'label[for^="speed-"]', // speed-で始まるfor属性を持つlabel
+      'label[for^="volume-"]', // volume-で始まるfor属性を持つlabel
     ];
     if (ignoredElements.some((selector) => event.target.closest(selector))) {
       return; // クリック対象が無視リストのいずれかに一致する場合は何もしない
