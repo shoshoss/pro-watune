@@ -1,9 +1,10 @@
+# app/controllers/posts_controller.rb
 class PostsController < ApplicationController
   include PostsAllHelper
   include ActionView::RecordIdentifier
 
   skip_before_action :require_login, only: %i[index show]
-  before_action :set_post, only: %i[show edit edit_modal update update_modal destroy]
+  before_action :set_post, only: %i[show convert_audio edit edit_modal update update_modal destroy]
   before_action :set_current_user_post, only: %i[edit edit_modal update update_modal destroy]
   before_action :set_followings_by_post_count, only: %i[new edit edit_modal create update update_modal]
   before_action :authorize_view!, only: [:show]
@@ -47,6 +48,18 @@ class PostsController < ApplicationController
     @pagy, @replies = pagy_countless(@post.replies.includes(:user, :replies, :likes, :bookmarks).order(created_at: :asc),
                                      items: 15)
     @parent_posts = @post.ancestors
+  end
+
+  def convert_audio
+    if @post.audio.attached? && @post.audio.content_type != 'audio/mpeg'
+      if @post.update(audio_params)
+        render json: { status: 'success' }
+      else
+        render json: { error: '音声の更新に失敗しました' }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: '変換できる音声がありません' }, status: :unprocessable_entity
+    end
   end
 
   # 新しい投稿フォームを表示するアクション
@@ -123,6 +136,10 @@ class PostsController < ApplicationController
     PostCreationJob.perform_later(@post.id, recipient_ids, @post.privacy)
     redirect_to profile_show_path(username_slug: current_user.username_slug, category: 'all_my_posts'), status: :see_other,
                                                                                                         notice: flash[:notice]
+  end
+
+  def audio_params
+    params.require(:post).permit(:audio)
   end
 
   # 失敗した投稿作成の処理

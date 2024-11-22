@@ -23,21 +23,10 @@ export default class extends Controller {
 
       // 音量コントロールの初期化
       const volumeControl = document.getElementById(`volume-${audioId}`);
-      const volumeValue = document.getElementById(`volume-value-${audioId}`);
       if (volumeControl) {
         const defaultVolume = 100;
         volumeControl.value = defaultVolume;
         audio.volume = defaultVolume / 100;
-
-        if (volumeValue) {
-          volumeValue.textContent = `${defaultVolume}%`;
-        }
-
-        // スライダーの値の変更を監視
-        volumeControl.addEventListener("input", () => {
-          const value = parseInt(volumeControl.value);
-          volumeValue.textContent = `${value}%`;
-        });
       }
 
       // 再生終了時のイベントリスナーを追加
@@ -59,19 +48,12 @@ export default class extends Controller {
 
   // 音量変更
   changeVolume(event) {
-    const volumeControl = event.currentTarget;
-    const audioId = volumeControl.dataset.audioId;
-    const audio = document.getElementById(`audio-${audioId}`);
-    const volumeValue = document.getElementById(`volume-value-${audioId}`);
+    const audioElement = document.getElementById(`audio-${this.audioId}`);
+    if (!audioElement) return;
 
-    if (audio) {
-      const value = parseInt(volumeControl.value);
-      audio.volume = value / 100;
-
-      if (volumeValue) {
-        volumeValue.textContent = `${value}%`;
-      }
-    }
+    // 0-150のレンジを0-1.5に変換
+    const volumeValue = parseFloat(event.target.value) / 100;
+    audioElement.volume = volumeValue;
   }
 
   // 音声終了時の処理を追加
@@ -94,9 +76,6 @@ export default class extends Controller {
     if (volumeControl && audio) {
       const currentVolume = parseInt(volumeControl.value);
       audio.volume = currentVolume / 100;
-      if (volumeValue) {
-        volumeValue.textContent = `${currentVolume}%`;
-      }
     }
   }
 

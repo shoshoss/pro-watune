@@ -10,8 +10,8 @@
         <div class="flex flex-col space-y-2 pt-2">
           <div class="flex space-x-4">
             <div class="flex-1 text-center">
-              <%= link_to '自分', new_post_path(privacy: 'only_me'), 
-                  class: "btn-choice #{active_bottom('only_me')} w-full", 
+              <%= link_to '自分', new_post_path(privacy: 'only_me'),
+                  class: "btn-choice #{active_bottom('only_me')} w-full",
                   data: { turbo_frame: "sending_privacy",
                           turbo: true } %>
               <p class="text-sm text-gray-600 mt-1">自分のみが<br class="sm:hidden">閲覧可能</p>
