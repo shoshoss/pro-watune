@@ -1,3 +1,4 @@
+// app/javascript/controllers/audio_controller.js
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
@@ -5,6 +6,110 @@ export default class extends Controller {
 
   connect() {
     this.updateAllIconsToPlay(); // 初期化時に全アイコンを再生ボタンに設定
+    this.initializeControls();
+  }
+
+  // 新規追加: コントロールの初期化
+  initializeControls() {
+    document.querySelectorAll("audio").forEach((audio) => {
+      const audioId = audio.id.split("-")[1];
+
+      // 速度コントロールの初期化
+      const speedControl = document.getElementById(`speed-${audioId}`);
+      if (speedControl) {
+        speedControl.value = "1.0";
+        audio.playbackRate = 1.0;
+      }
+
+      // 音量コントロールの初期化
+      const volumeControl = document.getElementById(`volume-${audioId}`);
+      const volumeValue = document.getElementById(`volume-value-${audioId}`);
+      if (volumeControl) {
+        const defaultVolume = 100;
+        volumeControl.value = defaultVolume;
+        audio.volume = defaultVolume / 100;
+
+        if (volumeValue) {
+          volumeValue.textContent = `${defaultVolume}%`;
+        }
+
+        // スライダーの値の変更を監視
+        volumeControl.addEventListener("input", () => {
+          const value = parseInt(volumeControl.value);
+          volumeValue.textContent = `${value}%`;
+        });
+      }
+
+      // 再生終了時のイベントリスナーを追加
+      audio.addEventListener("ended", () => {
+        this.handleAudioEnd(audioId);
+      });
+    });
+  }
+
+  // 再生速度変更
+  changeSpeed(event) {
+    const speedControl = event.currentTarget;
+    const audioId = speedControl.dataset.audioId;
+    const audio = document.getElementById(`audio-${audioId}`);
+    if (audio) {
+      audio.playbackRate = parseFloat(speedControl.value);
+    }
+  }
+
+  // 音量変更
+  changeVolume(event) {
+    const volumeControl = event.currentTarget;
+    const audioId = volumeControl.dataset.audioId;
+    const audio = document.getElementById(`audio-${audioId}`);
+    const volumeValue = document.getElementById(`volume-value-${audioId}`);
+
+    if (audio) {
+      const value = parseInt(volumeControl.value);
+      audio.volume = value / 100;
+
+      if (volumeValue) {
+        volumeValue.textContent = `${value}%`;
+      }
+    }
+  }
+
+  // 音声終了時の処理を追加
+  handleAudioEnd(audioId) {
+    const audio = document.getElementById(`audio-${audioId}`);
+    const seekBar = document.querySelector(
+      `input[data-seek-control][data-audio-id="${audioId}"]`
+    );
+    const volumeControl = document.querySelector(
+      `input[data-volume-control][data-audio-id="${audioId}"]`
+    );
+    const volumeValue = document.getElementById(`volume-value-${audioId}`);
+
+    // シークバーのリセット
+    if (seekBar) {
+      seekBar.value = 0;
+    }
+
+    // 音量は維持
+    if (volumeControl && audio) {
+      const currentVolume = parseInt(volumeControl.value);
+      audio.volume = currentVolume / 100;
+      if (volumeValue) {
+        volumeValue.textContent = `${currentVolume}%`;
+      }
+    }
+  }
+
+  // seek メソッドも修正
+  seek(event) {
+    const seekBar = event.currentTarget;
+    if (!seekBar.dataset.seekControl) return; // シークバーの確認
+
+    const audioId = seekBar.dataset.audioId;
+    const audio = document.getElementById(`audio-${audioId}`);
+    if (audio) {
+      audio.currentTime = seekBar.value;
+    }
   }
 
   // すべての音声アイコンを再生ボタンに設定
@@ -17,56 +122,67 @@ export default class extends Controller {
 
   // 再生/一時停止ボタンがクリックされたときの処理
   playPause(event) {
-    event.stopPropagation(); // クリックイベントの伝播を停止
+    event.stopPropagation();
     const button = event.currentTarget;
     const audioId = button.dataset.audioId;
     const audio = document.getElementById(`audio-${audioId}`);
     const icon = document.getElementById(`audio-icon-${audioId}`);
-    const seekBar = document.querySelector(`input[data-audio-id="${audioId}"]`);
+    // シークバーの取得を修正
+    const seekBar = document.querySelector(
+      `input[data-seek-control][data-audio-id="${audioId}"]`
+    );
     const postBody = document.querySelector(`div[data-audio-id="${audioId}"]`);
 
-    this.stopAllOtherAudios(audioId); // 他のすべての音声を停止
+    this.stopAllOtherAudios(audioId);
 
-    if (!audio) return; // 音声が存在しない場合は処理を終了
+    if (!audio) return;
 
     if (audio.paused) {
+      // 音量の復元
+      const volumeControl = document.querySelector(
+        `input[data-volume-control][data-audio-id="${audioId}"]`
+      );
+      if (volumeControl) {
+        const currentVolume = volumeControl.value;
+        audio.volume = parseInt(currentVolume) / 100;
+      }
+
       audio
         .play()
         .then(() => {
           this.updateIcon(icon, true);
           this.updateButtonColor(button, true);
-          this.updateTextColor(audioId, true); // IDを使って更新
+          this.updateTextColor(audioId, true);
         })
         .catch((error) => {
           console.error("Playback failed:", error);
           alert(`音声の再生に失敗しました: ${error.message}`);
           this.updateIcon(icon, false);
           this.updateButtonColor(button, false);
-          this.updateTextColor(audioId, false); // IDを使って更新
+          this.updateTextColor(audioId, false);
         });
+
+      // timeupdate イベントリスナーを修正
+      audio.addEventListener("timeupdate", () => {
+        this.updateCurrentTimeDisplay(audioId, audio.currentTime);
+        // シークバーのみを更新
+        if (seekBar) {
+          seekBar.value = audio.currentTime;
+        }
+      });
+
+      // シークバーのイベントリスナーを修正
+      if (seekBar) {
+        seekBar.addEventListener("input", () => {
+          audio.currentTime = seekBar.value;
+        });
+      }
     } else {
       audio.pause();
       this.updateIcon(icon, false);
       this.updateButtonColor(button, false);
-      this.updateTextColor(audioId, false); // IDを使って更新
+      this.updateTextColor(audioId, false);
     }
-
-    audio.addEventListener("timeupdate", () => {
-      this.updateCurrentTimeDisplay(audioId, audio.currentTime);
-      seekBar.value = audio.currentTime;
-    });
-
-    seekBar.addEventListener("input", () => {
-      audio.currentTime = seekBar.value;
-    });
-
-    audio.addEventListener("ended", () => {
-      this.updateCurrentTimeDisplay(audioId, 0);
-      seekBar.value = 0;
-      this.updateIcon(icon, false);
-      this.updateButtonColor(button, false);
-      this.updateTextColor(audioId, false); // IDを使って更新
-    });
   }
 
   // シークバーの位置を変更したときの処理
@@ -159,6 +275,11 @@ export default class extends Controller {
       "a",
       "button",
       "audio",
+      "select", // 速度調整用のセレクトボックスを追加
+      ".speed-control", // クラスでも指定可能
+      ".volume-control", // クラスでも指定可能
+      'label[for^="speed-"]', // speed-で始まるfor属性を持つlabel
+      'label[for^="volume-"]', // volume-で始まるfor属性を持つlabel
     ];
     if (ignoredElements.some((selector) => event.target.closest(selector))) {
       return; // クリック対象が無視リストのいずれかに一致する場合は何もしない

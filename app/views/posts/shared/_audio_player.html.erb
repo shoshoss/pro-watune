@@ -7,11 +7,13 @@
         <span class="uppercase"><%= post.audio.content_type.split('/').last %></span>
         <span>(<%= number_to_human_size(post.audio.byte_size) %>)</span>
       </div>
-      <%# <%= link_to url_for(post.audio),
-          class: "flex items-center space-x-1 text-blue-500 hover:text-blue-700 transition-colors duration-200",
-          download: post.audio.filename do %>
-        <%# <i class="fas fa-download"></i>
-        <span>ダウンロード</span>
+      <% if post.user == current_user %> 
+        <%= link_to url_for(post.audio),
+            class: "flex items-center space-x-1 text-blue-500 hover:text-blue-700 transition-colors duration-200",
+            download: post.audio.filename do %>
+          <i class="fas fa-download"></i>
+          <span>ダウンロード</span>
+        <% end %>
       <% end %>
     </div>
 
@@ -19,11 +21,44 @@
            class="pb-2 w-full"
            preload="metadata"
            controls
-           controlsList="nodownload"
+           controlsList="nodownload" 
            oncontextmenu="return false;">
       <source src="<%= url_for(post.audio) %>" type="<%= post.audio.content_type %>">
       お使いのブラウザはオーディオプレイヤーをサポートしていません。
     </audio>
+
+    <div class="flex justify-end space-x-4 mt-2 mb-2">
+      <!-- 速度調整と音量調整のコントロール -->
+      <div class="flex items-center space-x-2">
+        <label for="speed-<%= post.id %>" class="text-sm text-gray-600">速度:</label>
+        <select id="speed-<%= post.id %>"
+                class="border rounded px-2 py-1 text-sm"
+                data-action="change->audio#changeSpeed"
+                data-audio-id="<%= post.id %>">
+          <option value="0.5">0.5x</option>
+          <option value="0.75">0.75x</option>
+          <option value="1.0" selected>1.0x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2.0">2.0x</option>
+        </select>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <label for="volume-<%= post.id %>" class="text-sm text-gray-600">音量:</label>
+        <input type="range"
+               id="volume-<%= post.id %>"
+               class="w-24 volume-control"
+               min="0"
+               max="200"
+               value="00"
+               step="1"
+               data-action="input->audio#changeVolume"
+               data-audio-id="<%= post.id %>"
+               data-volume-control="true">
+        <span id="volume-value-<%= post.id %>" class="text-sm text-gray-600">100%</span>
+      </div>
+    </div>
 
     <input type="range"
            min="0"
@@ -32,7 +67,8 @@
            step="1"
            class="range range-info range-sm w-full mt-2"
            data-action="input->audio#seek"
-           data-audio-id="<%= post.id %>">
+           data-audio-id="<%= post.id %>"
+           data-seek-control="true">
 
     <div class="flex justify-between">
       <div id="current-time-<%= post.id %>" class="mr-2 text-black">00:00</div>
