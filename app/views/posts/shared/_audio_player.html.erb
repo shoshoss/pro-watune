@@ -2,19 +2,40 @@
 <div class="mb-2 mr-5">
   <% if post.audio.attached? && post.duration.present? %>
     <%# ファイル形式とサイズの表示 %>
-    <div class="flex justify-between items-center mb-2 text-sm text-gray-600">
-      <div class="flex items-center space-x-2">
-        <span class="uppercase"><%= post.audio.content_type.split('/').last %></span>
-        <span>(<%= number_to_human_size(post.audio.byte_size) %>)</span>
-      </div>
-      <% if post.user == current_user %> 
-        <%= link_to url_for(post.audio),
-            class: "flex items-center space-x-1 text-blue-500 hover:text-blue-700 transition-colors duration-200",
-            download: post.audio.filename do %>
-          <i class="fas fa-download"></i>
-          <span>ダウンロード</span>
+    <div class="flex justify-between items-end mb-2 text-sm text-gray-600">
+      <div class="flex space-x-2">
+        <% if post.audio.attached? && post.audio.content_type != 'audio/mpeg' %>
+          <div class="flex items-center">
+            <span class="uppercase"><%= post.audio.content_type.split('/').last %></span>
+            <span>(<%= number_to_human_size(post.audio.byte_size) %>)</span>
+          </div>
         <% end %>
-      <% end %>
+
+        <div class="post-item flex space-x-2" data-controller="audio-converter">
+          <% if post.audio.attached? && post.audio.content_type != 'audio/mpeg' %>
+            <button 
+              class="btn btn-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
+              data-audio-converter-target="convertButton"
+              data-action="click->audio-converter#convertToMp3"
+              data-audio-url="<%= url_for(post.audio) %>"
+              data-post-id="<%= post.id %>">
+              MP3に変換(未実装)
+            </button>
+            <span data-audio-converter-target="status" class="ml-2 text-sm text-gray-600"></span>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex text-sm text-gray-600">
+        <% if post.user == current_user %> 
+          <%= link_to url_for(post.audio),
+              class: "flex items-center space-x-1 text-blue-500 hover:text-blue-700 transition-colors duration-200",
+              download: post.audio.filename do %>
+            <i class="fas fa-download"></i>
+            <span>ダウンロード</span>
+          <% end %>
+        <% end %>
+      </div>
     </div>
 
     <audio id="audio-<%= post.id %>"
