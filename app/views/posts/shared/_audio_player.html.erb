@@ -8,19 +8,19 @@
         <% if post.audio.attached? && post.audio.content_type != 'audio/mpeg' %>
           <div class="flex items-center">
             <span class="uppercase"><%= post.audio.content_type.split('/').last %></span>
-            <span>(<%= number_to_human_size(post.audio.byte_size) %>)</span>
+            <span class="hidden sm:block">(<%= number_to_human_size(post.audio.byte_size) %>)</span>
           </div>
         <% end %>
 
-        <div class="post-item flex space-x-2" data-controller="audio-converter">
+        <div class="post-item flex items-center space-x-2" data-controller="audio-converter">
           <% if post.audio.attached? && post.audio.content_type != 'audio/mpeg' %>
             <button 
-              class="btn btn-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
+              class="btn btn-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 sm:mb-5 rounded"
               data-audio-converter-target="convertButton"
               data-action="click->audio-converter#convertToMp3"
               data-audio-url="<%= url_for(post.audio) %>"
               data-post-id="<%= post.id %>">
-              MP3に変換(未実装)
+              MP3に変換<br class="sm:hidden">(未実装)
             </button>
             <span data-audio-converter-target="status" class="ml-2 text-sm text-gray-600"></span>
           <% end %>
