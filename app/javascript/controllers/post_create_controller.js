@@ -163,11 +163,11 @@ export default class extends Controller {
 
     this.mediaRecorder.stop();
     clearInterval(this.recordingInterval);
-    // ボタン状態の更新をまとめる
+
+    // 録音停止時は開始ボタンを無効化したままにする
     const recordButton = this.element.querySelector(".record");
     if (recordButton) {
-      recordButton.disabled = false;
-      recordButton.classList.add("bg-blue-500", "hover:bg-blue-700");
+      recordButton.disabled = true;
     }
 
     const stopButton = this.element.querySelector(".stop");
@@ -224,6 +224,12 @@ export default class extends Controller {
     const recordButton = this.element.querySelector(".record");
     if (recordButton) {
       recordButton.disabled = false;
+      recordButton.classList.add("bg-green-500", "hover:bg-green-700");
+    }
+
+    const stopButton = this.element.querySelector(".stop");
+    if (stopButton) {
+      stopButton.disabled = true;
     }
 
     // Submitボタンの状態を更新
