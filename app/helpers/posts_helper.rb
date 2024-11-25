@@ -1,9 +1,8 @@
 module PostsHelper
   CATEGORY_ICONS = {
-    'respect' => 'fa fa-star text-yellow-400-accent',
-    'praise_gratitude' => 'fa fa-sun text-orange-400',
+    'praise_gratitude' => 'fa fa-star text-yellow-400-accent',
     'music' => 'fa fa-music text-blue-500',
-    'food' => 'fa-solid fa-utensils text-orange-400',
+    'respect' => 'fa fa-sun text-orange-400',
     'favorite' => 'fa fa-heart text-red-500',
     'happy' => 'fa-solid fa-crown text-pink-400',
     'goal' => 'fa fa-fire text-orange-500',
@@ -17,7 +16,6 @@ module PostsHelper
     'respect' => '尊敬する人',
     'praise_gratitude' => '褒め・感謝',
     'music' => '音楽',
-    'food' => '食事・スイーツ',
     'favorite' => 'その他の好きなこと・もの',
     'happy' => '最幸（最高）な出来事',
     'goal' => '攻略したいこと（目標）',
