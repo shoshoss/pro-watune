@@ -9,6 +9,7 @@ module PostsHelper
     'learn' => 'fas fa-graduation-cap text-green-500',
     'fast_talking' => 'fa-solid fa-bolt text-yellow-400-accent',
     'child' => 'fa fa-smile-o text-pink-400',
+    'output' => 'fa fa-sun text-orange-400',
     'other' => 'fa fa-ellipsis-h text-gray-500'
   }.freeze
 
@@ -22,6 +23,7 @@ module PostsHelper
     'learn' => '学び・気づき',
     'fast_talking' => '早口言葉',
     'child' => '子供の声',
+    'output' => 'アウトプット',
     'other' => 'その他'
   }.freeze
 
