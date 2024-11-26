@@ -180,16 +180,14 @@ class Post < ApplicationRecord
 
   def validate_audio
     return unless audio.attached?
-  
+
     # サイズチェック
-    if audio.blob.byte_size > 200.megabytes
-      errors.add(:audio, 'は200MB以下にしてください')
-    end
-  
+    errors.add(:audio, 'は200MB以下にしてください') if audio.blob.byte_size > 200.megabytes
+
     # 長さチェック
-    if respond_to?(:duration) && duration && duration > 3601
-      errors.add(:audio, 'は1時間以内にしてください')
-    end
+    return unless respond_to?(:duration) && duration && duration > 3601
+
+    errors.add(:audio, 'は1時間以内にしてください')
   end
 
   # def set_default_access_mode
