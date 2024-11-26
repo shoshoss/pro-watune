@@ -52,8 +52,7 @@ class Post < ApplicationRecord
     music
     fast_talking
     favorite
-    respect
-    other
+    output
   ].freeze
 
   # カテゴリー設定
@@ -62,8 +61,7 @@ class Post < ApplicationRecord
     music: 10,
     fast_talking: 30,
     favorite: 50,
-    respect: 88,
-    other: 100
+    output: 100,
   }
 
   # 定義した順序でカテゴリーを返すクラスメソッド
