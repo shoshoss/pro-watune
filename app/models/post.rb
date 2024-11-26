@@ -186,11 +186,6 @@ class Post < ApplicationRecord
       errors.add(:audio, 'は200MB以下にしてください')
     end
   
-    # 音声ファイルかチェック
-    unless audio.blob.content_type.start_with?('audio/')
-      errors.add(:audio, 'は音声ファイル形式である必要があります')
-    end
-  
     # 長さチェック
     if respond_to?(:duration) && duration && duration > 3601
       errors.add(:audio, 'は1時間以内にしてください')
