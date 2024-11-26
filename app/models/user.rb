@@ -72,7 +72,7 @@ class User < ApplicationRecord
     admin
   end
 
-  # スコープ: ログインしているユーザーがフォローしているユーザーを除外して、新規ユーザーを表示
+  # スコープ: ログインしているユーザーがフォローしているユーザーを除Z外して、新規ユーザーを表示
   def self.recently_registered(current_user = nil)
     users = where(guest: false)
     if current_user
@@ -101,6 +101,10 @@ class User < ApplicationRecord
       self.username_slug = SecureRandom.alphanumeric(rand(3..15)).downcase
       break unless User.exists?(username_slug:)
     end
+  end
+
+  def admin?
+    username_slug == "Watune"
   end
 
   private

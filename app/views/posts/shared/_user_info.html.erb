@@ -20,7 +20,7 @@
       </div>
     <% end %>
   </div>
-  <% if logged_in? && current_user.id == post.user_id %>
+  <% if logged_in? && (current_user.id == post.user_id || current_user.admin?) %>
     <div class="flex sm:flex-wrap space-x-3 sm:space-x-0 sm:flex-col sm:space-y-2 px-2">
       <%= link_to edit_modal_post_path(post),
                   id: "button-edit-#{post.id}",
