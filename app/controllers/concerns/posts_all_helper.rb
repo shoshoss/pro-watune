@@ -74,9 +74,7 @@ module PostsAllHelper
   # ログインユーザーの投稿をセットする
   def set_current_user_post
     @post = Post.find(params[:id])
-    unless current_user.id == @post.user_id || current_user.admin?
-      redirect_to root_path, alert: 'この操作を行う権限がありません。'
-    end
+    redirect_to root_path, alert: 'この操作を行う権限がありません。' unless current_user.id == @post.user_id || current_user.admin?
   rescue ActiveRecord::RecordNotFound
     redirect_to root_path, alert: 'この投稿は存在しません。'
   end
