@@ -74,9 +74,27 @@ module PostsAllHelper
   # ログインユーザーの投稿をセットする
   def set_current_user_post
     @post = Post.find(params[:id])
-    redirect_to root_path, alert: 'この操作を行う権限がありません。' unless current_user.id == @post.user_id || current_user.admin?
+    unless current_user.id == @post.user_id || current_user.admin?
+      respond_to do |format|
+        format.html { redirect_to root_path, alert: 'この操作を行う権限がありません。' }
+        format.turbo_stream { 
+          render turbo_stream: turbo_stream.update('flash', 
+            partial: 'shared/flash_message',
+            locals: { flash: { alert: 'この操作を行う権限がありません。' } }
+          ), status: :unprocessable_entity
+        }
+      end
+    end
   rescue ActiveRecord::RecordNotFound
-    redirect_to root_path, alert: 'この投稿は存在しません。'
+    respond_to do |format|
+      format.html { redirect_to root_path, alert: 'この投稿は存在しません。' }
+      format.turbo_stream { 
+        render turbo_stream: turbo_stream.update('flash', 
+          partial: 'shared/flash_message',
+          locals: { flash: { alert: 'この投稿は存在しません。' } }
+        ), status: :unprocessable_entity
+      }
+    end
   end
 
   # 投稿のパラメータを許可する
