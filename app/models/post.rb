@@ -50,18 +50,18 @@ class Post < ApplicationRecord
   DISPLAY_ORDER = %w[
     praise_gratitude
     music
-    favorite
     fast_talking
-    other
+    favorite
     respect
+    other
   ].freeze
 
   # カテゴリー設定
   enum fixed_category: {
     praise_gratitude: 0,
     music: 10,
-    favorite: 50,
     fast_talking: 30,
+    favorite: 50,
     respect: 88,
     other: 100
   }
