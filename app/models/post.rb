@@ -58,12 +58,12 @@ class Post < ApplicationRecord
 
   # カテゴリー設定
   enum fixed_category: {
-    respect: 100,
     praise_gratitude: 0,
     music: 10,
     favorite: 50,
     fast_talking: 30,
-    other: 1000
+    respect: 88,
+    other: 100
   }
 
   # 定義した順序でカテゴリーを返すクラスメソッド
