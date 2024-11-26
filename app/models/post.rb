@@ -50,20 +50,20 @@ class Post < ApplicationRecord
   DISPLAY_ORDER = %w[
     praise_gratitude
     music
-    respect
-    favorite
     fast_talking
+    favorite
+    respect
     other
   ].freeze
 
   # カテゴリー設定
   enum fixed_category: {
-    respect: 100,
     praise_gratitude: 0,
     music: 10,
-    favorite: 50,
     fast_talking: 30,
-    other: 1000
+    favorite: 50,
+    respect: 88,
+    other: 100
   }
 
   # 定義した順序でカテゴリーを返すクラスメソッド
