@@ -179,17 +179,22 @@ class Post < ApplicationRecord
   end
 
   def validate_audio
-    errors.add(:audio, 'は200MB以下にしてください') if audio.blob.byte_size > 100.megabytes
-
-    # ファイル形式の検証
-    allowed_types = ['audio/mpeg', 'audio/mp4', 'audio/webm']
-    errors.add(:audio, 'はMP3, M4A, またはWebM形式のみ対応しています') unless allowed_types.include?(audio.blob.content_type)
-
-    # 音声の長さの検証
-    max_duration = 3601 # 1時間（秒）
-    return unless respond_to?(:duration) && duration && duration > max_duration
-
-    errors.add(:audio, 'は1時間以内にしてください')
+    return unless audio.attached?
+  
+    # サイズチェック
+    if audio.blob.byte_size > 200.megabytes
+      errors.add(:audio, 'は200MB以下にしてください')
+    end
+  
+    # 音声ファイルかチェック
+    unless audio.blob.content_type.start_with?('audio/')
+      errors.add(:audio, 'は音声ファイル形式である必要があります')
+    end
+  
+    # 長さチェック
+    if respond_to?(:duration) && duration && duration > 3601
+      errors.add(:audio, 'は1時間以内にしてください')
+    end
   end
 
   # def set_default_access_mode
