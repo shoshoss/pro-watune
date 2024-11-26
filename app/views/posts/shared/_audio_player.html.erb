@@ -14,8 +14,8 @@
 
         <div class="post-item flex items-center space-x-2" data-controller="audio-converter">
           <% if post.audio.attached? && post.audio.content_type != 'audio/mpeg' %>
-            <button 
-              class="btn btn-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 sm:mb-5 rounded"
+            <button
+              class="hidden btn btn-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 sm:mb-5 rounded"
               data-audio-converter-target="convertButton"
               data-action="click->audio-converter#convertToMp3"
               data-audio-url="<%= url_for(post.audio) %>"
