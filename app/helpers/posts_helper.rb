@@ -15,15 +15,15 @@ module PostsHelper
 
   CATEGORY_NAMES = {
     'respect' => '尊敬する人',
-    'praise_gratitude' => '褒め・感謝',
+    'praise_gratitude' => '感謝や褒め',
     'music' => '音楽',
-    'favorite' => 'その他の好きなこと・もの',
+    'favorite' => 'その他の好きなコトやモノ',
     'happy' => '最幸（最高）な出来事',
     'goal' => '攻略したいこと（目標）',
     'learn' => '学び・気づき',
     'fast_talking' => '早口言葉',
     'child' => '子供の声',
-    'output' => 'アウトプット',
+    'output' => 'その他',
     'other' => 'その他'
   }.freeze
 
