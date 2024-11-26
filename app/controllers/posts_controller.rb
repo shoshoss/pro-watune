@@ -93,7 +93,7 @@ class PostsController < ApplicationController
       cache_headers(@post.audio) if @post.audio.attached?
 
       flash[:notice] = t('defaults.flash_message.updated', item: Post.model_name.human, default: '投稿が更新されました。')
-      redirect_to profile_show_path(username_slug: @post.user.username_slug, category: 'all_my_posts'), status: :see_other
+      redirect_to profile_show_path(username_slug: @post.user.username_slug), status: :see_other
     else
       flash.now[:danger] = t('defaults.flash_message.not_updated', item: Post.model_name.human, default: '投稿の更新に失敗しました。')
       render :edit, status: :unprocessable_entity
