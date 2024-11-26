@@ -104,7 +104,7 @@ class User < ApplicationRecord
   end
 
   def admin?
-    username_slug == "Watune"
+    username_slug == 'Watune'
   end
 
   private
