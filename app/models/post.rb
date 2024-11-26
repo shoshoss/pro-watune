@@ -50,10 +50,10 @@ class Post < ApplicationRecord
   DISPLAY_ORDER = %w[
     praise_gratitude
     music
-    respect
     favorite
     fast_talking
     other
+    respect
   ].freeze
 
   # カテゴリー設定
