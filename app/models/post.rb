@@ -61,7 +61,7 @@ class Post < ApplicationRecord
     music: 10,
     fast_talking: 30,
     favorite: 50,
-    output: 100,
+    output: 100
   }
 
   # 定義した順序でカテゴリーを返すクラスメソッド
