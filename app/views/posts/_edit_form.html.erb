@@ -3,12 +3,17 @@
   <%= "投稿の編集" %>
 </h1>
 
-<%= form_with model: post, method: :patch, data: { turbo: false }  do |f| %>
+<%= form_with model: post, method: :patch  do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
   <div class="card-body mx-auto">
     <!-- 送信先設定 -->
     <% current_privacy = params[:privacy] || post.privacy %>
-    <% if current_privacy == 'selected_users' %>
+  
+    <% if post.reply? %>
+      <div class="form-control pt-2">
+        <p class="font-semibold text-base text-black">返信先の変更はできません。</p>
+      </div>
+    <% elsif current_privacy == 'selected_users' %>
       <div class="form-control pt-2">
         <p class="font-semibold text-base text-black">ユーザーの選択の変更はできません。</p>
       </div>
