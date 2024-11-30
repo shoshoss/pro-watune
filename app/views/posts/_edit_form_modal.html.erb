@@ -6,7 +6,7 @@
                     } do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
   <div class="card-body mx-auto">
-    <!-- 送信先設定 -->
+    <!-- 送信先設定 -->    
     <% current_privacy = params[:privacy] || post.privacy %>
     
     <% if post.reply? %>

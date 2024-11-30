@@ -1,7 +1,15 @@
 <%# app/views/posts/_edit_form.html.erb %>
-<h1 class="text-3xl font-bold mt-4 text-center">
-  <%= "投稿の編集" %>
-</h1>
+
+
+
+<div class="sticky top-0 z-10 mt-2 flex flex mx-auto justify-between bg-white px-[16px] h-[30px] sm:h-[53px] border-b">
+      <!-- 戻るボタン -->
+      <%= render 'shared/back_edit_button' %>
+      <div class="flex justify-center items-center flex-grow">
+        <h1 class="text-[17px] sm:text-xl font-bold text-center">投稿の編集</h1>
+      </div>
+      <div class="invisible w-[56px] h-[30px] sm:h-[53px]">ダミー</div>
+    </div>
 
 <%= form_with model: post, method: :patch  do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
