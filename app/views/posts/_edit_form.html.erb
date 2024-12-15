@@ -63,7 +63,8 @@
         <%= f.label :custom_category, class: "block text-lg font-semibold" do %>
           追加カテゴリー <span class="text-base font-normal">※50文字までOK!</span>
         <% end %>
-        <%= f.text_field :custom_category, 
+        <%= f.text_field :custom_category,
+            value: post.custom_category_name,
             class: "block mt-1 p-2 text-base border-2 border-gray-300 rounded-lg", 
             placeholder: "必要に応じて入力" %>
       </div>
@@ -87,13 +88,6 @@
                 <span class="uppercase"><%= post.audio.content_type.split('/').last %></span>
                 <span>(<%= number_to_human_size(post.audio.byte_size) %>)</span>
               </div>
-              
-              <% if post.audio.content_type != 'audio/mpeg' %>
-                <%= button_to convert_to_mp3_post_path(post),
-                    class: "w-full sm:w-auto btn btn-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded" do %>
-                  MP3に変換
-                <% end %>
-              <% end %>
             </div>
           </div>
         </div>
