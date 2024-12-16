@@ -48,12 +48,14 @@ export default class extends Controller {
 
   // 音量変更
   changeVolume(event) {
-    const audioElement = document.getElementById(`audio-${this.audioId}`);
-    if (!audioElement) return;
+    const volumeControl = event.currentTarget;
+    const audioId = volumeControl.dataset.audioId;
+    const audio = document.getElementById(`audio-${audioId}`);
 
-    // 0-150のレンジを0-1.5に変換
-    const volumeValue = parseFloat(event.target.value) / 100;
-    audioElement.volume = volumeValue;
+    if (!audio) return;
+
+    const volumeValue = parseFloat(volumeControl.value) / 100;
+    audio.volume = Math.max(0, Math.min(1, volumeValue)); // 0-1の範囲に制限
   }
 
   // 音声終了時の処理を追加
