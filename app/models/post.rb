@@ -59,8 +59,11 @@ class Post < ApplicationRecord
   enum fixed_category: {
     praise_gratitude: 0,
     music: 10,
+    # learn: 20,
     fast_talking: 30,
+    # child: 40,
     favorite: 50,
+    # monologue: 60,
     output: 100
   }
 
