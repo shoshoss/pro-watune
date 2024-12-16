@@ -86,8 +86,25 @@
               <div class="text-sm text-gray-600">
                 <span class="font-medium">現在のファイル:</span>
                 <span class="uppercase"><%= post.audio.content_type.split('/').last %></span>
-                <span>(<%= number_to_human_size(post.audio.byte_size) %>)</span>
               </div>
+
+              <% if post.audio.content_type != 'audio/mpeg' %>
+                <div class="flex flex-col sm:flex-row gap-2 items-center">
+                  <!-- ファイル選択フィールド -->
+                  <div class="w-full sm:w-auto">
+                    <%= f.file_field :audio, 
+                        class: "block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-blue-50 file:text-blue-700
+                                hover:file:bg-blue-100",
+                        accept: "audio/*",
+                        direct_upload: true %>
+                  </div>
+                  <p class="text-sm text-gray-500">※MP3形式のファイルを選択してください</p>
+                </div>
+              <% end %>
             </div>
           </div>
         </div>

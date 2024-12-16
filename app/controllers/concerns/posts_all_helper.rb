@@ -96,11 +96,4 @@ module PostsAllHelper
 
     redirect_to root_path, alert: 'この投稿を見る権限がありません。'
   end
-
-  # オーディオファイルを変換するメソッド
-  def convert_audio(file_path)
-    output_path = file_path.sub(File.extname(file_path), '.mp3')
-    system("ffmpeg -i #{file_path} #{output_path}")
-    output_path
-  end
 end
