@@ -64,9 +64,6 @@ Rails.application.routes.draw do
   get '/:username_slug/status/:id/reply_modal', to: 'replies#new_modal', as: 'new_reply_modal'
   post '/:username_slug/status/:id/reply_modal', to: 'replies#create_modal', as: 'create_reply_modal'
 
-  # PostUserのルーティング（投稿受信者管理）
-  resources :post_users, only: %i[show create destroy]
-
   # プロフィールのルーティング
   resource :profile, only: %i[edit update]
   get '/star/:username_slug', to: 'profiles#show', as: :profile_show
