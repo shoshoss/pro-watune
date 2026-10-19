@@ -7,18 +7,27 @@
   "dependencies": {
     "autoprefixer": "^10.4.19",
     "daisyui": "^4.10.1",
+    "esbuild": "^0.28.2",
     "js-cookie": "^3.0.5",
     "postcss": "^8.4.38",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "tailwindcss": "^3.4.3"
   },
   "scripts": {
     "build:css": "tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --minify",
-    "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext css --exec \"yarn build:css\""
+    "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext css --exec \"yarn build:css\"",
+    "build:react": "esbuild app/javascript/react/entry.tsx --bundle --minify --jsx=automatic --format=iife --target=es2020 --outfile=app/assets/builds/react_app.js",
+    "watch:react": "esbuild app/javascript/react/entry.tsx --bundle --sourcemap --jsx=automatic --format=iife --target=es2020 --outfile=app/assets/builds/react_app.js --watch",
+    "typecheck": "tsc --noEmit"
   },
   "browserslist": [
     "defaults"
   ],
   "devDependencies": {
-    "nodemon": "^3.1.1"
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "nodemon": "^3.1.1",
+    "typescript": "^7.0.2"
   }
 }
