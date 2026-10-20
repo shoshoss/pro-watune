@@ -5,6 +5,7 @@ set -o pipefail
 bundle install
 yarn install
 yarn build:css
+yarn build:react
 bundle exec rails assets:precompile
 bundle exec rails assets:clean
 
