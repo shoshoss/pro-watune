@@ -23,6 +23,7 @@
 
   <!-- スタイルシートのリンク -->
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_include_tag "react_app", defer: true, "data-turbo-track": "reload" %>
 
   <!-- Turboフレームタグ -->
   <%= turbo_frame_tag 'signup_modal' %>
