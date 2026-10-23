@@ -5,9 +5,10 @@ module Posts
 
     included do
       # 投稿の通知を作成するメソッド
-      def create_notification_post(current_user)
+      def create_notification_post(current_user, recipient_ids: nil)
         ActiveRecord::Base.transaction do
-          direct_recipients.where.not(id: current_user.id).find_each do |recipient|
+          recipients = recipient_ids ? direct_recipients.where(id: recipient_ids) : direct_recipients
+          recipients.where.not(id: current_user.id).find_each do |recipient|
             # 通知の作成
             notification = current_user.sent_notifications.new(
               recipient_id: recipient.id,

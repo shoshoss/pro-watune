@@ -76,16 +76,27 @@ class PostsController < ApplicationController
 
   # 投稿を更新するアクション
   def update
-    if @post.update(post_params.except(:recipient_ids, :custom_category))
-      @post.assign_custom_category(post_params[:custom_category]) if post_params[:custom_category].present?
-      cache_headers(@post.audio) if @post.audio.attached?
-
-      flash[:notice] = t('defaults.flash_message.updated', item: Post.model_name.human, default: '投稿が更新されました。')
-      redirect_to profile_show_path(username_slug: @post.user.username_slug), status: :see_other
-    else
-      flash.now[:danger] = t('defaults.flash_message.not_updated', item: Post.model_name.human, default: '投稿の更新に失敗しました。')
-      render :edit, status: :unprocessable_entity
+    update_params = post_params
+    privacy_submitted = params[:post].key?(:privacy)
+    if @post.reply?
+      update_params.delete(:privacy)
+      privacy_submitted = false
     end
+    privacy = update_params[:privacy] || @post.privacy
+    return render_invalid_privacy unless @post.reply? || Post::EDITABLE_PRIVACIES.include?(privacy)
+
+    added_ids = ActiveRecord::Base.transaction do
+      @post.update!(update_params.except(:recipient_ids, :custom_category))
+      @post.assign_custom_category(update_params[:custom_category]) if update_params[:custom_category].present?
+      privacy_submitted ? @post.update_direct_recipients!(update_params[:recipient_ids] || []) : []
+    end
+
+    NotificationJob.perform_later('direct', @post.id, added_ids) if added_ids.any?
+    cache_headers(@post.audio) if @post.audio.attached?
+    flash[:notice] = t('defaults.flash_message.updated', item: Post.model_name.human, default: '投稿が更新されました。')
+    redirect_to profile_show_path(username_slug: @post.user.username_slug), status: :see_other
+  rescue ActiveRecord::RecordInvalid
+    render_update_failure
   end
 
   def update_modal
@@ -128,6 +139,16 @@ class PostsController < ApplicationController
 
   def audio_params
     params.require(:post).permit(:audio)
+  end
+
+  def render_invalid_privacy
+    @post.errors.add(:base, '変更できない公開範囲です')
+    render :edit, status: :unprocessable_entity
+  end
+
+  def render_update_failure
+    flash.now[:danger] = t('defaults.flash_message.not_updated', item: Post.model_name.human, default: '投稿の更新に失敗しました。')
+    render :edit, status: :unprocessable_entity
   end
 
   # 失敗した投稿作成の処理

@@ -44,6 +44,8 @@ class Post < ApplicationRecord
   # プライバシー設定
   enum privacy: { only_me: 0, reply: 1, open: 2, selected_users: 10, community: 20, only_direct: 30 }
 
+  EDITABLE_PRIVACIES = %w[only_me selected_users open].freeze
+
   # アクセス設定
   # enum access_mode: { legacy_id: 0, uuid: 10, custom_token: 20 }
 
@@ -106,6 +108,38 @@ class Post < ApplicationRecord
   # direct_recipient_idsを取得するメソッド
   def direct_recipient_ids
     direct_recipients.pluck(:id)
+  end
+
+  # 送信先の差分を反映し、新しく追加したユーザーのIDを返す
+  def update_direct_recipients!(recipient_ids)
+    return [] if reply?
+
+    normalized_ids = Array(recipient_ids).filter_map { |id| Integer(id, exception: false) }
+    normalized_ids = normalized_ids.reject { |id| id == user_id }.uniq
+
+    unless selected_users?
+      post_users.where(role: 'direct_recipient').destroy_all
+      return []
+    end
+
+    if normalized_ids.empty?
+      errors.add(:base, '送信先を1人以上選んでください')
+      raise ActiveRecord::RecordInvalid, self
+    end
+
+    allowed_ids = user.followings.pluck(:id) + direct_recipients.pluck(:id)
+    if (normalized_ids - allowed_ids).any?
+      errors.add(:base, '選択できないユーザーが含まれています')
+      raise ActiveRecord::RecordInvalid, self
+    end
+
+    current_ids = direct_recipients.pluck(:id)
+    added_ids = normalized_ids - current_ids
+    added_ids.each do |recipient_id|
+      post_users.create!(user_id: recipient_id, role: 'direct_recipient', approved: true)
+    end
+    post_users.where(role: 'direct_recipient').where.not(user_id: normalized_ids).destroy_all
+    added_ids
   end
 
   # リポストかどうかを判定するメソッド
