@@ -36,4 +36,24 @@ module PostsHelper
   def category_name(category)
     CATEGORY_NAMES[category] || '不明なカテゴリー'
   end
+
+  def recipient_selector_props(post)
+    original_recipient_ids = post.direct_recipients.pluck(:id)
+    following = post.user.following_ordered_by_sent_posts
+    following_ids = following.map(&:id)
+    unfollowed_recipients = post.direct_recipients.where.not(id: following_ids)
+    recipient_ids = params.dig(:post, :recipient_ids)
+
+    {
+      initialPrivacy: params.dig(:post, :privacy) || post.privacy,
+      initialRecipientIds: recipient_ids ? recipient_ids.map(&:to_i) : original_recipient_ids,
+      originalRecipientIds: original_recipient_ids,
+      candidates: following.map { |user| recipient_candidate(user, following: true) } +
+        unfollowed_recipients.map { |user| recipient_candidate(user, following: false) }
+    }
+  end
+
+  def recipient_candidate(user, following:)
+    { id: user.id, displayName: user.display_name.to_s, usernameSlug: user.username_slug, following: }
+  end
 end
