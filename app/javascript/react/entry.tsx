@@ -1,9 +1,10 @@
 import { createRoot, type Root } from 'react-dom/client';
 import type { ComponentType } from 'react';
 import HelloReact from './components/HelloReact';
+import RecipientSelector from './components/RecipientSelector';
 
 // <react-component name="名前"> で呼び出せるコンポーネントの一覧
-const components: Record<string, ComponentType<any>> = { HelloReact };
+const components: Record<string, ComponentType<any>> = { HelloReact, RecipientSelector };
 
 // <react-component name="HelloReact" props='{"name":"..."}'></react-component>
 // 画面に追加されたら React を組み立て、画面から取り除かれたら片付ける。
