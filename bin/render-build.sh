@@ -20,6 +20,5 @@ yarn build:react
 bundle exec rails assets:precompile
 bundle exec rails assets:clean
 
-# マイグレーションと管理者作成を実行
+# マイグレーションを実行
 bundle exec rails db:migrate
-bundle exec rails runner "User.find_or_create_admin"
