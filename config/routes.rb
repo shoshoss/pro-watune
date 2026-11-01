@@ -17,7 +17,6 @@ Rails.application.routes.draw do
   get ':username_slug/following', to: 'friendships#index', defaults: { category: 'following' }, as: 'user_following'
   get ':username_slug/followers', to: 'friendships#index', defaults: { category: 'followers' }, as: 'user_followers'
 
-  get 'guest_login', to: 'users#guest_login', as: 'guest_login'
   # モーダル用の新規登録ルーティング
   get 'signup_modal', to: 'users#new_modal', as: 'new_signup_modal'
   post 'signup_modal', to: 'users#create_modal', as: 'create_signup_modal'
