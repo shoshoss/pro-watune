@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  skip_before_action :require_login, only: %i[new_modal create_modal new create guest_login]
+  skip_before_action :require_login, only: %i[new_modal create_modal new create]
 
   def index
     @pagy, @users = pagy_countless(User.recently_registered(current_user), items: 15)
@@ -56,14 +56,6 @@ class UsersController < ApplicationController
     end
   end
 
-  def guest_login
-    email = generate_unique_guest_email
-    @user = User.create!(email:, password: SecureRandom.hex(10), guest: true)
-    auto_login(@user)
-    flash[:notice] = 'お試しログインに成功しました！'
-    redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts')
-  end
-
   def destroy
     @user = current_user
     if @user.destroy
@@ -80,12 +72,5 @@ class UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(:email, :password, :display_name, :username_slug, :self_introduction)
-  end
-
-  def generate_unique_guest_email
-    loop do
-      email = "guest_#{SecureRandom.hex(10)}@example.com"
-      break email unless User.exists?(email:)
-    end
   end
 end
