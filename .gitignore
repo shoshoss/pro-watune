@@ -51,3 +51,7 @@ public/sitemap.xml.gz
 /config/credentials/production.key
 
 /config/credentials/test.key
+
+# データベースのバックアップ（個人情報を含むため、リポジトリに入れない）
+*.dump
+*.backup
