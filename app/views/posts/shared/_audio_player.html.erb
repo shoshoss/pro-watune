@@ -1,23 +1,116 @@
+<%# app/views/posts/shared/_audio_player.html.erb %>
 <!-- オーディオプレイヤー -->
 <div class="mb-2 mr-5">
-  <% if post.audio.attached? %>
-    <audio id="audio-<%= post.id %>" class="pb-2 w-full" preload="metadata" controls controlsList="nodownload" oncontextmenu="return false;">
+  <% if post.audio.attached? && post.duration.present? %>
+    <%# ファイル形式とサイズの表示 %>
+    <div class="flex justify-between items-end mb-2 text-sm text-gray-600">
+      <div class="flex space-x-2">
+        <% if post.audio.attached? && post.audio.content_type != 'audio/mpeg' %>
+          <div class="flex items-center">
+            <span class="uppercase"><%= post.audio.content_type.split('/').last %></span>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="flex text-sm text-gray-600">
+        <% if logged_in? && (current_user.id == post.user_id || current_user.admin?) %> 
+          <%= link_to url_for(post.audio),
+              class: "flex items-center space-x-1 text-blue-500 hover:text-blue-700 transition-colors duration-200",
+              download: post.audio.filename do %>
+            <i class="fas fa-download"></i>
+            <span>ダウンロード</span>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <audio id="audio-<%= post.id %>"
+           class="pb-2 w-full"
+           preload="metadata"
+           controls
+           controlsList="nodownload" 
+           oncontextmenu="return false;">
       <source src="<%= url_for(post.audio) %>" type="<%= post.audio.content_type %>">
       お使いのブラウザはオーディオプレイヤーをサポートしていません。
     </audio>
-    <input type="range" min="0" max="<%= post.duration %>" value="0" step="1" class="range range-info range-sm w-full mt-2" data-action="input->audio#seek" data-audio-id="<%= post.id %>">
+
+    <div class="flex justify-end space-x-4 mt-2 mb-2">
+      <!-- 速度調整と音量調整のコントロール -->
+      <div class="flex items-center space-x-2">
+        <label for="speed-<%= post.id %>" class="text-sm text-gray-600">速度:</label>
+        <select id="speed-<%= post.id %>"
+                class="border rounded px-2 py-1 text-sm"
+                data-action="change->audio#changeSpeed"
+                data-audio-id="<%= post.id %>">
+          <option value="0.5">0.5x</option>
+          <option value="0.75">0.75x</option>
+          <option value="1.0" selected>1.0x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="1.75">1.75x</option>
+          <option value="2.0">2.0x</option>
+          <option value="2.5">2.5x</option>
+          <option value="3">3x</option>
+        </select>
+      </div>
+
+      <div class="hidden sm:inline flex items-center space-x-2">
+        <label for="volume-<%= post.id %>" class="text-sm text-gray-600">音量:</label>
+        <input type="range"
+               id="volume-<%= post.id %>"
+               class="w-24 volume-control"
+               min="0"
+               max="100"
+               value="100"
+               step="1"
+               data-action="input->audio#changeVolume"
+               data-audio-id="<%= post.id %>"
+               data-volume-control="true">
+      </div>
+    </div>
+
+    <input type="range"
+           min="0"
+           max="<%= post.duration %>"
+           value="0"
+           step="1"
+           class="range range-info range-sm w-full mt-2"
+           data-action="input->audio#seek"
+           data-audio-id="<%= post.id %>"
+           data-seek-control="true">
+
     <div class="flex justify-between">
       <div id="current-time-<%= post.id %>" class="mr-2 text-black">00:00</div>
       <button class="py-2 px-5 play-audio-button transition duration-300 ease-in-out transform hover:scale-110 cursor-pointer text-blue-500 hover:text-sky-400-accent"
               data-audio-target="playButton"
-              data-action="click->audio#playPause" data-audio-id="<%= post.id %>">
+              data-action="click->audio#playPause"
+              data-audio-id="<%= post.id %>">
         <i id="audio-icon-<%= post.id %>" class="fas fa-play audio-icon text-3xl md:text-4xl"></i>
       </button>
-      <div class="ml-2 text-black">
-        <% duration_minutes = post.duration / 60 %>
-        <% duration_seconds = post.duration % 60 %>
-        <%= format('%02d:%02d', duration_minutes, duration_seconds) %>
+      <div class="ml-2 text-black" id="duration-<%= post.id %>">
+        <% if post.duration.present? %>
+          <% duration_minutes = post.duration / 60 %>
+          <% duration_seconds = post.duration % 60 %>
+          <%= format('%02d:%02d', duration_minutes, duration_seconds) %>
+        <% end %>
       </div>
     </div>
   <% end %>
 </div>
+
+<script>
+  function displayDuration(postId) {
+    const audioElement = document.getElementById(`audio-${postId}`);
+    const durationElement = document.getElementById(`duration-${postId}`);
+
+    if (audioElement && durationElement) {
+      // duration が有効な数値であるかを確認
+      const duration = audioElement.duration;
+      if (isFinite(duration)) {
+        const minutes = Math.floor(duration / 60);
+        const seconds = Math.floor(duration % 60);
+        durationElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+    }
+  }
+</script>

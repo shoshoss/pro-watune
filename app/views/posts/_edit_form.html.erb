@@ -1,39 +1,86 @@
-<%= form_with model: @post, method: :patch, data: { controller: "post-edit-modal", action: "turbo:submit-end->post-edit-modal#afterClose" } do |f| %>
-  <%= render 'shared/error_messages', object: f.object %>
-  <div class="card-body mx-auto">
-    <div class="form-control pt-2">
-      <%= f.label :body, class: "block text-lg font-semibold" %>
-      <%= f.text_area :body, class: "block mt-1 p-2 text-base md:text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-sky-400-accent-accent resize-none overflow-y-auto", rows: "10", style: "resize: vertical;" %>
-    </div>
-    <div class="form-control mt-4 lg:mt-6">
-      <%= f.submit nil, class: "btn text-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50" %>
-    </div>
-  </div>
-<% end %>
+<%# app/views/posts/_edit_form.html.erb %>
+  <div class="sticky top-0 z-10 mt-2 flex flex mx-auto justify-between bg-white px-[16px] h-[30px] sm:h-[53px] border-b">
+        <!-- 戻るボタン -->
+        <%= render 'shared/back_edit_button' %>
+        <div class="flex justify-center items-center flex-grow">
+          <h1 class="text-[17px] sm:text-xl font-bold text-center">投稿の編集</h1>
+        </div>
+        <div class="invisible w-[56px] h-[30px] sm:h-[53px]">ダミー</div>
+      </div>
 
-<script>
-  document.addEventListener('input', function(event) {
-    if (event.target.tagName.toLowerCase() !== 'textarea') return;
+  <%= form_with model: post, method: :patch, data: { turbo: false }  do |f| %>
+    <%= render 'shared/error_messages', object: f.object %>
+    <div class="card-body mx-auto">
+      <!-- 送信先設定 -->
+      <% if post.reply? %>
+        <div class="form-control pt-2">
+          <p class="font-semibold text-base text-black">返信先の変更はできません。</p>
+        </div>
+      <% else %>
+        <react-component name="RecipientSelector" props="<%= recipient_selector_props(post).to_json %>"></react-component>
+      <% end %>
 
-    const textarea = event.target;
-    const modalBox = document.querySelector('.modal-box');
-    const maxModalHeight = window.innerHeight;
+      <!-- カテゴリー設定 -->
+      <div class="form-control pt-2">
+        <%= f.label :fixed_category, 'カテゴリー', class: "block text-lg font-semibold" %>
+        <%= f.select :fixed_category, 
+            Post.fixed_categories_i18n.invert.map { |key, value| [key, value] }, 
+            { include_blank: false }, 
+            class: "block mt-1 p-2 text-base border-2 border-gray-300 rounded-lg" %>
+      </div>
 
-    // モーダル全体の高さが画面の高さを超えた場合の処理 (sm以上)
-    if (window.innerWidth >= 640 && modalBox.scrollHeight >= maxModalHeight) {
-      // テキストエリアの高さを固定し、スクロール可能にする
-      textarea.classList.add('overflow-y-auto');
-    } else if (window.innerWidth < 640 && textarea.scrollHeight >= 300) {
-      // スマホの場合、テキストエリアの高さが300pxに達した場合
-      textarea.classList.add('overflow-y-auto');
-    } else {
-      textarea.classList.remove('overflow-y-auto');
-      // テキストエリアの高さを調整
-      textarea.style.height = 'auto';
-      textarea.style.height = textarea.scrollHeight + 'px';
-      // モーダルの高さを調整
-      modalBox.style.height = 'auto';
-      modalBox.style.height = modalBox.scrollHeight + 'px';
-    }
-  });
-</script>
+      <div class="form-control pt-2">
+        <%= f.label :custom_category, class: "block text-lg font-semibold" do %>
+          追加カテゴリー <span class="text-base font-normal">※50文字までOK!</span>
+        <% end %>
+        <%= f.text_field :custom_category,
+            value: post.custom_category_name,
+            class: "block mt-1 p-2 text-base border-2 border-gray-300 rounded-lg", 
+            placeholder: "必要に応じて入力" %>
+      </div>
+
+      <!-- 投稿内容 -->
+      <div class="form-control pt-2">
+        <%= f.label :body, class: "block text-lg font-semibold" %>
+        <%= f.text_area :body, 
+            class: "block mt-1 p-2 text-base md:text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-sky-400-accent-accent resize-none overflow-y-auto", 
+            rows: "10", 
+            style: "resize: vertical;" %>
+      </div>
+
+      <% if post.audio.attached? %>
+        <div class="form-control pt-4">
+          <label class="block text-lg font-semibold">音声ファイル</label>
+          <div class="bg-gray-50 p-4 rounded-lg mt-1">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div class="text-sm text-gray-600">
+                <span class="font-medium">現在のファイル:</span>
+                <span class="uppercase"><%= post.audio.content_type.split('/').last %></span>
+              </div>
+
+              <% if post.audio.content_type != 'audio/mpeg' %>
+                <div class="flex flex-col sm:flex-row gap-2 items-center">
+                  <!-- ファイル選択フィールド -->
+                  <div class="w-full sm:w-auto">
+                    <%= f.file_field :audio, 
+                        class: "block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-blue-50 file:text-blue-700
+                                hover:file:bg-blue-100",
+                        accept: "audio/*",
+                        direct_upload: true %>
+                  </div>
+                  <p class="text-sm text-gray-500">※MP3形式のファイルを選択してください</p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="form-control mt-4 lg:mt-6">
+        <%= f.submit nil, class: "btn text-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50" %>
+      </div>
+  <% end %>

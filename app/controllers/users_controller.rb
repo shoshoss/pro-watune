@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  skip_before_action :require_login, only: %i[new_modal create_modal new create guest_login]
+  skip_before_action :require_login, only: %i[new_modal create_modal new create]
 
   def index
     @pagy, @users = pagy_countless(User.recently_registered(current_user), items: 15)
@@ -13,60 +13,46 @@ class UsersController < ApplicationController
     if current_user&.guest?
       @user = current_user
       if @user.update(user_params.merge(guest: false))
-        flash[:notice] = I18n.t('flash_messages.users.signup_success')
+        flash[:notice] = t('flash_messages.users.signup_success')
       else
-        flash[:danger] = I18n.t('flash_messages.users.signup_failure')
+        flash[:danger] = t('flash_messages.users.signup_failure')
       end
     else
       @user = User.new(user_params)
       if @user.save
         login(user_params[:email], user_params[:password])
-        flash[:notice] = I18n.t('flash_messages.users.signup_success')
+        flash[:notice] = t('flash_messages.users.signup_success')
       else
-        flash[:danger] = I18n.t('flash_messages.users.signup_failure')
+        flash[:danger] = t('flash_messages.users.signup_failure')
       end
     end
   end
 
   def new
-    @user = User.new
+    @user = User.new(username_slug: session[:trial_username_slug])
   end
 
   def create
     if current_user&.guest?
       @user = current_user
+      @user.update!(guest: false)
       if @user.update(user_params.merge(guest: false))
-        flash[:notice] = I18n.t('flash_messages.users.guest_login_success')
+        flash[:notice] = 'データの引き継ぎに成功しました！'
+        redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts'), status: :see_other
       else
-        flash[:danger] = I18n.t('flash_messages.users.signup_failure')
+        flash[:danger] = 'データの引き継ぎに失敗しました。<br>再度お試しください。'
+        render :new, status: :unprocessable_entity
       end
     else
       @user = User.new(user_params)
       if @user.save
         login(user_params[:email], user_params[:password])
-        flash[:notice] = I18n.t('flash_messages.users.signup_success')
+        flash[:notice] = t('flash_messages.users.signup_success')
+        redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts'), status: :see_other
       else
-        flash[:danger] = I18n.t('flash_messages.users.signup_failure')
+        flash[:danger] = t('flash_messages.users.signup_failure')
+        render :new, status: :unprocessable_entity
       end
-    end
-  end
-
-  def guest_login
-    email = generate_unique_guest_email
-    @user = User.create!(email:, password: SecureRandom.hex(10), guest: true)
-    auto_login(@user)
-    set_flash(:before_profile_edit_flash, I18n.t('flash_messages.users.guest_login_success'))
-    redirect_to posts_path(category: 'recommended')
-    respond_to do |format|
-      format.html
-      format.turbo_stream
-    end
-  rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.error I18n.t('flash_messages.users.guest_login_failure') + ": #{e.message}"
-    flash.now[:alert] = I18n.t('flash_messages.users.guest_login_failure')
-    respond_to do |format|
-      format.html
-      format.turbo_stream
     end
   end
 
@@ -86,12 +72,5 @@ class UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(:email, :password, :display_name, :username_slug, :self_introduction)
-  end
-
-  def generate_unique_guest_email
-    loop do
-      email = "guest_#{SecureRandom.hex(10)}@example.com"
-      break email unless User.exists?(email:)
-    end
   end
 end

@@ -11,9 +11,9 @@ class User < ApplicationRecord
   after_initialize :set_default_notification_settings, if: :new_record?
 
   # 関連付け
-  has_many :authentications, dependent: :destroy # 認証情報を複数保持
+  has_many :post_users, dependent: :destroy # 投稿ユーザーと関連付け
   has_many :posts, dependent: :destroy # 投稿と関連付け
-  has_many :post_users, through: :posts # 投稿ユーザーと関連付け
+  has_many :authentications, dependent: :destroy # 認証情報を複数保持
   has_many :sent_notifications, class_name: 'Notification', foreign_key: 'sender_id', dependent: :destroy,
                                 inverse_of: :sender # 送信された通知
   has_many :received_notifications, class_name: 'Notification', foreign_key: 'recipient_id', dependent: :destroy,
@@ -31,7 +31,9 @@ class User < ApplicationRecord
 
   # 予約されたusername_slugを設定
   RESERVED_USERNAMES = %w[
-    admin support blog home user dashboard privacy_policy terms_of_use
+    article articles star stars timeline question questions file files ranking
+    community communities town towns group groups my self other admin support
+    blog home user dashboard privacy_policy terms_of_use
     privacy_modal tou_modal signup_modal signup oauth login logout
     login_modal password_resets posts profile explore notification
     notifications message messages lists bookmarks communities
@@ -70,7 +72,7 @@ class User < ApplicationRecord
     admin
   end
 
-  # スコープ: ログインしているユーザーがフォローしているユーザーを除外して、新規ユーザーを表示
+  # スコープ: ログインしているユーザーがフォローしているユーザーを除Z外して、新規ユーザーを表示
   def self.recently_registered(current_user = nil)
     users = where(guest: false)
     if current_user
@@ -90,11 +92,9 @@ class User < ApplicationRecord
     guest
   end
 
-  private
-
   # ユーザー名スラグを生成するメソッド
   def generate_username_slug
-    return if username_slug.present?
+    return if username_slug.present? && !guest?
 
     loop do
       # 3文字以上、15文字以内のランダムな文字列を生成
@@ -102,6 +102,12 @@ class User < ApplicationRecord
       break unless User.exists?(username_slug:)
     end
   end
+
+  def admin?
+    username_slug == 'Watune'
+  end
+
+  private
 
   # デフォルトの表示名を設定するメソッド
   def set_default_display_name

@@ -1,25 +1,29 @@
 module PostsHelper
   CATEGORY_ICONS = {
-    'recommended' => 'fa fa-star text-yellow-400-accent',
-    'praise_gratitude' => 'fa fa-sun text-orange-400',
+    'praise_gratitude' => 'fa fa-star text-yellow-400-accent',
     'music' => 'fa fa-music text-blue-500',
-    'learn' => 'fas fa-graduation-cap text-green-500',
-    'child' => 'fa fa-smile-o text-pink-400',
-    'skill' => 'fa-solid fa-lightbulb text-yellow-400-accent',
+    'respect' => 'fa fa-sun text-orange-400',
     'favorite' => 'fa fa-heart text-red-500',
-    'monologue' => 'fa fa-comment-dots text-teal-500',
+    'happy' => 'fa-solid fa-crown text-pink-400',
+    'goal' => 'fa fa-fire text-orange-500',
+    'learn' => 'fas fa-graduation-cap text-green-500',
+    'fast_talking' => 'fa-solid fa-bolt text-yellow-400-accent',
+    'child' => 'fa fa-smile-o text-pink-400',
+    'output' => 'fa fa-sun text-orange-400',
     'other' => 'fa fa-ellipsis-h text-gray-500'
   }.freeze
 
   CATEGORY_NAMES = {
-    'recommended' => 'おすすめ',
-    'praise_gratitude' => '褒めや感謝',
+    'respect' => '尊敬する人',
+    'praise_gratitude' => '感謝や褒め',
     'music' => '音楽',
-    'learn' => '学習',
+    'favorite' => 'その他の好きなコトやモノ',
+    'happy' => '最幸（最高）な出来事',
+    'goal' => '攻略したいこと（目標）',
+    'learn' => '学び・気づき',
+    'fast_talking' => '早口言葉',
     'child' => '子供の声',
-    'skill' => '特技や技術',
-    'favorite' => '好きなことや自己紹介',
-    'monologue' => 'ひとりごと',
+    'output' => 'その他',
     'other' => 'その他'
   }.freeze
 
@@ -31,5 +35,25 @@ module PostsHelper
   # カテゴリ名を適切な形式に変換するメソッド
   def category_name(category)
     CATEGORY_NAMES[category] || '不明なカテゴリー'
+  end
+
+  def recipient_selector_props(post)
+    original_recipient_ids = post.direct_recipients.pluck(:id)
+    following = post.user.following_ordered_by_sent_posts
+    following_ids = following.map(&:id)
+    unfollowed_recipients = post.direct_recipients.where.not(id: following_ids)
+    recipient_ids = params.dig(:post, :recipient_ids)
+
+    {
+      initialPrivacy: params.dig(:post, :privacy) || post.privacy,
+      initialRecipientIds: recipient_ids ? recipient_ids.map(&:to_i) : original_recipient_ids,
+      originalRecipientIds: original_recipient_ids,
+      candidates: following.map { |user| recipient_candidate(user, following: true) } +
+        unfollowed_recipients.map { |user| recipient_candidate(user, following: false) }
+    }
+  end
+
+  def recipient_candidate(user, following:)
+    { id: user.id, displayName: user.display_name.to_s, usernameSlug: user.username_slug, following: }
   end
 end

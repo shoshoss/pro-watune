@@ -1,11 +1,12 @@
+# app/controllers/posts_controller.rb
 class PostsController < ApplicationController
   include PostsAllHelper
   include ActionView::RecordIdentifier
 
   skip_before_action :require_login, only: %i[index show]
-  before_action :set_post, only: %i[show edit update destroy]
-  before_action :set_current_user_post, only: %i[edit update destroy]
-  before_action :set_followings_by_post_count, only: %i[new edit create update]
+  before_action :set_post, only: %i[show edit edit_modal update update_modal destroy]
+  before_action :set_current_user_post, only: %i[edit edit_modal update update_modal destroy]
+  before_action :set_followings_by_post_count, only: %i[new edit edit_modal create update update_modal]
   before_action :authorize_view!, only: [:show]
 
   # 投稿一覧を表示するアクション
@@ -58,10 +59,12 @@ class PostsController < ApplicationController
   # 投稿を編集するフォームを表示するアクション
   def edit; end
 
+  def edit_modal; end
+
   # 新しい投稿を作成するアクション
   def create
     @post = current_user.posts.build(post_params.except(:recipient_ids, :custom_category))
-    assign_custom_category if post_params[:custom_category].present?
+    @post.assign_custom_category(post_params[:custom_category]) if post_params[:custom_category].present?
 
     if @post.save
       handle_successful_create
@@ -73,11 +76,34 @@ class PostsController < ApplicationController
 
   # 投稿を更新するアクション
   def update
-    if @post.update(post_params.except(:recipient_ids))
-      assign_custom_category if post_params[:custom_category].present?
+    update_params = post_params
+    privacy_submitted = params[:post].key?(:privacy)
+    if @post.reply?
+      update_params.delete(:privacy)
+      privacy_submitted = false
+    end
+    privacy = update_params[:privacy] || @post.privacy
+    return render_invalid_privacy unless @post.reply? || Post::EDITABLE_PRIVACIES.include?(privacy)
+
+    added_ids = ActiveRecord::Base.transaction do
+      @post.update!(update_params.except(:recipient_ids, :custom_category))
+      @post.assign_custom_category(update_params[:custom_category]) if update_params[:custom_category].present?
+      privacy_submitted ? @post.update_direct_recipients!(update_params[:recipient_ids] || []) : []
+    end
+
+    NotificationJob.perform_later('direct', @post.id, added_ids) if added_ids.any?
+    cache_headers(@post.audio) if @post.audio.attached?
+    flash[:notice] = t('defaults.flash_message.updated', item: Post.model_name.human, default: '投稿が更新されました。')
+    redirect_to profile_show_path(username_slug: @post.user.username_slug), status: :see_other
+  rescue ActiveRecord::RecordInvalid
+    render_update_failure
+  end
+
+  def update_modal
+    if @post.update(post_params.except(:recipient_ids, :custom_category))
+      @post.assign_custom_category(post_params[:custom_category]) if post_params[:custom_category].present?
       cache_headers(@post.audio) if @post.audio.attached?
 
-      PostCreationJob.perform_later(@post.id, post_params[:recipient_ids], @post.privacy) if post_params[:recipient_ids].present?
       flash[:notice] = t('defaults.flash_message.updated', item: Post.model_name.human, default: '投稿が更新されました。')
     else
       flash.now[:danger] = t('defaults.flash_message.not_updated', item: Post.model_name.human, default: '投稿の更新に失敗しました。')
@@ -109,6 +135,20 @@ class PostsController < ApplicationController
     PostCreationJob.perform_later(@post.id, recipient_ids, @post.privacy)
     redirect_to profile_show_path(username_slug: current_user.username_slug, category: 'all_my_posts'), status: :see_other,
                                                                                                         notice: flash[:notice]
+  end
+
+  def audio_params
+    params.require(:post).permit(:audio)
+  end
+
+  def render_invalid_privacy
+    @post.errors.add(:base, '変更できない公開範囲です')
+    render :edit, status: :unprocessable_entity
+  end
+
+  def render_update_failure
+    flash.now[:danger] = t('defaults.flash_message.not_updated', item: Post.model_name.human, default: '投稿の更新に失敗しました。')
+    render :edit, status: :unprocessable_entity
   end
 
   # 失敗した投稿作成の処理

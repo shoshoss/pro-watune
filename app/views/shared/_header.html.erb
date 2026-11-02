@@ -15,10 +15,9 @@
     <div class="flex flex-1 justify-end items-center">
       <% if current_user.guest %>
         <%= link_to '引き継ぐ',
-                    new_signup_modal_path,
+                    new_signup_path,
                     id: "guest-update",
-                    method: :get,
-                    data: { turbo_frame: "signup_modal" },
+                    method: :patch,
                     class: 'btn btn-outline btn-accent flex rounded-full btn-sm text-sm sm:btn-md sm:text-lg sm:btn-sm sm:rounded-full mr-2 sm:mr-4' %>
       <% end %>
       <%= link_to t('header.post_audio'),
@@ -109,7 +108,7 @@
                         user_path(current_user),
                         id: "header-delete-account-link",
                         method: :delete,
-                        data: { turbo_method: :delete, turbo_confirm: '本当に退会しますか（アカウント削除）？' }, class: 'btn btn-danger btn-sm text-sm' %>
+                        data: { turbo_method: :delete, turbo_confirm: '退会すると、すべての投稿データも削除されます。本当に退会しますか？' }, class: 'btn btn-danger btn-sm text-sm' %>
           </li>
         </ul>
       </div>

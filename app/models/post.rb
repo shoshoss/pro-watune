@@ -33,6 +33,8 @@ class Post < ApplicationRecord
 
   # 音声添付ファイル
   has_one_attached :audio # ActiveStorageを利用してこれらのファイルを管理する場合
+  validate :validate_audio, if: :audio_attached?
+
   # mount_uploader :audio, AudioUploader
 
   # バリデーション
@@ -42,20 +44,35 @@ class Post < ApplicationRecord
   # プライバシー設定
   enum privacy: { only_me: 0, reply: 1, open: 2, selected_users: 10, community: 20, only_direct: 30 }
 
+  EDITABLE_PRIVACIES = %w[only_me selected_users open].freeze
+
   # アクセス設定
   # enum access_mode: { legacy_id: 0, uuid: 10, custom_token: 20 }
+
+  DISPLAY_ORDER = %w[
+    praise_gratitude
+    music
+    fast_talking
+    favorite
+    output
+  ].freeze
 
   # カテゴリー設定
   enum fixed_category: {
     praise_gratitude: 0,
     music: 10,
-    learn: 20,
+    # learn: 20,
+    fast_talking: 30,
+    # child: 40,
     favorite: 50,
-    child: 40,
-    skill: 30,
-    monologue: 60,
-    other: 100
+    # monologue: 60,
+    output: 100
   }
+
+  # 定義した順序でカテゴリーを返すクラスメソッド
+  def self.ordered_categories
+    DISPLAY_ORDER
+  end
 
   validates :fixed_category, presence: true
 
@@ -93,6 +110,38 @@ class Post < ApplicationRecord
     direct_recipients.pluck(:id)
   end
 
+  # 送信先の差分を反映し、新しく追加したユーザーのIDを返す
+  def update_direct_recipients!(recipient_ids)
+    return [] if reply?
+
+    normalized_ids = Array(recipient_ids).filter_map { |id| Integer(id, exception: false) }
+    normalized_ids = normalized_ids.reject { |id| id == user_id }.uniq
+
+    unless selected_users?
+      post_users.where(role: 'direct_recipient').destroy_all
+      return []
+    end
+
+    if normalized_ids.empty?
+      errors.add(:base, '送信先を1人以上選んでください')
+      raise ActiveRecord::RecordInvalid, self
+    end
+
+    allowed_ids = user.followings.pluck(:id) + direct_recipients.pluck(:id)
+    if (normalized_ids - allowed_ids).any?
+      errors.add(:base, '選択できないユーザーが含まれています')
+      raise ActiveRecord::RecordInvalid, self
+    end
+
+    current_ids = direct_recipients.pluck(:id)
+    added_ids = normalized_ids - current_ids
+    added_ids.each do |recipient_id|
+      post_users.create!(user_id: recipient_id, role: 'direct_recipient', approved: true)
+    end
+    post_users.where(role: 'direct_recipient').where.not(user_id: normalized_ids).destroy_all
+    added_ids
+  end
+
   # リポストかどうかを判定するメソッド
   def repost?
     reposts.exists?
@@ -105,10 +154,23 @@ class Post < ApplicationRecord
 
   # カスタムカテゴリーを設定するメソッド
   def assign_custom_category(custom_category_name)
-    return if custom_category_name.blank?
+    if custom_category_name.blank?
+      # カスタムカテゴリーを削除する場合
+      self.category = nil
+    else
+      # カスタムカテゴリーを設定または更新
+      custom_category = Category.find_or_create_by(
+        category_name: fixed_category,
+        add_category_name: custom_category_name
+      )
+      self.category = custom_category
+    end
+    save
+  end
 
-    custom_category = Category.find_or_create_by(category_name: fixed_category, add_category_name: custom_category_name)
-    self.category = custom_category
+  # カスタムカテゴリー名を取得するメソッド
+  def custom_category_name
+    category&.add_category_name
   end
 
   scope :reposted, -> { joins(:reposts).distinct }
@@ -120,11 +182,49 @@ class Post < ApplicationRecord
   after_create :update_latest_activity
   after_update :update_latest_activity, if: :saved_change_to_created_at?
 
+  # カスタムカテゴリーを含むカテゴリー名を生成するメソッド
+  def combined_category
+    if category&.add_category_name.present?
+      "#{fixed_category_i18n} / #{category.add_category_name}"
+    else
+      "#{fixed_category_i18n} / 感謝してます"
+    end
+  end
+
+  def reply?
+    post_reply_id.present?
+  end
+
+  def parent_post?
+    replies.exists?
+  end
+
+  # 返信関連の投稿かどうかをチェックするメソッドを追加
+  def reply_related?
+    reply? || parent_post?
+  end
+
   private
 
   def update_latest_activity
     latest_time = [created_at, reposts.maximum(:created_at)].compact.max
     update(latest_activity: latest_time)
+  end
+
+  def audio_attached?
+    audio.attached?
+  end
+
+  def validate_audio
+    return unless audio.attached?
+
+    # サイズチェック
+    errors.add(:audio, 'は200MB以下にしてください') if audio.blob.byte_size > 200.megabytes
+
+    # 長さチェック
+    return unless respond_to?(:duration) && duration && duration > 3601
+
+    errors.add(:audio, 'は1時間以内にしてください')
   end
 
   # def set_default_access_mode

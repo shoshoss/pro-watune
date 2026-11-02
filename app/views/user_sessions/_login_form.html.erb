@@ -9,7 +9,7 @@
   <!-- Googleでログインのボタン -->
   <div class="flex items-center justify-center mb-8">
       <%= link_to auth_at_provider_path(provider: :google),
-          class: "px-6 py-3 border flex gap-2 border-blue-200 dark:border-blue-300 rounded-lg text-blue-700 dark:text-blue-200 hover:border-blue-400 hover:text-blue-800 hover:shadow-outline transition duration-150 text-lg",
+          class: "btn-google",
           data: { turbo: false } do %>
         <img class="w-8 h-8" src="https://www.svgrepo.com/show/475656/google-color.svg" loading="lazy" alt="google logo">
         <span class="text-xl"><%= t('user_sessions.new_modal.google_login') %></span>

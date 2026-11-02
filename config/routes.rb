@@ -1,3 +1,4 @@
+# config/routes.rb
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
@@ -16,10 +17,13 @@ Rails.application.routes.draw do
   get ':username_slug/following', to: 'friendships#index', defaults: { category: 'following' }, as: 'user_following'
   get ':username_slug/followers', to: 'friendships#index', defaults: { category: 'followers' }, as: 'user_followers'
 
-  get 'guest_login', to: 'users#guest_login', as: 'guest_login'
   # モーダル用の新規登録ルーティング
   get 'signup_modal', to: 'users#new_modal', as: 'new_signup_modal'
   post 'signup_modal', to: 'users#create_modal', as: 'create_signup_modal'
+
+  # 通常の新規登録ルーティング
+  get 'signup', to: 'users#new', as: 'new_signup'
+  post 'signup', to: 'users#create', as: 'create_signup'
 
   # get と post のリクエストをまとめるために match を使用
   match 'oauth/callback', to: 'oauths#callback', via: %i[get post]
@@ -41,8 +45,11 @@ Rails.application.routes.draw do
 
   # 投稿のルーティング
   resources :waves, controller: 'posts', as: 'posts', except: [:show] do
+    member do
+      get 'edit_modal'
+      patch 'update_modal'
+    end
     collection do
-      get :privacy_settings
       get :latest, to: 'posts#latest' # 最新データ取得のルートを追加
     end
     resources :likes, only: %i[create destroy]
@@ -56,11 +63,9 @@ Rails.application.routes.draw do
   get '/:username_slug/status/:id/reply_modal', to: 'replies#new_modal', as: 'new_reply_modal'
   post '/:username_slug/status/:id/reply_modal', to: 'replies#create_modal', as: 'create_reply_modal'
 
-  # PostUserのルーティング（投稿受信者管理）
-  resources :post_users, only: %i[show create destroy]
-
   # プロフィールのルーティング
   resource :profile, only: %i[edit update]
+  get '/star/:username_slug', to: 'profiles#show', as: :profile_show
   # プロフィールモーダルのルーティング
   get '/profiles/:username_slug/modal', to: 'profiles#modal', as: 'profile_modal'
 
@@ -76,7 +81,8 @@ Rails.application.routes.draw do
 
   # 開発用ツール
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
+  get '/dev/react_test', to: 'dev/react_tests#show' if Rails.env.development?
 
   # プロフィールの詳細のルーティング（他のルートに影響しないよう、最後に配置すること）
-  get '/:username_slug', to: 'profiles#show', as: :profile_show
+  get '/:username_slug', to: 'profiles#show'
 end

@@ -1,6 +1,11 @@
+// app/javascript/controllers/post_create_controller.js
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
+  static values = {
+    maxRecordingTime: { type: Number, default: 3600.9999 }, // 1時間
+  };
+
   audioCtx;
   canvasCtx;
   mediaRecorder;
@@ -8,10 +13,15 @@ export default class extends Controller {
   animationFrameRequest;
   startTime;
   recordingInterval;
+  totalRecordingTime = 0;
+  previewAudioURL;
 
   // 初期設定 コントローラが接続されたときに呼ばれる
   connect() {
     this.checkForm(); // フォームの初期状態をチェック
+
+    // 録音データのクリア処理を追加
+    window.addEventListener("beforeunload", this.clearData.bind(this));
 
     // ページが読み込まれた時に音声録音の許可を取得
     navigator.mediaDevices
@@ -28,8 +38,42 @@ export default class extends Controller {
 
   // MediaRecorderの初期化処理を行うメソッド
   initializeMediaRecorder(stream) {
-    this.mediaRecorder = new MediaRecorder(stream);
-    console.log("MediaRecorder initialized.");
+    try {
+      // 利用可能な形式を確認
+      const options = this.getSupportedAudioFormat();
+      this.mediaRecorder = new MediaRecorder(stream, options);
+      console.log(`録音形式: ${this.mediaRecorder.mimeType}`);
+    } catch (error) {
+      console.warn(
+        "推奨形式が使用できません。デフォルト設定を使用します:",
+        error
+      );
+      this.mediaRecorder = new MediaRecorder(stream);
+    }
+  }
+
+  getSupportedAudioFormat() {
+    // 優先順位順にフォーマットをチェック
+    const formats = [
+      { mimeType: "audio/mpeg", bitRate: 128000 },
+      { mimeType: "audio/webm;codecs=opus", bitRate: 128000 },
+    ];
+
+    for (const format of formats) {
+      if (MediaRecorder.isTypeSupported(format.mimeType)) {
+        return {
+          mimeType: format.mimeType,
+          bitsPerSecond: format.bitRate,
+        };
+      }
+    }
+
+    return {}; // デフォルト設定を使用
+  }
+
+  disconnect() {
+    // コントローラが切断されるときにイベントリスナーを削除
+    window.removeEventListener("beforeunload", this.clearData.bind(this));
   }
 
   // フォームの状態をチェックし、投稿ボタンの有効/無効を切り替えるメソッド
@@ -39,8 +83,11 @@ export default class extends Controller {
     const soundClips = this.element.querySelector(".sound-clips");
     const hasAudio = soundClips.querySelector("audio") !== null;
 
+    const durationField = document.getElementById("post_duration");
+    const hasDuration = durationField && durationField.value !== "";
+
     const submitButton = this.element.querySelector('input[type="submit"]');
-    if (hasText || hasAudio) {
+    if (hasText || (hasAudio && hasDuration)) {
       submitButton.disabled = false;
       submitButton.classList.remove("opacity-50");
       submitButton.classList.remove("cursor-not-allowed");
@@ -53,6 +100,8 @@ export default class extends Controller {
 
   // 録音開始
   startRecording() {
+    this.clearData();
+
     const canvas = this.element.querySelector(".visualizer");
     if (!canvas) {
       console.error("Canvas要素が見つかりませんでした！");
@@ -67,22 +116,36 @@ export default class extends Controller {
     if (this.mediaRecorder) {
       let chunks = [];
 
+      // 録音開始時刻を設定
+      this.startTime = Date.now();
+      this.totalRecordingTime = 0;
+
       // 録音ボタンの制御
       this.element.querySelector(".record").disabled = true;
       this.element.querySelector(".stop").disabled = false;
       this.element.querySelector('input[type="submit"]').disabled = true;
       this.shouldStop = false;
-      this.startTime = Date.now();
-      this.recordingInterval = setInterval(() => this.updateTimer(), 1000);
 
-      // 録音時間制限の設定を修正
-      setTimeout(() => {
-        if (!this.shouldStop) {
-          // 録音完了ボタンを自動クリック
-          document.getElementById("stopRecordingButton").click();
-          alert("録音時間が制限時間（3分15秒）に達しました。");
+      // タイマーの更新と制限時間のチェック
+      this.recordingInterval = setInterval(() => {
+        if (!this.startTime) return; // startTimeがnullの場合は処理を中止
+
+        const currentTime = Date.now();
+        const elapsedTime = (currentTime - this.startTime) / 1000;
+
+        // 制限時間のチェック
+        if (elapsedTime >= this.maxRecordingTimeValue) {
+          const stopButton = document.getElementById("stopRecordingButton");
+          if (stopButton) {
+            stopButton.click();
+            alert("録音時間が制限時間（1時間）に達しました。");
+            clearInterval(this.recordingInterval); // インターバルをクリア
+          }
+          return;
         }
-      }, 195.999 * 1000); // 3分15秒
+
+        this.updateTimer(elapsedTime);
+      }, 1000);
 
       this.mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
       this.mediaRecorder.onstop = (e) => this.handleRecordingStop(chunks);
@@ -96,35 +159,97 @@ export default class extends Controller {
 
   // 録音を停止するメソッド
   stopRecording() {
+    if (!this.mediaRecorder || this.mediaRecorder.state === "inactive") return;
+
     this.mediaRecorder.stop();
     clearInterval(this.recordingInterval);
 
-    // 録音ボタンのスタイルを元に戻す（この部分を修正）
+    // 録音停止時は開始ボタンを無効化したままにする
     const recordButton = this.element.querySelector(".record");
-    recordButton.disabled = false;
-    recordButton.classList.remove("bg-gray-400");
-    recordButton.classList.add("bg-blue-500", "hover:bg-blue-700");
+    if (recordButton) {
+      recordButton.disabled = true;
+    }
 
     const stopButton = this.element.querySelector(".stop");
-    stopButton.disabled = true;
+    if (stopButton) {
+      stopButton.disabled = true;
+    }
 
     this.shouldStop = true;
     cancelAnimationFrame(this.animationFrameRequest);
-
-    // 経過時間をミリ秒から秒に変換し、切り捨てを行う
-    const durationInSeconds = Math.floor((Date.now() - this.startTime) / 1000);
-    document.querySelector(".duration-field").value = durationInSeconds;
     this.checkForm();
   }
 
+  // 録音データのクリア
+  clearData() {
+    // サウンドクリップのクリア
+    this.element.querySelector(".sound-clips").innerHTML = "";
+
+    // ファイル入力のクリア
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      // DataTransferオブジェクトをリセット
+      const dt = new DataTransfer();
+      fileInput.files = dt.files; // 空のファイルリストを設定
+      fileInput.value = ""; // 値もクリア
+    }
+
+    // durationフィールドのクリア
+    const durationField = document.getElementById("post_duration");
+    if (durationField) {
+      durationField.value = "";
+    }
+
+    // タイマーのリセット
+    const timerElement = this.element.querySelector(".timer");
+    if (timerElement) {
+      timerElement.textContent = "00:00";
+    }
+
+    // 録音関連の状態をリセット
+    this.startTime = null;
+    if (this.recordingInterval) {
+      clearInterval(this.recordingInterval);
+      this.recordingInterval = null;
+    }
+    this.shouldStop = false;
+
+    // オーディオリソースの解放
+    if (this.previewAudioURL) {
+      URL.revokeObjectURL(this.previewAudioURL);
+      this.previewAudioURL = null;
+    }
+
+    // ボタンの状態をリセット
+    const recordButton = this.element.querySelector(".record");
+    if (recordButton) {
+      recordButton.disabled = false;
+      recordButton.classList.add("bg-green-500", "hover:bg-green-700");
+    }
+
+    const stopButton = this.element.querySelector(".stop");
+    if (stopButton) {
+      stopButton.disabled = true;
+    }
+
+    // Submitボタンの状態を更新
+    const submitButton = this.element.querySelector('input[type="submit"]');
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.classList.add("opacity-50");
+      submitButton.classList.add("cursor-not-allowed");
+    }
+  }
+
   // タイマー更新
-  updateTimer() {
-    const elapsedTime = Date.now() - this.startTime;
-    const seconds = Math.floor((elapsedTime / 1000) % 60);
-    const minutes = Math.floor(elapsedTime / 1000 / 60);
-    this.element.querySelector(".timer").textContent = `${this.pad(
-      minutes
-    )}:${this.pad(seconds)}`;
+  updateTimer(elapsedSeconds) {
+    const timerElement = this.element.querySelector(".timer");
+    if (!timerElement) return;
+
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = Math.floor(elapsedSeconds % 60);
+
+    timerElement.textContent = `${this.pad(minutes)}:${this.pad(seconds)}`;
   }
 
   // 数字を2桁に整形するメソッド
@@ -133,39 +258,159 @@ export default class extends Controller {
   }
 
   // 録音停止後の処理
-  handleRecordingStop(chunks) {
-    // 録音データをBlobに変換
-    const blob = new Blob(chunks, { type: this.mediaRecorder.mimeType });
+  async handleRecordingStop(chunks) {
+    if (!chunks || chunks.length === 0) {
+      this.showError("録音データが取得できませんでした");
+      return;
+    }
 
-    // Blobから生成されたURLを取得
-    const audioURL = window.URL.createObjectURL(blob);
-    this.previewAudioURL = audioURL; // プレビュー用のオーディオURLを設定
-    this.previewAudioType = this.mediaRecorder.mimeType; // プレビュー用のMIMEタイプを設定
+    try {
+      this.showLoading("音声を処理中...");
 
-    // プレビュー用のサウンドクリップを作成
-    this.createSoundClip(audioURL, this.mediaRecorder.mimeType);
+      // 音声データの形式を確認
+      const mimeType = this.mediaRecorder.mimeType;
+      let audioFile;
 
-    // MIMEタイプからファイル拡張子を決定
-    const mimeType = this.mediaRecorder.mimeType;
-    const fileExtension = mimeType.split("/")[1].split(";")[0];
+      if (mimeType.includes("mpeg")) {
+        // すでにMP3形式の場合
+        audioFile = new File(chunks, `recording-${Date.now()}.mp3`, {
+          type: "audio/mpeg",
+        });
+      } else {
+        // WebMまたは他の形式の場合、MP3に変換を試みる
+        try {
+          const blob = new Blob(chunks, { type: mimeType });
+          audioFile = await this.convertToMp3(blob);
+          console.log("MP3変換成功");
+        } catch (conversionError) {
+          console.warn("MP3変換失敗:", conversionError);
+          // 変換失敗時は元の形式のまま
+          audioFile = new File(chunks, `recording-${Date.now()}.webm`, {
+            type: mimeType,
+          });
+        }
+      }
 
-    // 録音データをファイルに変換
-    const file = new File([blob], `recording.${fileExtension}`, {
-      type: mimeType,
-    });
+      // 録音時間の設定
+      const actualDuration = await this.getAudioDuration(audioFile);
+      console.log("Actual duration:", actualDuration);
 
-    // DataTransferオブジェクトを使用してファイル入力にファイルを設定
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    const fileInput = document.querySelector('input[type="file"]');
-    fileInput.files = dt.files;
+      // フィールドの設定
+      const durationField = document.getElementById("post_duration");
+      if (durationField) {
+        durationField.value = Math.floor(actualDuration); // 秒単位で四捨五入
+      }
 
-    // Submitボタンを有効化
-    const submitButton = fileInput.form.querySelector('input[type="submit"]');
-    submitButton.disabled = false;
+      // プレビューの設定
+      const audioURL = URL.createObjectURL(audioFile);
+      this.previewAudioURL = audioURL;
+      this.createSoundClip(audioURL, audioFile.type);
 
-    // フォームの状態を再チェック
-    this.checkForm();
+      // フォームへのファイル設定
+      const fileInput = document.querySelector('input[type="file"]');
+      if (fileInput) {
+        const dt = new DataTransfer();
+        dt.items.add(audioFile);
+        fileInput.files = dt.files;
+      }
+
+      this.hideLoading();
+      this.checkForm();
+    } catch (error) {
+      console.error("音声処理エラー:", error);
+      this.hideLoading();
+      this.showError("音声の処理に失敗しました。もう一度お試しください。");
+      this.clearData();
+    }
+  }
+
+  // WebMからMP3への変換処理
+  async convertToMp3(webmBlob) {
+    try {
+      // WebMをAudioBufferに変換
+      const arrayBuffer = await webmBlob.arrayBuffer();
+      const audioContext = new AudioContext();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+      // AudioBufferからPCMデータを取得
+      const samples = new Int16Array(audioBuffer.length);
+      const channel = audioBuffer.getChannelData(0);
+
+      // Float32をInt16に変換
+      for (let i = 0; i < audioBuffer.length; i++) {
+        samples[i] = Math.min(1, Math.max(-1, channel[i])) * 0x7fff;
+      }
+
+      // MP3エンコード
+      const mp3encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, 128);
+      const mp3Data = [];
+
+      const blockSize = 1152; // MP3フレームサイズ
+      for (let i = 0; i < samples.length; i += blockSize) {
+        const mono = samples.subarray(i, i + blockSize);
+        const mp3buf = mp3encoder.encodeBuffer(mono);
+        if (mp3buf.length > 0) {
+          mp3Data.push(new Int8Array(mp3buf));
+        }
+      }
+
+      // 最後のフレームを処理
+      const mp3buf = mp3encoder.flush();
+      if (mp3buf.length > 0) {
+        mp3Data.push(new Int8Array(mp3buf));
+      }
+
+      // MP3ファイルの作成
+      const blob = new Blob(mp3Data, { type: "audio/mpeg" });
+      return new File([blob], `recording-${Date.now()}.mp3`, {
+        type: "audio/mpeg",
+      });
+    } catch (error) {
+      console.error("MP3変換エラー:", error);
+      throw new Error("音声の変換に失敗しました");
+    }
+  }
+
+  // ローディング表示の改善
+  showLoading(message = "処理中...") {
+    const loadingHtml = `
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm mx-4">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+        <p class="text-gray-700 text-lg">${message}</p>
+      </div>
+    </div>
+  `;
+    document.body.insertAdjacentHTML("beforeend", loadingHtml);
+  }
+
+  // ローディング非表示のメソッド
+  hideLoading() {
+    const overlay = document.getElementById("loading-overlay");
+    if (overlay) {
+      overlay.remove();
+    }
+  }
+
+  // エラー表示のメソッド
+  showError(message) {
+    const errorHtml = `
+    <div id="error-message" 
+         class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg" 
+         role="alert">
+      <strong class="font-bold">エラー: </strong>
+      <span class="block sm:inline">${message}</span>
+    </div>
+  `;
+    document.body.insertAdjacentHTML("beforeend", errorHtml);
+
+    // 5秒後に自動で消える
+    setTimeout(() => {
+      const errorMessage = document.getElementById("error-message");
+      if (errorMessage) {
+        errorMessage.remove();
+      }
+    }, 5000);
   }
 
   // 音声クリップを生成して表示するメソッド
@@ -180,29 +425,28 @@ export default class extends Controller {
     audio.type = mimeType;
     audio.className = "w-full";
 
-    // 削除ボタンを作成
-    const deleteButton = this.createDeleteButton(clipContainer);
+    const deleteButton = this.createDeleteButton();
 
-    // クリップコンテナにオーディオと削除ボタンを追加
     clipContainer.appendChild(deleteButton);
     clipContainer.appendChild(audio);
 
-    // 既存のサウンドクリップをクリアし、新しいクリップを追加
-    this.element.querySelector(".sound-clips").innerHTML = "";
-    this.element.querySelector(".sound-clips").appendChild(clipContainer);
+    const soundClips = this.element.querySelector(".sound-clips");
+    if (soundClips) {
+      soundClips.innerHTML = "";
+      soundClips.appendChild(clipContainer);
+    }
   }
 
   // 削除ボタンを生成するメソッド
-  createDeleteButton(clipContainer) {
+  createDeleteButton() {
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "削除";
     deleteButton.className =
-      "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mb-2 flex justify-center"; // 右端に配置
+      "bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mb-2 flex justify-center";
+
     deleteButton.onclick = () => {
-      clipContainer.remove();
-      this.element.querySelector(".record").disabled = false;
-      this.element.querySelector(".timer").textContent = "00:00"; // タイマーをリセット
-      this.checkForm(); // フォームの状態を再チェック
+      this.clearData();
+      this.checkForm();
     };
 
     return deleteButton;
@@ -254,5 +498,44 @@ export default class extends Controller {
     };
 
     draw();
+  }
+  // 音声ファイルの実際の長さを取得するメソッド
+  async getAudioDuration(audioFile) {
+    return new Promise((resolve, reject) => {
+      const audio = new Audio();
+      const objectUrl = URL.createObjectURL(audioFile);
+
+      audio.addEventListener("loadedmetadata", () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(audio.duration);
+      });
+
+      audio.addEventListener("error", (error) => {
+        URL.revokeObjectURL(objectUrl);
+        reject(error);
+      });
+
+      audio.src = objectUrl;
+    });
+  }
+
+  // 音声ファイルの実際の長さを取得するメソッド
+  async getAudioDuration(audioFile) {
+    return new Promise((resolve, reject) => {
+      const audio = new Audio();
+      const objectUrl = URL.createObjectURL(audioFile);
+
+      audio.addEventListener("loadedmetadata", () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(audio.duration);
+      });
+
+      audio.addEventListener("error", (error) => {
+        URL.revokeObjectURL(objectUrl);
+        reject(error);
+      });
+
+      audio.src = objectUrl;
+    });
   }
 }

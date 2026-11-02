@@ -14,13 +14,6 @@ module PostsAllHelper
     end
   end
 
-  # カスタムカテゴリーを設定するメソッド
-  def assign_custom_category
-    custom_category = Category.find_or_create_by(category_name: post_params[:fixed_category],
-                                                 add_category_name: post_params[:custom_category])
-    @post.category = custom_category
-  end
-
   # プライバシー設定に基づくリダイレクト先を決定する
   # def redirect_based_on_privacy
   #   cookies[:selected_post_category] = post_params[:fixed_category] if post_params[:fixed_category].present?
@@ -80,7 +73,8 @@ module PostsAllHelper
 
   # ログインユーザーの投稿をセットする
   def set_current_user_post
-    @post = current_user.posts.find(params[:id])
+    @post = Post.find(params[:id])
+    redirect_to root_path, alert: 'この操作を行う権限がありません。' unless current_user.id == @post.user_id || current_user.admin?
   rescue ActiveRecord::RecordNotFound
     redirect_to root_path, alert: 'この投稿は存在しません。'
   end
@@ -101,12 +95,5 @@ module PostsAllHelper
     return if @post.visible_to?(current_user)
 
     redirect_to root_path, alert: 'この投稿を見る権限がありません。'
-  end
-
-  # オーディオファイルを変換するメソッド
-  def convert_audio(file_path)
-    output_path = file_path.sub(File.extname(file_path), '.mp3')
-    system("ffmpeg -i #{file_path} #{output_path}")
-    output_path
   end
 end
