@@ -1,5 +1,6 @@
 class RepliesController < ApplicationController
   before_action :set_post, only: %i[new_modal create_modal create]
+  before_action :authorize_view!, only: %i[new_modal create_modal create]
 
   def new_modal
     @show_reply_line = true

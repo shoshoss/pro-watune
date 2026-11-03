@@ -85,7 +85,7 @@ class ProfilesController < ApplicationController
     }
 
     posts = scopes[category] || Post.none
-    posts.order(created_at: :desc)
+    posts.visible_to(current_user).order(created_at: :desc)
   end
 
   # フィルタリングされた投稿を取得

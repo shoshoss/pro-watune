@@ -89,6 +89,16 @@ class Post < ApplicationRecord
     post_users.exists?(user:, approved: true)
   end
 
+  # 投稿の表示権限がある投稿だけに絞り込むスコープ
+  scope :visible_to, lambda { |viewer|
+    viewer_id = viewer&.id
+    visible_posts = Post.where(privacy: %w[open reply])
+                        .or(Post.where(user_id: viewer_id))
+                        .or(Post.where(id: PostUser.where(user_id: viewer_id, approved: true).select(:post_id)))
+
+    where(id: visible_posts.select(:id))
+  }
+
   # 親の投稿のユーザー名が重複しないように祖先を取得するメソッド
   def ancestors
     parents = []
