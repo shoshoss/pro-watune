@@ -1,4 +1,5 @@
 class Post < ApplicationRecord
+  include Posts::Visibility
   include Posts::UserPostScopes
   include Posts::SharedScopes
   include Posts::Notification
@@ -75,29 +76,6 @@ class Post < ApplicationRecord
   end
 
   validates :fixed_category, presence: true
-
-  # 投稿の可視性を判定するメソッド
-  def visible_to?(user)
-    return true if self.user == user # 投稿者本人
-    return true if privacy == 'open' # 全体公開
-    return true if privacy == 'reply' # リプライ
-
-    # 未ログインユーザーはこれ以上のプライバシーレベルの投稿は見れない
-    return false if user.nil?
-
-    # ログインユーザーかつ承認された受信者であれば投稿を見ることができる
-    post_users.exists?(user:, approved: true)
-  end
-
-  # 投稿の表示権限がある投稿だけに絞り込むスコープ
-  scope :visible_to, lambda { |viewer|
-    viewer_id = viewer&.id
-    visible_posts = Post.where(privacy: %w[open reply])
-                        .or(Post.where(user_id: viewer_id))
-                        .or(Post.where(id: PostUser.where(user_id: viewer_id, approved: true).select(:post_id)))
-
-    where(id: visible_posts.select(:id))
-  }
 
   # 親の投稿のユーザー名が重複しないように祖先を取得するメソッド
   def ancestors

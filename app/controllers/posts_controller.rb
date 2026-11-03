@@ -45,9 +45,10 @@ class PostsController < ApplicationController
   def show
     @show_reply_line = true
     @reply = Post.new
-    @pagy, @replies = pagy_countless(@post.replies.includes(:user, :replies, :likes, :bookmarks).order(created_at: :asc),
-                                     items: 15)
-    @parent_posts = @post.ancestors
+    @pagy, @replies = pagy_countless(@post.replies.visible_to(current_user)
+                                           .includes(:user, :replies, :likes, :bookmarks)
+                                           .order(created_at: :asc), items: 15)
+    @parent_posts = @post.ancestors.select { |parent_post| parent_post.visible_to?(current_user) }
   end
 
   # 新しい投稿フォームを表示するアクション
