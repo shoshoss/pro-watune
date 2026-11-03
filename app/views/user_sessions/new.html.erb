@@ -39,6 +39,9 @@
       </div>
     <% end %>
 
+    <%= button_to 'お試しログイン', guest_login_path, method: :post,
+                  class: 'btn btn-outline btn-primary w-full mt-4' %>
+
     <!-- パスワードリセットと新規登録のリンク -->
     <div class='text-center text-base text-gray-600'>
       <%= link_to t('.password_forget'), new_password_reset_path, class: "link link-hover text-lg" %>

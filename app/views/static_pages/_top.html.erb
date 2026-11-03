@@ -20,6 +20,14 @@
                       category: cookies[:selected_post_category] || 'recommended'
                     },
                     class: "mb-3 mt-3 sm:mt-6 text-xl sm:text-2xl btn btn-accent bg-opacity-80 hover:bg-opacity-100 rounded-full transition-colors duration-300" %>
+        <% unless current_user %>
+          <%= button_to guest_login_path, method: :post,
+                        form: { data: { turbo_frame: "_top" } },
+                        class: "trial-btn text-xl sm:text-2xl" do %>
+            お試しで始める<br>登録なしですぐ使える<br class="sm:hidden">
+            （あとから本登録で引き継ぎOK）
+          <% end %>
+        <% end %>
       </div>
     </div>
   </div>
@@ -109,6 +117,12 @@
                                             },
                                             class: "mb-6 text-xl sm:text-2xl btn btn-accent bg-opacity-80 hover:bg-opacity-100 rounded-full transition-colors duration-300" %>
       <% unless current_user %>
+        <%= button_to guest_login_path, method: :post,
+                      form: { class: "mb-6", data: { turbo_frame: "_top" } },
+                      class: "trial-btn text-xl sm:text-2xl" do %>
+          お試しで始める<br>登録なしですぐ使える<br class="sm:hidden">
+          （あとから本登録で引き継ぎOK）
+        <% end %>
         <!-- Googleで新規登録のボタン -->
         <div class="flex items-center justify-center mb-8">
           <%= link_to auth_at_provider_path(provider: :google), method: :post, class: "btn-google", data: { turbo: false } do %>

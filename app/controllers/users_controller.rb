@@ -1,5 +1,8 @@
 class UsersController < ApplicationController
-  skip_before_action :require_login, only: %i[new_modal create_modal new create]
+  skip_before_action :require_login, only: %i[new_modal create_modal new create guest_login]
+
+  GUEST_LOGIN_LIMIT = 5
+  GUEST_LOGIN_PERIOD = 1.hour
 
   def index
     @pagy, @users = pagy_countless(User.recently_registered(current_user), items: 15)
@@ -56,6 +59,19 @@ class UsersController < ApplicationController
     end
   end
 
+  def guest_login
+    if increment_guest_login_count > GUEST_LOGIN_LIMIT
+      redirect_back_or_to login_path, alert: 'しばらくしてからお試しください。'
+      return
+    end
+
+    email = generate_unique_guest_email
+    @user = User.create!(email:, password: SecureRandom.hex(10), guest: true)
+    auto_login(@user)
+    flash[:notice] = 'お試しログインに成功しました！'
+    redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts')
+  end
+
   def destroy
     @user = current_user
     if @user.destroy
@@ -72,5 +88,20 @@ class UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(:email, :password, :display_name, :username_slug, :self_introduction)
+  end
+
+  def generate_unique_guest_email
+    loop do
+      email = "guest_#{SecureRandom.hex(10)}@example.com"
+      break email unless User.exists?(email:)
+    end
+  end
+
+  def guest_login_cache_key
+    "guest_login:#{request.remote_ip}"
+  end
+
+  def increment_guest_login_count
+    Rails.cache.increment(guest_login_cache_key, 1, expires_in: GUEST_LOGIN_PERIOD).to_i
   end
 end

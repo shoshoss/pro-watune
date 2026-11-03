@@ -9,7 +9,7 @@ class Like < ApplicationRecord
   private
 
   def notify_like
-    return if user_id == post.user_id
+    return if user.guest? || user_id == post.user_id
 
     post.create_notification_like(user)
   end
