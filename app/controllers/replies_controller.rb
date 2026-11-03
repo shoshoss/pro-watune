@@ -12,7 +12,7 @@ class RepliesController < ApplicationController
     @reply = @post.replies.build(reply_params)
     @reply.user = current_user
     if @reply.save
-      notify_async(@reply, 'reply') unless current_user.guest?
+      notify_async(@reply, 'reply')
       flash[:notice] = '返信しました！'
     else
       flash.now[:danger] = 'お手数をおかけします。返信できませんでした。'
@@ -24,7 +24,7 @@ class RepliesController < ApplicationController
     @reply = @post.replies.build(reply_params)
     @reply.user = current_user
     if @reply.save
-      notify_async(@reply, 'reply') unless current_user.guest?
+      notify_async(@reply, 'reply')
       flash[:notice] = '返信しました！'
       respond_to do |format|
         format.turbo_stream

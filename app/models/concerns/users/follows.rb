@@ -13,7 +13,7 @@ module Users
       # フォロー関連のインスタンスメソッド
       def follow(user)
         active_friendships.find_or_create_by(followed_id: user.id)
-        create_notification_follow(user) unless guest? # フォロー時に通知を作成
+        create_notification_follow(user) # フォロー時に通知を作成
       end
 
       def unfollow(user)
