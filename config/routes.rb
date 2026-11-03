@@ -2,6 +2,10 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  # Active Storage の direct upload に、ログインとファイルの確認を追加する（#744）。
+  # Active Storage のルートより先に読み込まれるので、こちらが使われる。名前は Active Storage 側のものを使うため付けない。
+  post '/rails/active_storage/direct_uploads', to: 'direct_uploads#create'
+
   root 'static_pages#root'
   get 'top', to: 'static_pages#top'
   get 'about', to: 'static_pages#about'
