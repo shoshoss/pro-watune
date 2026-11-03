@@ -15,7 +15,13 @@
       <div class="bg-white">
           <% unless @parent_posts.include?(@post.parent_post) %>
             <% if @post.parent_post.present? %>
-              <%= render 'replies/post_content', post: @post.parent_post %>
+              <% if @post.parent_post.visible_to?(current_user) %>
+                <%= render 'replies/post_content', post: @post.parent_post %>
+              <% else %>
+                <div class="text-lg text-gray-500 mb-2">
+                  返信先の投稿は表示できません。
+                </div>
+              <% end %>
             <% elsif @post.post_reply_id.present? %>
               <div class="text-lg text-gray-500 mb-2">
                 親の投稿が削除されました。

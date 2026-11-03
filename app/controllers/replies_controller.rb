@@ -5,7 +5,7 @@ class RepliesController < ApplicationController
   def new_modal
     @show_reply_line = true
     @reply = Post.new
-    @parent_posts = @post.ancestors
+    @parent_posts = @post.ancestors.select { |parent_post| parent_post.visible_to?(current_user) }
   end
 
   def create_modal
