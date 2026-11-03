@@ -26,11 +26,34 @@ RSpec.describe 'Security mitigation' do
     end
 
     it 'does not create a user on the sixth request from the same IP' do
-      5.times { post guest_login_path }
+      5.times { post_guest_login(remote_addr: '203.0.113.10') }
 
-      expect { post guest_login_path }.not_to change(User, :count)
+      expect { post_guest_login(remote_addr: '203.0.113.10') }.not_to change(User, :count)
       expect(response).to redirect_to(login_path)
       expect(flash[:alert]).to eq('しばらくしてからお試しください。')
+    end
+
+    it 'limits guest logins per client IP behind Cloudflare' do
+      5.times { post_guest_login(remote_addr: '104.22.66.254', forwarded_for: '203.0.113.10') }
+
+      expect { post_guest_login(remote_addr: '104.22.66.254', forwarded_for: '203.0.113.20') }
+        .to change(User, :count).by(1)
+    end
+
+    it 'does not bypass the limit with a forwarded IP from outside Cloudflare' do
+      5.times do |attempt|
+        forwarded_for = "203.0.113.#{attempt + 10}, 198.51.100.5"
+        post_guest_login(remote_addr: '198.51.100.5', forwarded_for:)
+      end
+
+      expect { post_guest_login(remote_addr: '198.51.100.5', forwarded_for: '203.0.113.20, 198.51.100.5') }
+        .not_to change(User, :count)
+    end
+
+    def post_guest_login(remote_addr:, forwarded_for: nil)
+      env = { 'REMOTE_ADDR' => remote_addr }
+      env['HTTP_X_FORWARDED_FOR'] = forwarded_for if forwarded_for
+      post guest_login_path, env:
     end
   end
 
