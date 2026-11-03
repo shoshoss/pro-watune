@@ -1,5 +1,6 @@
 class LikesController < ApplicationController
   before_action :set_post
+  before_action :authorize_view!, only: :create
 
   def create
     @like = current_user.like(@post)
