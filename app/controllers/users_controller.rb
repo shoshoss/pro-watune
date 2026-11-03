@@ -69,7 +69,7 @@ class UsersController < ApplicationController
     @user = User.create!(email:, password: SecureRandom.hex(10), guest: true)
     auto_login(@user)
     flash[:notice] = 'お試しログインに成功しました！'
-    redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts')
+    redirect_to profile_show_path(username_slug: @user.username_slug, category: 'all_my_posts'), status: :see_other
   end
 
   def destroy
