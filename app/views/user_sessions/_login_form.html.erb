@@ -41,6 +41,7 @@
 <% end %>
 
 <%= button_to 'お試しログイン', guest_login_path, method: :post,
+              form: { data: { turbo: false } },
               class: 'btn btn-outline btn-primary text-xl w-full mb-4' %>
 
 <!-- パスワードリセットと新規登録のリンク -->
