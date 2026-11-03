@@ -33,6 +33,8 @@ class Post < ApplicationRecord
   has_many :notifications, as: :notifiable
 
   # 音声添付ファイル
+  MAX_AUDIO_SIZE = 100.megabytes
+
   has_one_attached :audio # ActiveStorageを利用してこれらのファイルを管理する場合
   validate :validate_audio, if: :audio_attached?
 
@@ -207,7 +209,7 @@ class Post < ApplicationRecord
     return unless audio.attached?
 
     # サイズチェック
-    errors.add(:audio, 'は200MB以下にしてください') if audio.blob.byte_size > 200.megabytes
+    errors.add(:audio, 'は100MB以下にしてください') if audio.blob.byte_size > MAX_AUDIO_SIZE
 
     # 長さチェック
     return unless respond_to?(:duration) && duration && duration > 3601
