@@ -2,11 +2,34 @@
 音声で、自分と仲間に元気を届け合うアプリです。
 
 - URL：https://www.watune.com
-- 主な技術：Ruby on Rails / Stimulus・Turbo / React・TypeScript（導入中）/ PostgreSQL / Docker / RSpec
-- インフラ：Render / Neon / Cloudflare R2
-- 最近の取り組み
-  - 権限確認の漏れを修正：https://github.com/shoshoss/pro-watune/pull/707
-  - React・TypeScriptのビルド環境を構築：https://github.com/shoshoss/pro-watune/pull/709
+- **お試しログイン**：トップページの「お試しで始める」から、登録なしですぐに使えます（あとから本登録すると、データを引き継げます）
+- 主な技術：Ruby on Rails / Stimulus・Turbo / React・TypeScript（導入中）/ PostgreSQL / RSpec / Docker（開発・テスト環境）
+- インフラ：Render / Neon（PostgreSQL）/ Cloudflare（R2・プロキシ）/ GitHub Actions（CI）
+
+## 最近の取り組み
+
+**セキュリティ**
+- Rails の脆弱性（CVE-2026-66066）の暫定対策：https://github.com/shoshoss/pro-watune/pull/720
+- 秘密情報（鍵・パスワード）の入れ替え：https://github.com/shoshoss/pro-watune/pull/722
+- 非公開の投稿が一覧から見えていた不具合の修正：https://github.com/shoshoss/pro-watune/pull/732
+- 非公開の投稿への返信が見えていた不具合の修正：https://github.com/shoshoss/pro-watune/pull/737
+- ログインしていなくてもファイルを置けた入口を閉じる：https://github.com/shoshoss/pro-watune/pull/745
+- Cloudflare を通ったアクセスで利用者の IP を正しく取る：https://github.com/shoshoss/pro-watune/pull/753
+
+**機能**
+- 投稿の編集で、送信先を変えられるようにした：https://github.com/shoshoss/pro-watune/pull/713
+- 送信先の選択を React・TypeScript で作り直した：https://github.com/shoshoss/pro-watune/pull/715
+- お試しログインを、回数の制限を付けて再開した：https://github.com/shoshoss/pro-watune/pull/747
+- 権限確認の漏れを修正：https://github.com/shoshoss/pro-watune/pull/707
+- React・TypeScript のビルド環境を構築：https://github.com/shoshoss/pro-watune/pull/709
+
+**開発の進め方**
+- CI を約8分から35秒に短縮した：https://github.com/shoshoss/pro-watune/pull/755
+- AI（Codex）向けのルール（AGENTS.md）を整備した：https://github.com/shoshoss/pro-watune/pull/742
+
+## 開発の流れ
+- Issue を作る → ブランチを作る → develop に PR → develop から main に PR → main が本番（Render）に反映される
+- PR には、変更の理由・確認したこと・学んだことを書いています
 
 ■ サービス概要  
   本アプリは、音声メッセージを通じて自己肯定感を高め、相互にポジティブなエネルギーを共有することができるプラットフォームです。
